@@ -30,10 +30,15 @@ export default function Home() {
             if (isLogin) {
                 const { error } = await supabase.auth.signInWithPassword({ email, password })
                 if (error) throw error
+                // Đăng nhập thành công -> onAuthStateChange sẽ tự set user
             } else {
                 const { error } = await supabase.auth.signUp({ email, password })
                 if (error) throw error
-                alert('Đăng ký thành công! Bạn có thể đăng nhập ngay.')
+                
+                // Đăng ký thành công -> chuyển sang form đăng nhập
+                alert('✅ Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.')
+                setIsLogin(true)
+                setPassword('') // Xóa mật khẩu để người dùng nhập lại
             }
         } catch (error: any) {
             alert(error.message)
@@ -74,8 +79,14 @@ export default function Home() {
                 <div style={{ width: '100%', maxWidth: 380, background: '#161618', border: '1px solid #1C1C1E', borderRadius: 16, padding: '32px 24px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
                         <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 24, color: '#F5A623' }}>🐝 TaskBee</h1>
-                        <button onClick={() => setShowAuth(false)} style={{ background: 'none', border: 'none', color: '#8A857D', fontSize: 20, cursor: 'pointer' }}>✕</button>
+                        <button onClick={() => { setShowAuth(false); setIsLogin(true); setPassword('') }} style={{ background: 'none', border: 'none', color: '#8A857D', fontSize: 20, cursor: 'pointer' }}>✕</button>
                     </div>
+                    
+                    {/* Tiêu đề form */}
+                    <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, marginBottom: 20, textAlign: 'center' }}>
+                        {isLogin ? 'Đăng nhập' : 'Tạo tài khoản mới'}
+                    </h2>
+
                     <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                         <div>
                             <label style={{ display: 'block', fontSize: 13, marginBottom: 6, color: '#8A857D' }}>Email</label>
@@ -88,15 +99,22 @@ export default function Home() {
                                 style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 15, outline: 'none' }} />
                         </div>
                         <button type="submit" disabled={loading}
-                            style={{ width: '100%', padding: '12px 0', background: '#F5A623', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
-                            {loading ? 'Đang xử lý...' : isLogin ? 'Đăng nhập' : 'Đăng ký'}
+                            style={{ width: '100%', padding: '12px 0', background: '#F5A623', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", transition: 'all 0.2s' }}>
+                            {loading ? '⏳ Đang xử lý...' : isLogin ? '🔐 Đăng nhập' : '📝 Tạo tài khoản'}
                         </button>
                     </form>
-                    <p style={{ textAlign: 'center', fontSize: 14, marginTop: 16, color: '#8A857D' }}>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '20px 0' }}>
+                        <div style={{ flex: 1, height: 1, background: '#1C1C1E' }} />
+                        <span style={{ fontSize: 12, color: '#8A857D' }}>hoặc</span>
+                        <div style={{ flex: 1, height: 1, background: '#1C1C1E' }} />
+                    </div>
+
+                    <p style={{ textAlign: 'center', fontSize: 14, color: '#8A857D' }}>
                         {isLogin ? "Chưa có tài khoản? " : "Đã có tài khoản? "}
-                        <button onClick={() => setIsLogin(!isLogin)}
+                        <button onClick={() => { setIsLogin(!isLogin); setPassword('') }}
                             style={{ background: 'none', border: 'none', color: '#F5A623', cursor: 'pointer', fontWeight: 600, fontSize: 14 }}>
-                            {isLogin ? 'Đăng ký' : 'Đăng nhập'}
+                            {isLogin ? 'Đăng ký ngay' : 'Đăng nhập'}
                         </button>
                     </p>
                 </div>
@@ -117,26 +135,18 @@ export default function Home() {
                 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap');
                 :root { --amber: #F5A623; --bg: #0a0a0b; --card: #161618; --fg: #EDEBE7; --muted: #8A857D; --border: #1C1C1E; }
                 * { margin: 0; padding: 0; box-sizing: border-box; }
-                .btn-primary {
-                    background: var(--amber); color: #000; border: none; padding: 12px 24px; border-radius: 8px;
-                    font-weight: 700; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s;
-                }
+                .btn-primary { background: var(--amber); color: #000; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
                 .btn-primary:hover { background: #FFC04D; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(245,166,35,0.25); }
-                .btn-ghost {
-                    background: transparent; color: var(--fg); border: 1px solid var(--border); padding: 12px 24px;
-                    border-radius: 8px; font-weight: 500; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s;
-                }
+                .btn-ghost { background: transparent; color: var(--fg); border: 1px solid var(--border); padding: 12px 24px; border-radius: 8px; font-weight: 500; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
                 .btn-ghost:hover { border-color: var(--amber); color: var(--amber); }
                 .card-hover { transition: all 0.3s; }
-                .card-hover:hover { border-color: rgba(245,166,35,0.3) !important; transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
+                .card-hover:hover { border-color: rgba(245,166,35,0.3)!important; transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
                 @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
                 .fade-up { animation: fadeUp 0.7s ease both; }
             `}</style>
 
-            {/* Canvas nền lục giác */}
             <canvas ref={canvasRef} style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }} />
 
-            {/* Navigation */}
             <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px', background: 'rgba(10,10,11,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #1C1C1E' }}>
                 <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 20, color: '#F5A623' }}>🐝 TaskBee</span>
                 <div style={{ display: 'flex', gap: 10 }}>
@@ -170,7 +180,7 @@ export default function Home() {
                 <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(28px, 4vw, 42px)', maxWidth: 600, marginBottom: 40 }}>Ba bước để bắt đầu kiếm tiền ngay hôm nay</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
                     {[
-                        { icon: '📱', num: '01', title: 'Đăng ký bằng số điện thoại', desc: '30 giây, không cần hồ sơ. Bất kỳ ai cũng có thể tham gia.' },
+                        { icon: '📱', num: '01', title: 'Đăng ký bằng email', desc: '30 giây, không cần hồ sơ. Bất kỳ ai cũng có thể tham gia.' },
                         { icon: '✅', num: '02', title: 'Làm 5 task thử miễn phí', desc: 'Hệ thống đánh giá độ chính xác qua 5 task demo trước khi nhận việc thật.' },
                         { icon: '💰', num: '03', title: 'Nhận tiền trong 24 giờ', desc: 'Rút về MoMo hoặc ngân hàng bất cứ lúc nào, tối thiểu 50.000đ.' },
                     ].map(({ icon, num, title, desc }) => (
