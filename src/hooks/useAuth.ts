@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import { supabase } from "@/lib/supabaseClient"
-import { normalizePhone, isPhoneNumber } from "@/utils/validation"
+import { normalizePhone, isPhoneNumber } from "@/utils/phone"
 
 interface RegisterInput {
   email: string
@@ -22,27 +22,40 @@ export function useAuth() {
     setLoading(true)
     const normalizedPhone = normalizePhone(input.phone)
     try {
+      // Kiểm tra SĐT đã tồn tại chưa
       const { data: existingPhone } = await supabase
         .from("users").select("id").eq("phone", normalizedPhone).maybeSingle()
       if (existingPhone) return { success: false, error: "Số điện thoại này đã được đăng ký" }
 
+      // Đăng ký - Supabase sẽ tự động đăng nhập nếu Confirm email đã tắt
       const { data, error: signUpError } = await supabase.auth.signUp({
-        email: input.email, password: input.password,
-        options: { data: { full_name: input.fullName } },
+        email: input.email,
+        password: input.password,
       })
       if (signUpError) {
         if (signUpError.message.includes("already registered")) return { success: false, error: "Email này đã được đăng ký" }
         return { success: false, error: "Đăng ký thất bại, vui lòng thử lại" }
       }
+
+      // Lưu thông tin vào bảng users
       if (data.user) {
-        const { error: insertError } = await supabase.from("users").insert({
-          id: data.user.id, email: input.email, phone: normalizedPhone,
-          full_name: input.fullName, balance: 0, role: "user",
+        const { error: insertError } = await supabase.from("users").upsert({
+          id: data.user.id,
+          email: input.email,
+          phone: normalizedPhone,
+          full_name: input.fullName,
+          balance: 0,
+          role: "user",
           terms_accepted_at: new Date().toISOString(),
-        })
-        if (insertError) return { success: false, error: "Đăng ký thất bại, vui lòng thử lại" }
+        }, { onConflict: 'id' })
+        
+        if (insertError) {
+          console.error("Insert user failed:", insertError)
+          return { success: false, error: "Đăng ký thất bại, vui lòng thử lại" }
+        }
       }
-      return { success: true }
+
+      return { success: true, autoLogin: !!data.session }
     } finally { setLoading(false) }
   }
 
@@ -50,17 +63,34 @@ export function useAuth() {
     setLoading(true)
     try {
       let email = identifier
+
+      // Nếu là SĐT -> lookup email từ bảng users
       if (isPhoneNumber(identifier)) {
         const normalizedPhone = normalizePhone(identifier)
-        const { data, error } = await supabase.from("users").select("email").eq("phone", normalizedPhone).maybeSingle()
-        if (error || !data) return { success: false, error: "Số điện thoại chưa được đăng ký" }
+        const { data, error } = await supabase
+          .from("users")
+          .select("email")
+          .eq("phone", normalizedPhone)
+          .maybeSingle()
+
+        if (error || !data?.email) {
+          return { success: false, error: "Số điện thoại chưa được đăng ký" }
+        }
         email = data.email
       }
-      const { error: loginError } = await supabase.auth.signInWithPassword({ email, password })
+
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
       if (loginError) {
-        if (loginError.message.includes("Email not confirmed")) return { success: false, error: "EMAIL_NOT_CONFIRMED" }
+        if (loginError.message.includes("Email not confirmed")) {
+          return { success: false, error: "EMAIL_NOT_CONFIRMED" }
+        }
         return { success: false, error: "Thông tin đăng nhập không đúng" }
       }
+
       return { success: true }
     } finally { setLoading(false) }
   }
@@ -70,7 +100,9 @@ export function useAuth() {
   async function sendResetPassword(email: string): Promise<AuthResult> {
     setLoading(true)
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` })
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      })
       if (error) return { success: false, error: "Không thể gửi email, thử lại sau" }
       return { success: true }
     } finally { setLoading(false) }
