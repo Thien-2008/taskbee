@@ -296,3 +296,154 @@ function HelpPage({ onBack }: { onBack: () => void }) {
     </div>
   )
 }
+function WithdrawTab({ user, balance, onRefresh }: { user: any; balance: number; onRefresh: () => void }) {
+  const [amount, setAmount] = useState(''); const [method, setMethod] = useState('momo'); const [accountInfo, setAccountInfo] = useState('')
+  const [submitting, setSubmitting] = useState(false); const [history, setHistory] = useState<any[]>([])
+  useEffect(() => { supabase.from('withdrawals').select('*').eq('user_id', user.id).order('requested_at', { ascending: false }).then(({ data }) => { if (data) setHistory(data) }) }, [user])
+  const handleWithdraw = async () => {
+    const amt = parseInt(amount); if (!amt || amt < 50000) { alert('Tối thiểu 50.000đ'); return }; if (amt > balance) { alert('Số dư không đủ'); return }; if (!accountInfo.trim()) { alert('Nhập số TK/SĐT'); return }
+    setSubmitting(true)
+    try { await supabase.from('withdrawals').insert({ user_id: user.id, amount: amt, method, account_info: accountInfo, status: 'pending', requested_at: new Date().toISOString() }); alert('✅ Đã ghi nhận! Xử lý trong 24h.'); setAmount(''); onRefresh() }
+    catch (e: any) { alert('Lỗi: ' + e.message) } finally { setSubmitting(false) }
+  }
+  return (
+    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
+      <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 20 }}>💰 Rút tiền</h2>
+      <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 20, marginBottom: 20 }}><div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#8A857D', fontSize: 14 }}>Số dư khả dụng</span><span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 24, color: '#F5A623' }}>{balance.toLocaleString()}đ</span></div></div>
+      <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 20, marginBottom: 20 }}>
+        <div style={{ marginBottom: 12 }}><label style={{ display: 'block', fontSize: 13, color: '#8A857D', marginBottom: 6 }}>Phương thức</label><select value={method} onChange={e => setMethod(e.target.value)} style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none' }}><option value="momo">📱 Ví MoMo</option><option value="bank">🏦 Tài khoản ngân hàng</option></select></div>
+        <div style={{ marginBottom: 12 }}><label style={{ display: 'block', fontSize: 13, color: '#8A857D', marginBottom: 6 }}>Số tài khoản / SĐT</label><input type="text" value={accountInfo} onChange={e => setAccountInfo(e.target.value)} placeholder="Nhập số tài khoản hoặc SĐT MoMo" style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none' }} /></div>
+        <div style={{ marginBottom: 16 }}><label style={{ display: 'block', fontSize: 13, color: '#8A857D', marginBottom: 6 }}>Số tiền muốn rút</label><input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder={`Tối đa ${balance.toLocaleString()}đ`} style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none' }} /></div>
+        <div style={{ fontSize: 12, color: '#8A857D', marginBottom: 16 }}>⏱ Thời gian xử lý: 24h · 💸 Phí: 0đ · 📌 Tối thiểu: 50.000đ</div>
+        <button onClick={handleWithdraw} disabled={submitting} style={{ width: '100%', padding: '12px 0', background: submitting ? '#8A857D' : '#F5A623', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>{submitting ? '⏳ Đang xử lý...' : 'Xác nhận rút tiền'}</button>
+      </div>
+      {history.length > 0 && (
+        <div><div style={{ fontWeight: 600, marginBottom: 12 }}>📜 Lịch sử rút tiền</div>
+          <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 16 }}>{history.map((tx, i) => (
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: i < history.length - 1 ? '1px solid #1C1C1E' : 'none' }}>
+              <div>
+                <div style={{ fontSize: 14 }}>{tx.amount.toLocaleString()}đ</div>
+                <div style={{ fontSize: 12, color: '#8A857D' }}>{new Date(tx.requested_at).toLocaleDateString('vi-VN')} · {tx.status === 'completed' ? '✅ Hoàn thành' : tx.status === 'pending' ? '⏳ Đang xử lý' : '❌ Từ chối'}</div>
+              </div>
+              <span style={{ fontWeight: 600, color: tx.status === 'completed' ? '#34D399' : tx.status === 'failed' ? '#F97373' : '#F5A623' }}>{tx.status === 'completed' ? '✅' : tx.status === 'failed' ? '❌' : '⏳'}</span>
+            </div>
+          ))}</div></div>)}
+    </div>
+  )
+}
+
+function ProfileTab({ user, displayName, balance, tasksDone, userRole, onLogout, onNavigate }: { user: any; displayName: string; balance: number; tasksDone: number; userRole: string; onLogout: () => void; onNavigate: (v: View) => void }) {
+  return (
+    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
+      <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 20 }}>👤 Hồ sơ</h2>
+      <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 20, marginBottom: 20, textAlign: 'center' }}>
+        <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(245,166,35,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, margin: '0 auto 12px' }}>🐝</div>
+        <div style={{ fontWeight: 600, fontSize: 16 }}>{displayName}</div>
+        <div style={{ fontSize: 13, color: '#8A857D', marginTop: 4 }}>Thành viên từ: Tháng 4/2025{userRole === 'admin' ? ' · 👑 Admin' : userRole === 'business' ? ' · 🏢 Doanh nghiệp' : ''}</div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 16 }}>
+          <div style={{ textAlign: 'center' }}><div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 18, color: '#F5A623' }}>{balance.toLocaleString()}đ</div><div style={{ fontSize: 11, color: '#8A857D' }}>Số dư</div></div>
+          <div style={{ textAlign: 'center' }}><div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 18 }}>{tasksDone}</div><div style={{ fontSize: 11, color: '#8A857D' }}>Task đã làm</div></div>
+        </div>
+      </div>
+      <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, overflow: 'hidden' }}>
+        {[
+          { icon: '📋', label: 'Lịch sử làm task', view: 'taskHistory' as View },
+          { icon: '💳', label: 'Lịch sử giao dịch', view: 'txHistory' as View },
+          ...(userRole === 'admin' ? [{ icon: '⚙️', label: 'Admin (duyệt rút tiền)', view: 'admin' as View }] : []),
+          { icon: '🔔', label: 'Cài đặt thông báo', view: 'settings' as View },
+          { icon: '❓', label: 'Hướng dẫn sử dụng', view: 'help' as View },
+        ].map((item, i, arr) => (
+          <div key={i} onClick={() => onNavigate(item.view)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: i < arr.length - 1 ? '1px solid #1C1C1E' : 'none', cursor: 'pointer' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}><span style={{ fontSize: 18 }}>{item.icon}</span><span style={{ fontSize: 14 }}>{item.label}</span></div><span style={{ color: '#8A857D' }}>→</span>
+          </div>
+        ))}
+      </div>
+      <button onClick={onLogout} style={{ width: '100%', marginTop: 20, padding: '12px 0', background: 'transparent', border: '1px solid #F97373', color: '#F97373', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>🚪 Đăng xuất</button>
+    </div>
+  )
+}
+
+function AdminPage({ onBack }: { onBack: () => void }) {
+  const [withdrawals, setWithdrawals] = useState<any[]>([]); const [loading, setLoading] = useState(true)
+  useEffect(() => { loadWithdrawals() }, [])
+  const loadWithdrawals = async () => { setLoading(true); const { data } = await supabase.from('withdrawals').select('*, users(email)').order('requested_at', { ascending: false }); if (data) setWithdrawals(data); setLoading(false) }
+  const handleAction = async (id: number, action: 'completed' | 'failed') => { await supabase.from('withdrawals').update({ status: action, completed_at: action === 'completed' ? new Date().toISOString() : null }).eq('id', id); loadWithdrawals() }
+  return (
+    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}><button onClick={onBack} style={{ background: 'none', border: 'none', color: '#8A857D', fontSize: 18, cursor: 'pointer' }}>←</button><h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20 }}>⚙️ Duyệt rút tiền</h2></div>
+      {loading ? <div style={{ textAlign: 'center', padding: 40, color: '#8A857D' }}>⏳...</div> : withdrawals.length === 0 ? <div style={{ textAlign: 'center', padding: 40, background: '#161618', borderRadius: 12, color: '#8A857D' }}>Không có yêu cầu nào.</div> :
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>{withdrawals.map(w => (
+        <div key={w.id} style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 10, padding: 14 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}><div><div style={{ fontSize: 14, fontWeight: 600 }}>{w.amount?.toLocaleString()}đ</div><div style={{ fontSize: 12, color: '#8A857D' }}>{w.users?.email || 'N/A'} · {w.method} · {w.account_info}</div><div style={{ fontSize: 11, color: '#8A857D' }}>{new Date(w.requested_at).toLocaleDateString('vi-VN')} · {w.status}</div></div></div>
+          {w.status === 'pending' && (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => handleAction(w.id, 'completed')} style={{ flex: 1, padding: '8px 0', background: '#34D399', color: '#000', border: 'none', borderRadius: 6, fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>✅ Duyệt</button>
+              <button onClick={() => handleAction(w.id, 'failed')} style={{ flex: 1, padding: '8px 0', background: '#F97373', color: '#000', border: 'none', borderRadius: 6, fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>❌ Từ chối</button>
+            </div>
+          )}
+        </div>
+      ))}</div>}
+    </div>
+  )
+}
+
+function TaskHistoryPage({ user, onBack }: { user: any; onBack: () => void }) {
+  const [history, setHistory] = useState<any[]>([]); const [loading, setLoading] = useState(true)
+  useEffect(() => { supabase.from('assignments').select('id, answer, submitted_at, reward_paid').eq('user_id', user.id).order('submitted_at', { ascending: false }).then(({ data }) => { if (data) setHistory(data); setLoading(false) }) }, [user])
+  return (
+    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}><button onClick={onBack} style={{ background: 'none', border: 'none', color: '#8A857D', fontSize: 18, cursor: 'pointer' }}>←</button><h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20 }}>📋 Lịch sử làm task</h2></div>
+      {loading ? <div style={{ textAlign: 'center', padding: 40, color: '#8A857D' }}>⏳...</div> : history.length === 0 ? <div style={{ textAlign: 'center', padding: 40, background: '#161618', borderRadius: 12, color: '#8A857D' }}>Chưa làm task nào.</div> :
+      <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 16 }}>{history.map((item, i) => (
+        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < history.length - 1 ? '1px solid #1C1C1E' : 'none' }}><div><div style={{ fontSize: 14 }}>Đáp án: {item.answer}</div><div style={{ fontSize: 12, color: '#8A857D' }}>{new Date(item.submitted_at).toLocaleString('vi-VN')}</div></div><span style={{ color: item.reward_paid ? '#34D399' : '#F5A623' }}>{item.reward_paid ? '✅' : '⏳'}</span></div>
+      ))}</div>}
+    </div>
+  )
+}
+
+function TxHistoryPage({ user, onBack }: { user: any; onBack: () => void }) {
+  const [txs, setTxs] = useState<any[]>([]); const [loading, setLoading] = useState(true)
+  useEffect(() => {
+    Promise.all([
+      supabase.from('assignments').select('id, answer, submitted_at, reward_paid').eq('user_id', user.id).eq('reward_paid', true).order('submitted_at', { ascending: false }),
+      supabase.from('withdrawals').select('id, amount, status, requested_at').eq('user_id', user.id).order('requested_at', { ascending: false })
+    ]).then(([taskRes, wdRes]) => {
+      const items: any[] = []
+      if (taskRes.data) taskRes.data.forEach((t: any) => items.push({ type: 'task', desc: 'Hoàn thành task', date: t.submitted_at, detail: t.answer }))
+      if (wdRes.data) wdRes.data.forEach((w: any) => items.push({ type: 'withdraw', desc: 'Rút tiền', amount: -w.amount, date: w.requested_at, status: w.status }))
+      items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      setTxs(items); setLoading(false)
+    })
+  }, [user])
+  return (
+    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}><button onClick={onBack} style={{ background: 'none', border: 'none', color: '#8A857D', fontSize: 18, cursor: 'pointer' }}>←</button><h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20 }}>💳 Lịch sử giao dịch</h2></div>
+      {loading ? <div style={{ textAlign: 'center', padding: 40, color: '#8A857D' }}>⏳...</div> : txs.length === 0 ? <div style={{ textAlign: 'center', padding: 40, background: '#161618', borderRadius: 12, color: '#8A857D' }}>Chưa có giao dịch nào.</div> :
+      <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 16 }}>{txs.map((tx, i) => (
+        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < txs.length - 1 ? '1px solid #1C1C1E' : 'none' }}><div><div style={{ fontSize: 14 }}>{tx.type === 'task' ? '🐝 ' : '💰 '}{tx.desc}{tx.detail ? `: ${tx.detail}` : ''}</div><div style={{ fontSize: 12, color: '#8A857D' }}>{new Date(tx.date).toLocaleString('vi-VN')}</div></div><span style={{ color: tx.amount > 0 ? '#34D399' : tx.amount < 0 ? '#F97373' : '#34D399' }}>{tx.amount > 0 ? '+' : ''}{tx.amount !== 0 ? tx.amount.toLocaleString() + 'đ' : 'Đã nhận'}</span></div>
+      ))}</div>}
+    </div>
+  )
+}
+
+function SettingsPage({ onBack }: { onBack: () => void }) {
+  return (
+    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}><button onClick={onBack} style={{ background: 'none', border: 'none', color: '#8A857D', fontSize: 18, cursor: 'pointer' }}>←</button><h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20 }}>🔔 Cài đặt thông báo</h2></div>
+      <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 20 }}><p style={{ color: '#8A857D', fontSize: 14 }}>Tính năng đang phát triển.</p></div>
+    </div>
+  )
+}
+
+function HelpPage({ onBack }: { onBack: () => void }) {
+  return (
+    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}><button onClick={onBack} style={{ background: 'none', border: 'none', color: '#8A857D', fontSize: 18, cursor: 'pointer' }}>←</button><h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20 }}>❓ Hướng dẫn</h2></div>
+      <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 20 }}>
+        <div style={{ marginBottom: 16 }}><div style={{ fontWeight: 600, marginBottom: 6 }}>1. Làm task</div><div style={{ fontSize: 14, color: '#8A857D' }}>Vào tab Làm task, chọn task, làm theo hướng dẫn và nộp kết quả.</div></div>
+        <div style={{ marginBottom: 16 }}><div style={{ fontWeight: 600, marginBottom: 6 }}>2. Rút tiền</div><div style={{ fontSize: 14, color: '#8A857D' }}>Vào tab Rút tiền, nhập số tiền (tối thiểu 50.000đ) và thông tin tài khoản. Tiền sẽ được chuyển trong 24h.</div></div>
+        <div><div style={{ fontWeight: 600, marginBottom: 6 }}>3. Hỗ trợ</div><div style={{ fontSize: 14, color: '#8A857D' }}>Email: support@taskbee.vn</div></div>
+      </div>
+    </div>
+  )
+}
