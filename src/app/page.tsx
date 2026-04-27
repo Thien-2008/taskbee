@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
-import { phoneToEmail, normalizePhone, isPhoneNumber, formatPhoneDisplay } from '../utils/phone'
+import { useAuth } from '../hooks/useAuth'
+import { validateEmail, validatePhone, validatePassword, validatePasswordMatch, validateFullName, checkPasswordStrength, formatPhoneDisplay } from '../utils/validation'
 
 type Tab = 'dashboard' | 'tasks' | 'postTask' | 'withdraw' | 'profile'
 type View = 'main' | 'taskDetail' | 'taskHistory' | 'txHistory' | 'settings' | 'help' | 'admin'
@@ -13,103 +14,97 @@ interface DbTaskBatch {
 }
 
 export default function Home() {
-  const [phone, setPhone] = useState('')
-  const [fullName, setFullName] = useState('')
-  const [password, setPassword] = useState('')
-  const [isLogin, setIsLogin] = useState(true); const [loading, setLoading] = useState(false)
-  const [user, setUser] = useState<any>(null); const [showAuth, setShowAuth] = useState(false)
+  const [showAuth, setShowAuth] = useState(false)
+  const [isLogin, setIsLogin] = useState(true)
+  const [user, setUser] = useState<any>(null)
   const [displayName, setDisplayName] = useState('')
+  const [regFullName, setRegFullName] = useState('')
+  const [regEmail, setRegEmail] = useState('')
+  const [regPhone, setRegPhone] = useState('')
+  const [regPassword, setRegPassword] = useState('')
+  const [regConfirmPassword, setRegConfirmPassword] = useState('')
+  const [termsAccepted, setTermsAccepted] = useState(false)
+  const [showRegPassword, setShowRegPassword] = useState(false)
+  const [regErrors, setRegErrors] = useState<Record<string, string>>({})
+  const [loginIdentifier, setLoginIdentifier] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [showLoginPassword, setShowLoginPassword] = useState(false)
+  const [loginError, setLoginError] = useState('')
   const [activeTab, setActiveTab] = useState<Tab>('dashboard')
   const [currentView, setCurrentView] = useState<View>('main')
   const [selectedBatch, setSelectedBatch] = useState<DbTaskBatch | null>(null)
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0)
-  const [selectedAnswer, setSelectedAnswer] = useState(''); const [submitting, setSubmitting] = useState(false)
+  const [selectedAnswer, setSelectedAnswer] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const [notification, setNotification] = useState('')
-  const [balance, setBalance] = useState(0); const [tasksDone, setTasksDone] = useState(0)
+  const [balance, setBalance] = useState(0)
+  const [tasksDone, setTasksDone] = useState(0)
   const [userRole, setUserRole] = useState<string>('user')
   const [refreshTrigger, setRefreshTrigger] = useState(0)
-  const [authError, setAuthError] = useState('')
+
+  const { loading: authLoading, register, login, logout } = useAuth()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null))
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => setUser(s?.user ?? null))
     return () => subscription.unsubscribe()
   }, [])
+
   useEffect(() => { if (user) { loadUserStats(); loadUserRole() } }, [user, refreshTrigger])
 
   const loadUserStats = async () => {
     if (!user) return
-    const { data: ud } = await supabase.from('users').select('balance, role, phone').eq('id', user.id).single()
+    const { data: ud } = await supabase.from('users').select('balance, role, phone, full_name, email').eq('id', user.id).single()
     if (ud) {
-      setBalance(ud.balance || 0)
-      setUserRole(ud.role || 'user')
-      // Hiển thị tên: nếu có phone thì hiển thị phone, nếu không thì hiển thị email
-      if (ud.phone) {
-        setDisplayName(formatPhoneDisplay(ud.phone))
-      } else {
-        setDisplayName(user.email || '')
-      }
+      setBalance(ud.balance || 0); setUserRole(ud.role || 'user')
+      if (ud.full_name) setDisplayName(ud.full_name)
+      else if (ud.phone) setDisplayName(formatPhoneDisplay(ud.phone))
+      else if (ud.email) setDisplayName(ud.email)
+      else setDisplayName('Người dùng')
     }
     const { count } = await supabase.from('assignments').select('id', { count: 'exact' }).eq('user_id', user.id).eq('reward_paid', true)
     if (count) setTasksDone(count)
   }
+
   const loadUserRole = async () => {
     const { data } = await supabase.from('users').select('role').eq('id', user.id).single()
     if (data) setUserRole(data.role || 'user')
   }
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setAuthError('')
-    try {
-      // Tự nhận diện: input là email hay số điện thoại
-      const email = isPhoneNumber(phone) ? phoneToEmail(phone) : phone
-      const normPhone = isPhoneNumber(phone) ? normalizePhone(phone) : null
-
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
-        if (error) throw error
-      } else {
-        if (!normPhone) {
-          setAuthError('Số điện thoại không hợp lệ')
-          setLoading(false)
-          return
-        }
-        if (password.length < 6) {
-          setAuthError('Mật khẩu phải có ít nhất 6 ký tự')
-          setLoading(false)
-          return
-        }
-        if (!fullName.trim()) {
-          setAuthError('Vui lòng nhập họ và tên')
-          setLoading(false)
-          return
-        }
-
-        const { error } = await supabase.auth.signUp({ email, password })
-        if (error) {
-          if (error.message.includes('already registered')) {
-            setAuthError('Số điện thoại này đã được đăng ký')
-          } else {
-            setAuthError(error.message)
-          }
-          setLoading(false)
-          return
-        }
-        alert('✅ Đăng ký thành công! Vui lòng đăng nhập.')
-        setIsLogin(true)
-        setPassword('')
-        setFullName('')
-      }
-    } catch (error: any) {
-      setAuthError('Số điện thoại hoặc mật khẩu không đúng')
-    } finally {
-      setLoading(false)
+  const handleRegister = async () => {
+    const newErrors = {
+      fullName: validateFullName(regFullName) ?? '',
+      email: validateEmail(regEmail) ?? '',
+      phone: validatePhone(regPhone) ?? '',
+      password: validatePassword(regPassword) ?? '',
+      confirmPassword: validatePasswordMatch(regPassword, regConfirmPassword) ?? '',
     }
+    setRegErrors(newErrors)
+    if (Object.values(newErrors).some(Boolean)) return
+    if (!termsAccepted) { setRegErrors(p => ({ ...p, terms: 'Vui lòng đồng ý với điều khoản' })); return }
+    const result = await register({ email: regEmail, phone: regPhone, password: regPassword, fullName: regFullName })
+    if (!result.success) {
+      if (result.error?.includes('Email')) setRegErrors(p => ({ ...p, email: result.error! }))
+      else if (result.error?.includes('điện thoại') || result.error?.includes('SĐT')) setRegErrors(p => ({ ...p, phone: result.error! }))
+      else alert(result.error)
+      return
+    }
+    alert('✅ Đăng ký thành công! Vui lòng kiểm tra email để xác nhận.')
+    setIsLogin(true)
+    setRegFullName(''); setRegEmail(''); setRegPhone(''); setRegPassword(''); setRegConfirmPassword(''); setTermsAccepted(false); setRegErrors({})
   }
 
-  const handleLogout = async () => { await supabase.auth.signOut() }
+  const handleLogin = async () => {
+    if (!loginIdentifier || !loginPassword) { setLoginError('Vui lòng nhập đầy đủ thông tin'); return }
+    const result = await login(loginIdentifier, loginPassword)
+    if (!result.success) {
+      setLoginError(result.error === 'EMAIL_NOT_CONFIRMED' ? 'Email chưa xác nhận. Kiểm tra hộp thư.' : result.error ?? 'Đăng nhập thất bại')
+      return
+    }
+    setShowAuth(false)
+  }
+
+  const handleLogout = async () => { await logout() }
   const startTask = (batch: DbTaskBatch) => { setSelectedBatch(batch); setCurrentTaskIndex(0); setSelectedAnswer(''); setCurrentView('taskDetail') }
 
   const submitTaskAnswer = async () => {
@@ -133,55 +128,55 @@ export default function Home() {
     } catch (error: any) { alert('Lỗi: ' + error.message) } finally { setSubmitting(false) }
   }
 
-  // ── Auth Form ──
   if (!user) {
     if (showAuth) {
+      const strength = checkPasswordStrength(regPassword)
       return (
         <div style={{ fontFamily: "'DM Sans', sans-serif", background: '#0a0a0b', color: '#EDEBE7', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <style>{`@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap');`}</style>
           <div style={{ width: '100%', maxWidth: 380, background: '#161618', border: '1px solid #1C1C1E', borderRadius: 16, padding: '32px 24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
               <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 24, color: '#F5A623' }}>🐝 TaskBee</h1>
-              <button onClick={() => { setShowAuth(false); setIsLogin(true); setPassword(''); setAuthError('') }} style={{ background: 'none', border: 'none', color: '#8A857D', fontSize: 20, cursor: 'pointer' }}>✕</button>
+              <button onClick={() => { setShowAuth(false); setIsLogin(true); setLoginError('') }} style={{ background: 'none', border: 'none', color: '#8A857D', fontSize: 20, cursor: 'pointer' }}>✕</button>
             </div>
-            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, marginBottom: 20, textAlign: 'center' }}>{isLogin ? 'Đăng nhập' : 'Tạo tài khoản mới'}</h2>
-            <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div>
-                <label style={{ display: 'block', fontSize: 13, marginBottom: 6, color: '#8A857D' }}>Số điện thoại</label>
-                <input type="tel" required value={phone} onChange={e => setPhone(e.target.value)} placeholder="0912 345 678"
-                  inputMode="tel" maxLength={15}
-                  style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 15, outline: 'none' }} />
-              </div>
-              {!isLogin && (
+            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, marginBottom: 20, textAlign: 'center' }}>
+              {isLogin ? 'Đăng nhập' : 'Tạo tài khoản mới'}
+            </h2>
+            {isLogin ? (
+              <form onSubmit={e => { e.preventDefault(); handleLogin() }} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, marginBottom: 6, color: '#8A857D' }}>Họ và tên</label>
-                  <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Nguyễn Văn A"
-                    style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 15, outline: 'none' }} />
+                  <label style={{ display: 'block', fontSize: 13, marginBottom: 6, color: '#8A857D' }}>Email hoặc SĐT</label>
+                  <input type="text" required value={loginIdentifier} onChange={e => { setLoginIdentifier(e.target.value); setLoginError('') }} placeholder="example@mail.com hoặc 0912 345 678" style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 15, outline: 'none' }} />
                 </div>
-              )}
-              <div>
-                <label style={{ display: 'block', fontSize: 13, marginBottom: 6, color: '#8A857D' }}>Mật khẩu</label>
-                <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••"
-                  style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 15, outline: 'none' }} />
-              </div>
-              {authError && <div style={{ color: '#F97373', fontSize: 14, textAlign: 'center' }}>{authError}</div>}
-              <button type="submit" disabled={loading}
-                style={{ width: '100%', padding: '12px 0', background: '#F5A623', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
-                {loading ? '⏳...' : isLogin ? '🔐 Đăng nhập' : '📝 Tạo tài khoản'}
-              </button>
-            </form>
+                <div style={{ position: 'relative' }}>
+                  <label style={{ display: 'block', fontSize: 13, marginBottom: 6, color: '#8A857D' }}>Mật khẩu</label>
+                  <input type={showLoginPassword ? 'text' : 'password'} required value={loginPassword} onChange={e => { setLoginPassword(e.target.value); setLoginError('') }} placeholder="••••••" style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 15, outline: 'none' }} />
+                  <button type="button" onClick={() => setShowLoginPassword(!showLoginPassword)} style={{ position: 'absolute', right: 10, bottom: 10, background: 'none', border: 'none', color: '#8A857D', cursor: 'pointer' }}>{showLoginPassword ? '🙈' : '👁'}</button>
+                </div>
+                {loginError && <div style={{ color: '#F97373', fontSize: 14, textAlign: 'center' }}>{loginError}</div>}
+                <button type="submit" disabled={authLoading} style={{ width: '100%', padding: '12px 0', background: '#F5A623', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>{authLoading ? '⏳...' : '🔐 Đăng nhập'}</button>
+              </form>
+            ) : (
+              <form onSubmit={e => { e.preventDefault(); handleRegister() }} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div><label style={{ display: 'block', fontSize: 13, marginBottom: 6, color: '#8A857D' }}>Họ và tên</label><input type="text" required value={regFullName} onChange={e => { setRegFullName(e.target.value); setRegErrors(p => ({...p, fullName:''})) }} placeholder="Nguyễn Văn A" style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 15, outline: 'none' }} />{regErrors.fullName && <div style={{ color: '#F97373', fontSize: 12, marginTop: 4 }}>{regErrors.fullName}</div>}</div>
+                <div><label style={{ display: 'block', fontSize: 13, marginBottom: 6, color: '#8A857D' }}>Email</label><input type="email" required value={regEmail} onChange={e => { setRegEmail(e.target.value); setRegErrors(p => ({...p, email:''})) }} placeholder="example@gmail.com" style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 15, outline: 'none' }} />{regErrors.email && <div style={{ color: '#F97373', fontSize: 12, marginTop: 4 }}>{regErrors.email}</div>}</div>
+                <div><label style={{ display: 'block', fontSize: 13, marginBottom: 6, color: '#8A857D' }}>Số điện thoại</label><input type="tel" required value={regPhone} onChange={e => { setRegPhone(e.target.value); setRegErrors(p => ({...p, phone:''})) }} placeholder="0912 345 678" maxLength={15} style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 15, outline: 'none' }} />{regErrors.phone && <div style={{ color: '#F97373', fontSize: 12, marginTop: 4 }}>{regErrors.phone}</div>}</div>
+                <div style={{ position: 'relative' }}><label style={{ display: 'block', fontSize: 13, marginBottom: 6, color: '#8A857D' }}>Mật khẩu</label><input type={showRegPassword ? 'text' : 'password'} required value={regPassword} onChange={e => { setRegPassword(e.target.value); setRegErrors(p => ({...p, password:''})) }} placeholder="••••••" style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 15, outline: 'none' }} /><button type="button" onClick={() => setShowRegPassword(!showRegPassword)} style={{ position: 'absolute', right: 10, bottom: 10, background: 'none', border: 'none', color: '#8A857D', cursor: 'pointer' }}>{showRegPassword ? '🙈' : '👁'}</button></div>
+                {regPassword && (<div><div style={{ height: 4, background: '#1C1C1E', borderRadius: 2 }}><div style={{ width: `${(strength.score / 4) * 100}%`, height: '100%', background: strength.color, borderRadius: 2, transition: 'width 0.3s' }} /></div><p style={{ color: strength.color, fontSize: 12, marginTop: 4 }}>{strength.label}</p>{regErrors.password && <div style={{ color: '#F97373', fontSize: 12 }}>{regErrors.password}</div>}</div>)}
+                <div><label style={{ display: 'block', fontSize: 13, marginBottom: 6, color: '#8A857D' }}>Xác nhận mật khẩu</label><input type="password" required value={regConfirmPassword} onChange={e => { setRegConfirmPassword(e.target.value); setRegErrors(p => ({...p, confirmPassword:''})) }} placeholder="••••••" style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 15, outline: 'none' }} />{regErrors.confirmPassword && <div style={{ color: '#F97373', fontSize: 12, marginTop: 4 }}>{regErrors.confirmPassword}</div>}</div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#8A857D', cursor: 'pointer' }}><input type="checkbox" checked={termsAccepted} onChange={e => { setTermsAccepted(e.target.checked); setRegErrors(p => ({...p, terms:''})) }} />Tôi đồng ý với Điều khoản và Chính sách bảo mật</label>
+                {regErrors.terms && <div style={{ color: '#F97373', fontSize: 12 }}>{regErrors.terms}</div>}
+                <button type="submit" disabled={authLoading} style={{ width: '100%', padding: '12px 0', background: '#F5A623', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>{authLoading ? '⏳...' : '📝 Tạo tài khoản'}</button>
+              </form>
+            )}
             <p style={{ textAlign: 'center', fontSize: 14, marginTop: 16, color: '#8A857D' }}>
               {isLogin ? "Chưa có tài khoản? " : "Đã có tài khoản? "}
-              <button onClick={() => { setIsLogin(!isLogin); setAuthError('') }}
-                style={{ background: 'none', border: 'none', color: '#F5A623', cursor: 'pointer', fontWeight: 600, fontSize: 14 }}>
-                {isLogin ? 'Đăng ký ngay' : 'Đăng nhập'}
-              </button>
+              <button onClick={() => { setIsLogin(!isLogin); setLoginError('') }} style={{ background: 'none', border: 'none', color: '#F5A623', cursor: 'pointer', fontWeight: 600, fontSize: 14 }}>{isLogin ? 'Đăng ký ngay' : 'Đăng nhập'}</button>
             </p>
           </div>
         </div>
       )
     }
-    // Landing page giữ nguyên...
     return (
       <div style={{ fontFamily: "'DM Sans', sans-serif", background: '#0a0a0b', color: '#EDEBE7', overflowX: 'hidden', userSelect: 'none' }}>
         <style>{`@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap');`}</style>
@@ -208,7 +203,7 @@ export default function Home() {
     )
   }
 
-  // ── Nav ──
+  // ── Dashboard ──
   const navTabs: { key: Tab; icon: string; label: string }[] = [
     { key: 'dashboard', icon: '🏠', label: 'Tổng quan' },
     { key: 'tasks', icon: '📋', label: 'Làm task' },
@@ -256,97 +251,7 @@ export default function Home() {
   )
 }
 
-// ─── Dashboard Tab ──
-function DashboardTab({ user, displayName, balance, tasksDone, onNavigate }: { user: any; displayName: string; balance: number; tasksDone: number; onNavigate: (t: Tab) => void }) {
-  const isNewUser = balance === 0 && tasksDone === 0
-  return (
-    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
-      <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 4 }}>Xin chào, {displayName} 👋</h2>
-      <div style={{ fontSize: 13, color: '#8A857D', marginBottom: 20 }}>Cấp độ: {tasksDone >= 50 ? 'Ong chúa 🐝' : tasksDone >= 20 ? 'Ong thợ' : 'Tân binh'}<div style={{ width: '100%', height: 4, background: '#1C1C1E', borderRadius: 2, marginTop: 6 }}><div style={{ width: `${Math.min(tasksDone / 50 * 100, 100)}%`, height: '100%', background: '#F5A623', borderRadius: 2 }} /></div></div>
-      {isNewUser && (
-        <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 20, marginBottom: 20 }}>
-          <div style={{ fontWeight: 600, marginBottom: 12 }}>✨ Bắt đầu hành trình TaskBee</div>
-          {[{ done: true, text: 'Đăng ký tài khoản' }, { done: false, text: 'Làm task đầu tiên', action: 'Làm ngay', tab: 'tasks' as Tab }, { done: false, text: 'Rút tiền đầu tiên', action: 'Xem hướng dẫn', tab: 'withdraw' as Tab }].map((step, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < 2 ? '1px solid #1C1C1E' : 'none' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><span style={{ color: step.done ? '#34D399' : '#8A857D' }}>{step.done ? '✅' : '○'}</span><span style={{ color: step.done ? '#8A857D' : '#EDEBE7', fontSize: 14 }}>{step.text}</span></div>
-              {!step.done && step.tab && <button onClick={() => onNavigate(step.tab)} style={{ background: '#F5A623', color: '#000', border: 'none', padding: '6px 14px', borderRadius: 6, fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>{step.action}</button>}
-            </div>
-          ))}
-        </div>
-      )}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
-        <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 16 }}><div style={{ fontSize: 12, color: '#8A857D', marginBottom: 4 }}>💰 Số dư</div><div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 24, color: '#F5A623' }}>{balance.toLocaleString()}đ</div></div>
-        <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 16 }}><div style={{ fontSize: 12, color: '#8A857D', marginBottom: 4 }}>🐝 Task đã làm</div><div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 24 }}>{tasksDone}</div></div>
-      </div>
-    </div>
-  )
-}
-
-// ─── Tasks Tab ──
-function TasksTab({ user, onStartTask }: { user: any; onStartTask: (b: DbTaskBatch) => void }) {
-  const [batches, setBatches] = useState<DbTaskBatch[]>([]); const [loading, setLoading] = useState(true)
-  useEffect(() => { supabase.from('task_batches').select('*').eq('status', 'active').order('id', { ascending: false }).then(({ data }) => { if (data) setBatches(data); setLoading(false) }) }, [])
-  const reward = (b: DbTaskBatch) => Math.round(b.budget_total / b.total_items)
-  return (
-    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
-      <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 16 }}>📋 Danh sách task</h2>
-      {loading ? <div style={{ textAlign: 'center', padding: 40, color: '#8A857D' }}>⏳ Đang tải...</div> : batches.length === 0 ? <div style={{ textAlign: 'center', padding: 40, background: '#161618', borderRadius: 12 }}><div style={{ fontSize: 40, marginBottom: 12 }}>📋</div><div style={{ color: '#8A857D' }}>Chưa có task nào.</div></div> :
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>{batches.map(batch => (
-        <div key={batch.id} style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-            <div style={{ flex: 1 }}><div style={{ fontWeight: 600, fontSize: 15 }}>{batch.task_type}</div><div style={{ fontSize: 12, color: '#8A857D', marginTop: 6 }}>{reward(batch).toLocaleString()}đ/task · {batch.total_items - batch.completed_items} còn lại</div><div style={{ fontSize: 10, color: '#34D399', marginTop: 6 }}>🔒 Tiền đã được bảo vệ</div></div>
-            <button onClick={() => onStartTask(batch)} style={{ background: '#F5A623', color: '#000', border: 'none', padding: '8px 16px', borderRadius: 6, fontWeight: 600, fontSize: 14, cursor: 'pointer', marginLeft: 12 }}>Làm ngay</button>
-          </div>
-        </div>
-      ))}</div>}
-    </div>
-  )
-}
-// ─── Post Task Tab ──
-function PostTaskTab({ user, onRefresh }: { user: any; onRefresh: () => void }) {
-  const [taskType, setTaskType] = useState('Gắn thẻ ảnh'); const [totalItems, setTotalItems] = useState('50')
-  const [budgetTotal, setBudgetTotal] = useState('25000'); const [instructions, setInstructions] = useState('')
-  const [submitting, setSubmitting] = useState(false); const [myBatches, setMyBatches] = useState<any[]>([])
-  useEffect(() => { supabase.from('task_batches').select('*').order('id', { ascending: false }).then(({ data }) => { if (data) setMyBatches(data) }) }, [])
-  const handlePost = async () => {
-    const items = parseInt(totalItems); const budget = parseInt(budgetTotal)
-    if (!items || !budget || items < 1 || budget < 1000) { alert('Vui lòng nhập số hợp lệ'); return }
-    setSubmitting(true)
-    try {
-      const { data: businesses } = await supabase.from('businesses').select('id').limit(1)
-      const businessId = businesses && businesses.length > 0 ? businesses[0].id : 1
-      const { error } = await supabase.from('task_batches').insert({ business_id: businessId, task_type: taskType, total_items: items, budget_total: budget, completed_items: 0, status: 'active', instructions: instructions || 'Xem ảnh và chọn đáp án phù hợp' })
-      if (error) throw error
-      const { data: newBatch } = await supabase.from('task_batches').select('id').order('id', { ascending: false }).limit(1)
-      if (newBatch && newBatch.length > 0) {
-        const itemsToInsert = Array.from({ length: items }, (_, i) => ({ batch_id: newBatch[0].id, content_url: `https://picsum.photos/seed/batch${newBatch[0].id}_${i}/400/400`, status: 'pending' }))
-        await supabase.from('task_items').insert(itemsToInsert)
-      }
-      alert('✅ Đăng task thành công!'); setTotalItems('50'); setBudgetTotal('25000'); setInstructions(''); onRefresh()
-    } catch (error: any) { alert('Lỗi: ' + error.message) } finally { setSubmitting(false) }
-  }
-  return (
-    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
-      <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 20 }}>📝 Đăng task mới</h2>
-      <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 20, marginBottom: 20 }}>
-        <div style={{ marginBottom: 12 }}><label style={{ display: 'block', fontSize: 13, color: '#8A857D', marginBottom: 6 }}>Loại task</label><select value={taskType} onChange={e => setTaskType(e.target.value)} style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none' }}><option>Gắn thẻ ảnh</option><option>Nhập liệu</option></select></div>
-        <div style={{ marginBottom: 12 }}><label style={{ display: 'block', fontSize: 13, color: '#8A857D', marginBottom: 6 }}>Tổng số task</label><input type="number" value={totalItems} onChange={e => setTotalItems(e.target.value)} style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none' }} /></div>
-        <div style={{ marginBottom: 12 }}><label style={{ display: 'block', fontSize: 13, color: '#8A857D', marginBottom: 6 }}>Tổng ngân sách (đ)</label><input type="number" value={budgetTotal} onChange={e => setBudgetTotal(e.target.value)} style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none' }} /></div>
-        <div style={{ marginBottom: 16 }}><label style={{ display: 'block', fontSize: 13, color: '#8A857D', marginBottom: 6 }}>Hướng dẫn</label><textarea value={instructions} onChange={e => setInstructions(e.target.value)} rows={3} placeholder="Hướng dẫn cho người làm..." style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none', resize: 'vertical' }} /></div>
-        <button onClick={handlePost} disabled={submitting} style={{ width: '100%', padding: '12px 0', background: submitting ? '#8A857D' : '#F5A623', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>{submitting ? '⏳...' : 'Đăng task'}</button>
-      </div>
-      {myBatches.length > 0 && (
-        <div><div style={{ fontWeight: 600, marginBottom: 12 }}>📋 Task đã đăng</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>{myBatches.map(batch => (
-            <div key={batch.id} style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 10, padding: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><div><div style={{ fontSize: 14, fontWeight: 600 }}>{batch.task_type}</div><div style={{ fontSize: 12, color: '#8A857D' }}>{batch.total_items} task · {batch.budget_total.toLocaleString()}đ</div></div><div style={{ fontSize: 12, color: '#8A857D' }}>{batch.completed_items}/{batch.total_items} hoàn thành</div></div>
-            </div>
-          ))}</div></div>)}
-    </div>
-  )
-}
-
-// ─── Withdraw Tab ──
+// ── Các component con ──
 function WithdrawTab({ user, balance, onRefresh }: { user: any; balance: number; onRefresh: () => void }) {
   const [amount, setAmount] = useState(''); const [method, setMethod] = useState('momo'); const [accountInfo, setAccountInfo] = useState('')
   const [submitting, setSubmitting] = useState(false); const [history, setHistory] = useState<any[]>([])
@@ -377,7 +282,6 @@ function WithdrawTab({ user, balance, onRefresh }: { user: any; balance: number;
   )
 }
 
-// ─── Profile Tab ──
 function ProfileTab({ user, displayName, balance, tasksDone, userRole, onLogout, onNavigate }: { user: any; displayName: string; balance: number; tasksDone: number; userRole: string; onLogout: () => void; onNavigate: (v: View) => void }) {
   return (
     <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
@@ -409,7 +313,6 @@ function ProfileTab({ user, displayName, balance, tasksDone, userRole, onLogout,
   )
 }
 
-// ─── Admin Page ──
 function AdminPage({ onBack }: { onBack: () => void }) {
   const [withdrawals, setWithdrawals] = useState<any[]>([]); const [loading, setLoading] = useState(true)
   useEffect(() => { loadWithdrawals() }, [])
@@ -434,7 +337,6 @@ function AdminPage({ onBack }: { onBack: () => void }) {
   )
 }
 
-// ─── Task History ──
 function TaskHistoryPage({ user, onBack }: { user: any; onBack: () => void }) {
   const [history, setHistory] = useState<any[]>([]); const [loading, setLoading] = useState(true)
   useEffect(() => { supabase.from('assignments').select('id, answer, submitted_at, reward_paid').eq('user_id', user.id).order('submitted_at', { ascending: false }).then(({ data }) => { if (data) setHistory(data); setLoading(false) }) }, [user])
@@ -449,7 +351,6 @@ function TaskHistoryPage({ user, onBack }: { user: any; onBack: () => void }) {
   )
 }
 
-// ─── Tx History ──
 function TxHistoryPage({ user, onBack }: { user: any; onBack: () => void }) {
   const [txs, setTxs] = useState<any[]>([]); const [loading, setLoading] = useState(true)
   useEffect(() => {
@@ -475,7 +376,6 @@ function TxHistoryPage({ user, onBack }: { user: any; onBack: () => void }) {
   )
 }
 
-// ─── Settings ──
 function SettingsPage({ onBack }: { onBack: () => void }) {
   return (
     <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
@@ -485,7 +385,6 @@ function SettingsPage({ onBack }: { onBack: () => void }) {
   )
 }
 
-// ─── Help ──
 function HelpPage({ onBack }: { onBack: () => void }) {
   return (
     <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
@@ -495,172 +394,6 @@ function HelpPage({ onBack }: { onBack: () => void }) {
         <div style={{ marginBottom: 16 }}><div style={{ fontWeight: 600, marginBottom: 6 }}>2. Rút tiền</div><div style={{ fontSize: 14, color: '#8A857D' }}>Vào tab Rút tiền, nhập số tiền (tối thiểu 50.000đ) và thông tin tài khoản. Tiền sẽ được chuyển trong 24h.</div></div>
         <div><div style={{ fontWeight: 600, marginBottom: 6 }}>3. Hỗ trợ</div><div style={{ fontSize: 14, color: '#8A857D' }}>Email: support@taskbee.vn</div></div>
       </div>
-    </div>
-  )
-}
-
-  // ── Nav ──
-  const navTabs: { key: Tab; icon: string; label: string }[] = [
-    { key: 'dashboard', icon: '🏠', label: 'Tổng quan' },
-    { key: 'tasks', icon: '📋', label: 'Làm task' },
-    ...(userRole === 'business' || userRole === 'admin' ? [{ key: 'postTask' as Tab, icon: '📝', label: 'Đăng task' }] : []),
-    { key: 'withdraw', icon: '💰', label: 'Rút tiền' },
-    { key: 'profile', icon: '👤', label: 'Hồ sơ' },
-  ]
-
-  return (
-    <div style={{ fontFamily: "'DM Sans', sans-serif", background: '#0a0a0b', color: '#EDEBE7', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap');`}</style>
-      <header style={{ background: '#111113', borderBottom: '1px solid #1C1C1E', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 18, color: '#F5A623', cursor: 'pointer' }} onClick={() => { setCurrentView('main'); setActiveTab('dashboard') }}>🐝 TaskBee</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <button style={{ background: 'none', border: 'none', color: '#8A857D', fontSize: 20, cursor: 'pointer' }}>🔔</button>
-          <button onClick={handleLogout} style={{ background: 'transparent', border: '1px solid #1C1C1E', color: '#EDEBE7', padding: '6px 14px', borderRadius: 6, fontSize: 13, cursor: 'pointer' }}>Đăng xuất</button>
-        </div>
-      </header>
-      {notification && <div style={{ position: 'fixed', top: 70, left: '50%', transform: 'translateX(-50%)', zIndex: 100, background: '#34D399', color: '#000', padding: '10px 24px', borderRadius: 20, fontWeight: 600, fontSize: 14 }}>{notification}</div>}
-      <div style={{ flex: 1, overflow: 'auto', paddingBottom: 80 }}>
-        {currentView === 'taskHistory' && <TaskHistoryPage user={user} onBack={() => setCurrentView('main')} />}
-        {currentView === 'txHistory' && <TxHistoryPage user={user} onBack={() => setCurrentView('main')} />}
-        {currentView === 'settings' && <SettingsPage onBack={() => setCurrentView('main')} />}
-        {currentView === 'help' && <HelpPage onBack={() => setCurrentView('main')} />}
-        {currentView === 'admin' && <AdminPage onBack={() => setCurrentView('main')} />}
-        {currentView === 'main' && (
-          <>
-            {activeTab === 'dashboard' && <DashboardTab user={user} displayName={displayName} balance={balance} tasksDone={tasksDone} onNavigate={(tab) => setActiveTab(tab)} />}
-            {activeTab === 'tasks' && <TasksTab user={user} onStartTask={startTask} />}
-            {activeTab === 'postTask' && <PostTaskTab user={user} onRefresh={() => setRefreshTrigger(p => p + 1)} />}
-            {activeTab === 'withdraw' && <WithdrawTab user={user} balance={balance} onRefresh={() => setRefreshTrigger(p => p + 1)} />}
-            {activeTab === 'profile' && <ProfileTab user={user} displayName={displayName} balance={balance} tasksDone={tasksDone} userRole={userRole} onLogout={handleLogout} onNavigate={(v: View) => setCurrentView(v)} />}
-          </>
-        )}
-      </div>
-      <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#111113', borderTop: '1px solid #1C1C1E', display: 'flex', justifyContent: 'space-around', padding: '8px 0', zIndex: 50 }}>
-        {navTabs.map(tab => (
-          <button key={tab.key} onClick={() => { setActiveTab(tab.key); setCurrentView('main'); setSelectedBatch(null) }}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: activeTab === tab.key ? '#F5A623' : '#8A857D', cursor: 'pointer', padding: '4px 8px', fontSize: 11, fontWeight: activeTab === tab.key ? 600 : 400 }}>
-            <span style={{ fontSize: 20 }}>{tab.icon}</span><span>{tab.label}</span>
-          </button>
-        ))}
-      </nav>
-    </div>
-  )
-}
-
-function DashboardTab({ user, displayName, balance, tasksDone, onNavigate }: { user: any; displayName: string; balance: number; tasksDone: number; onNavigate: (t: Tab) => void }) {
-  const isNewUser = balance === 0 && tasksDone === 0
-  return (
-    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
-      <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 4 }}>Xin chào, {displayName} 👋</h2>
-      <div style={{ fontSize: 13, color: '#8A857D', marginBottom: 20 }}>Cấp độ: {tasksDone >= 50 ? 'Ong chúa 🐝' : tasksDone >= 20 ? 'Ong thợ' : 'Tân binh'}<div style={{ width: '100%', height: 4, background: '#1C1C1E', borderRadius: 2, marginTop: 6 }}><div style={{ width: `${Math.min(tasksDone / 50 * 100, 100)}%`, height: '100%', background: '#F5A623', borderRadius: 2 }} /></div></div>
-      {isNewUser && (
-        <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 20, marginBottom: 20 }}>
-          <div style={{ fontWeight: 600, marginBottom: 12 }}>✨ Bắt đầu hành trình TaskBee</div>
-          {[{ done: true, text: 'Đăng ký tài khoản' }, { done: false, text: 'Làm task đầu tiên', action: 'Làm ngay', tab: 'tasks' as Tab }, { done: false, text: 'Rút tiền đầu tiên', action: 'Xem hướng dẫn', tab: 'withdraw' as Tab }].map((step, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < 2 ? '1px solid #1C1C1E' : 'none' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><span style={{ color: step.done ? '#34D399' : '#8A857D' }}>{step.done ? '✅' : '○'}</span><span style={{ color: step.done ? '#8A857D' : '#EDEBE7', fontSize: 14 }}>{step.text}</span></div>
-              {!step.done && step.tab && <button onClick={() => onNavigate(step.tab)} style={{ background: '#F5A623', color: '#000', border: 'none', padding: '6px 14px', borderRadius: 6, fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>{step.action}</button>}
-            </div>
-          ))}
-        </div>
-      )}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
-        <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 16 }}><div style={{ fontSize: 12, color: '#8A857D', marginBottom: 4 }}>💰 Số dư</div><div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 24, color: '#F5A623' }}>{balance.toLocaleString()}đ</div></div>
-        <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 16 }}><div style={{ fontSize: 12, color: '#8A857D', marginBottom: 4 }}>🐝 Task đã làm</div><div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 24 }}>{tasksDone}</div></div>
-      </div>
-    </div>
-  )
-}
-
-function TasksTab({ user, onStartTask }: { user: any; onStartTask: (b: DbTaskBatch) => void }) {
-  const [batches, setBatches] = useState<DbTaskBatch[]>([]); const [loading, setLoading] = useState(true)
-  useEffect(() => { supabase.from('task_batches').select('*').eq('status', 'active').order('id', { ascending: false }).then(({ data }) => { if (data) setBatches(data); setLoading(false) }) }, [])
-  const reward = (b: DbTaskBatch) => Math.round(b.budget_total / b.total_items)
-  return (
-    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
-      <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 16 }}>📋 Danh sách task</h2>
-      {loading ? <div style={{ textAlign: 'center', padding: 40, color: '#8A857D' }}>⏳ Đang tải...</div> : batches.length === 0 ? <div style={{ textAlign: 'center', padding: 40, background: '#161618', borderRadius: 12 }}><div style={{ fontSize: 40, marginBottom: 12 }}>📋</div><div style={{ color: '#8A857D' }}>Chưa có task nào.</div></div> :
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>{batches.map(batch => (
-        <div key={batch.id} style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-            <div style={{ flex: 1 }}><div style={{ fontWeight: 600, fontSize: 15 }}>{batch.task_type}</div><div style={{ fontSize: 12, color: '#8A857D', marginTop: 6 }}>{reward(batch).toLocaleString()}đ/task · {batch.total_items - batch.completed_items} còn lại</div><div style={{ fontSize: 10, color: '#34D399', marginTop: 6 }}>🔒 Tiền đã được bảo vệ</div></div>
-            <button onClick={() => onStartTask(batch)} style={{ background: '#F5A623', color: '#000', border: 'none', padding: '8px 16px', borderRadius: 6, fontWeight: 600, fontSize: 14, cursor: 'pointer', marginLeft: 12 }}>Làm ngay</button>
-          </div>
-        </div>
-      ))}</div>}
-    </div>
-  )
-}
-
-function PostTaskTab({ user, onRefresh }: { user: any; onRefresh: () => void }) {
-  const [taskType, setTaskType] = useState('Gắn thẻ ảnh'); const [totalItems, setTotalItems] = useState('50')
-  const [budgetTotal, setBudgetTotal] = useState('25000'); const [instructions, setInstructions] = useState('')
-  const [submitting, setSubmitting] = useState(false); const [myBatches, setMyBatches] = useState<any[]>([])
-  useEffect(() => { supabase.from('task_batches').select('*').order('id', { ascending: false }).then(({ data }) => { if (data) setMyBatches(data) }) }, [])
-  const handlePost = async () => {
-    const items = parseInt(totalItems); const budget = parseInt(budgetTotal)
-    if (!items || !budget || items < 1 || budget < 1000) { alert('Vui lòng nhập số hợp lệ'); return }
-    setSubmitting(true)
-    try {
-      const { data: businesses } = await supabase.from('businesses').select('id').limit(1)
-      const businessId = businesses && businesses.length > 0 ? businesses[0].id : 1
-      const { error } = await supabase.from('task_batches').insert({ business_id: businessId, task_type: taskType, total_items: items, budget_total: budget, completed_items: 0, status: 'active', instructions: instructions || 'Xem ảnh và chọn đáp án phù hợp' })
-      if (error) throw error
-      const { data: newBatch } = await supabase.from('task_batches').select('id').order('id', { ascending: false }).limit(1)
-      if (newBatch && newBatch.length > 0) {
-        const itemsToInsert = Array.from({ length: items }, (_, i) => ({ batch_id: newBatch[0].id, content_url: `https://picsum.photos/seed/batch${newBatch[0].id}_${i}/400/400`, status: 'pending' }))
-        await supabase.from('task_items').insert(itemsToInsert)
-      }
-      alert('✅ Đăng task thành công!'); setTotalItems('50'); setBudgetTotal('25000'); setInstructions(''); onRefresh()
-    } catch (error: any) { alert('Lỗi: ' + error.message) } finally { setSubmitting(false) }
-  }
-  return (
-    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
-      <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 20 }}>📝 Đăng task mới</h2>
-      <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 20, marginBottom: 20 }}>
-        <div style={{ marginBottom: 12 }}><label style={{ display: 'block', fontSize: 13, color: '#8A857D', marginBottom: 6 }}>Loại task</label><select value={taskType} onChange={e => setTaskType(e.target.value)} style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none' }}><option>Gắn thẻ ảnh</option><option>Nhập liệu</option></select></div>
-        <div style={{ marginBottom: 12 }}><label style={{ display: 'block', fontSize: 13, color: '#8A857D', marginBottom: 6 }}>Tổng số task</label><input type="number" value={totalItems} onChange={e => setTotalItems(e.target.value)} style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none' }} /></div>
-        <div style={{ marginBottom: 12 }}><label style={{ display: 'block', fontSize: 13, color: '#8A857D', marginBottom: 6 }}>Tổng ngân sách (đ)</label><input type="number" value={budgetTotal} onChange={e => setBudgetTotal(e.target.value)} style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none' }} /></div>
-        <div style={{ marginBottom: 16 }}><label style={{ display: 'block', fontSize: 13, color: '#8A857D', marginBottom: 6 }}>Hướng dẫn</label><textarea value={instructions} onChange={e => setInstructions(e.target.value)} rows={3} placeholder="Hướng dẫn cho người làm..." style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none', resize: 'vertical' }} /></div>
-        <button onClick={handlePost} disabled={submitting} style={{ width: '100%', padding: '12px 0', background: submitting ? '#8A857D' : '#F5A623', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>{submitting ? '⏳...' : 'Đăng task'}</button>
-      </div>
-      {myBatches.length > 0 && (
-        <div><div style={{ fontWeight: 600, marginBottom: 12 }}>📋 Task đã đăng</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>{myBatches.map(batch => (
-            <div key={batch.id} style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 10, padding: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><div><div style={{ fontSize: 14, fontWeight: 600 }}>{batch.task_type}</div><div style={{ fontSize: 12, color: '#8A857D' }}>{batch.total_items} task · {batch.budget_total.toLocaleString()}đ</div></div><div style={{ fontSize: 12, color: '#8A857D' }}>{batch.completed_items}/{batch.total_items} hoàn thành</div></div>
-            </div>
-          ))}</div></div>)}
-    </div>
-  )
-}
-
-function WithdrawTab({ user, balance, onRefresh }: { user: any; balance: number; onRefresh: () => void }) {
-  const [amount, setAmount] = useState(''); const [method, setMethod] = useState('momo'); const [accountInfo, setAccountInfo] = useState('')
-  const [submitting, setSubmitting] = useState(false); const [history, setHistory] = useState<any[]>([])
-  useEffect(() => { supabase.from('withdrawals').select('*').eq('user_id', user.id).order('requested_at', { ascending: false }).then(({ data }) => { if (data) setHistory(data) }) }, [user])
-  const handleWithdraw = async () => {
-    const amt = parseInt(amount); if (!amt || amt < 50000) { alert('Tối thiểu 50.000đ'); return }; if (amt > balance) { alert('Số dư không đủ'); return }; if (!accountInfo.trim()) { alert('Nhập số TK/SĐT'); return }
-    setSubmitting(true)
-    try { await supabase.from('withdrawals').insert({ user_id: user.id, amount: amt, method, account_info: accountInfo, status: 'pending', requested_at: new Date().toISOString() }); alert('✅ Đã ghi nhận! Xử lý trong 24h.'); setAmount(''); onRefresh() }
-    catch (e: any) { alert('Lỗi: ' + e.message) } finally { setSubmitting(false) }
-  }
-  return (
-    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
-      <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 20 }}>💰 Rút tiền</h2>
-      <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 20, marginBottom: 20 }}><div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#8A857D', fontSize: 14 }}>Số dư khả dụng</span><span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 24, color: '#F5A623' }}>{balance.toLocaleString()}đ</span></div></div>
-      <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 20, marginBottom: 20 }}>
-        <div style={{ marginBottom: 12 }}><label style={{ display: 'block', fontSize: 13, color: '#8A857D', marginBottom: 6 }}>Phương thức</label><select value={method} onChange={e => setMethod(e.target.value)} style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none' }}><option value="momo">📱 Ví MoMo</option><option value="bank">🏦 Ngân hàng</option></select></div>
-        <div style={{ marginBottom: 12 }}><label style={{ display: 'block', fontSize: 13, color: '#8A857D', marginBottom: 6 }}>Số TK / SĐT</label><input type="text" value={accountInfo} onChange={e => setAccountInfo(e.target.value)} placeholder="Nhập số TK hoặc SĐT MoMo" style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none' }} /></div>
-        <div style={{ marginBottom: 16 }}><label style={{ display: 'block', fontSize: 13, color: '#8A857D', marginBottom: 6 }}>Số tiền</label><input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder={`Tối đa ${balance.toLocaleString()}đ`} style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none' }} /></div>
-        <div style={{ fontSize: 12, color: '#8A857D', marginBottom: 16 }}>⏱ 24h · 💸 Phí: 0đ · 📌 Tối thiểu: 50.000đ</div>
-        <button onClick={handleWithdraw} disabled={submitting} style={{ width: '100%', padding: '12px 0', background: submitting ? '#8A857D' : '#F5A623', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>{submitting ? '⏳...' : 'Xác nhận rút tiền'}</button>
-      </div>
-      {history.length > 0 && (
-        <div><div style={{ fontWeight: 600, marginBottom: 12 }}>📜 Lịch sử rút tiền</div>
-          <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 16 }}>{history.map((tx, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < history.length - 1 ? '1px solid #1C1C1E' : 'none' }}><div><div style={{ fontSize: 14 }}>{tx.amount.toLocaleString()}đ</div><div style={{ fontSize: 12, color: '#8A857D' }}>{new Date(tx.requested_at).toLocaleDateString('vi-VN')} · {tx.status === 'completed' ? '✅ Đã nhận' : tx.status === 'failed' ? '❌ Từ chối' : '⏳ Đang xử lý'}</div></div></div>
-          ))}</div></div>)}
     </div>
   )
 }
