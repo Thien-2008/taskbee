@@ -1,153 +1,110 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabaseClient'
-import { normalizePhone, isPhoneNumber } from '@/utils/phone'
 
-export default function Home() {
+export default function LandingPage() {
   const router = useRouter()
-  const [isLogin, setIsLogin] = useState(true)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
-
-  // Login fields
-  const [loginIdentifier, setLoginIdentifier] = useState('')
-  const [loginPassword, setLoginPassword] = useState('')
-
-  // Register fields
-  const [regFullName, setRegFullName] = useState('')
-  const [regEmail, setRegEmail] = useState('')
-  const [regPhone, setRegPhone] = useState('')
-  const [regPassword, setRegPassword] = useState('')
-  const [regConfirm, setRegConfirm] = useState('')
-  const [termsAccepted, setTermsAccepted] = useState(false)
-
-  const handleRegister = async () => {
-    setError('')
-    if (!regFullName.trim() || !regEmail.trim() || !regPhone.trim()) {
-      setError('Vui lòng nhập đầy đủ thông tin'); return
-    }
-    if (regPassword.length < 6) {
-      setError('Mật khẩu phải có ít nhất 6 ký tự'); return
-    }
-    if (regPassword !== regConfirm) {
-      setError('Mật khẩu không khớp'); return
-    }
-    if (!termsAccepted) {
-      setError('Vui lòng đồng ý điều khoản'); return
-    }
-
-    setLoading(true)
-    const normalizedPhone = normalizePhone(regPhone)
-    try {
-      const { data: existing } = await supabase.from('users').select('id').eq('phone', normalizedPhone).maybeSingle()
-      if (existing) { setError('Số điện thoại đã được đăng ký'); return }
-
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email: regEmail.trim(),
-        password: regPassword,
-        options: { data: { full_name: regFullName.trim() } }
-      })
-      if (signUpError) {
-        setError(signUpError.message.includes('already registered') ? 'Email đã được đăng ký' : 'Đăng ký thất bại')
-        return
-      }
-      if (data.user) {
-        await supabase.from('users').upsert({
-          id: data.user.id,
-          email: regEmail.trim(),
-          phone: normalizedPhone,
-          full_name: regFullName.trim(),
-          balance: 0,
-          role: 'user',
-          terms_accepted_at: new Date().toISOString()
-        }, { onConflict: 'id' })
-      }
-
-      await supabase.auth.signOut()
-      setSuccessMessage('✅ Đăng ký thành công! Vui lòng đăng nhập.')
-      setLoginIdentifier(regEmail.trim())
-      setIsLogin(true)
-      setRegFullName(''); setRegEmail(''); setRegPhone(''); setRegPassword(''); setRegConfirm(''); setTermsAccepted(false)
-    } finally { setLoading(false) }
-  }
-
-  const handleLogin = async () => {
-    setError(''); setSuccessMessage('')
-    if (!loginIdentifier || !loginPassword) { setError('Vui lòng nhập đầy đủ'); return }
-    setLoading(true)
-    try {
-      let email = loginIdentifier.trim()
-      if (isPhoneNumber(loginIdentifier)) {
-        const normalizedPhone = normalizePhone(loginIdentifier)
-        const { data, error: lookupError } = await supabase.from('users').select('email').eq('phone', normalizedPhone).maybeSingle()
-        if (lookupError || !data?.email) { setError('Số điện thoại chưa được đăng ký'); return }
-        email = data.email
-      }
-      const { error: loginError } = await supabase.auth.signInWithPassword({ email, password: loginPassword })
-      if (loginError) {
-        setError(loginError.message.includes('Email not confirmed') ? 'Email chưa xác nhận' : 'Thông tin đăng nhập không đúng')
-        return
-      }
-      router.push('/dashboard')
-    } finally { setLoading(false) }
-  }
 
   return (
-    <div style={{ fontFamily: "'DM Sans', sans-serif", background: '#0a0a0b', color: '#EDEBE7', minHeight: '100vh' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap');`}</style>
-      <nav style={{ padding: '14px 24px', background: 'rgba(10,10,11,0.85)', borderBottom: '1px solid #1C1C1E' }}>
+    <div style={{
+      fontFamily: "'DM Sans', sans-serif",
+      background: '#0a0a0b',
+      color: '#EDEBE7',
+      overflowX: 'hidden',
+      userSelect: 'none',
+    }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap');
+        :root { --amber: #F5A623; --bg: #0a0a0b; --card: #161618; --fg: #EDEBE7; --muted: #8A857D; --border: #1C1C1E; }
+        .btn-primary { background: var(--amber); color: #000; border: none; padding: 14px 32px; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+        .btn-primary:hover { background: #FFC04D; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(245,166,35,0.25); }
+        .btn-ghost { background: transparent; color: var(--fg); border: 1px solid var(--border); padding: 14px 32px; border-radius: 8px; font-weight: 500; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+        .btn-ghost:hover { border-color: var(--amber); color: var(--amber); }
+        .card-hover { transition: all 0.3s; }
+        .card-hover:hover { border-color: rgba(245,166,35,0.3) !important; transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-up { animation: fadeUp 0.7s ease both; }
+      `}</style>
+
+      {/* Navigation */}
+      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px', background: 'rgba(10,10,11,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #1C1C1E' }}>
         <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 20, color: '#F5A623' }}>🐝 TaskBee</span>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button onClick={() => router.push('/auth?mode=login')} className="btn-ghost" style={{ padding: '10px 20px', fontSize: 14 }}>Đăng nhập</button>
+          <button onClick={() => router.push('/auth?mode=register')} className="btn-primary" style={{ padding: '10px 20px', fontSize: 14 }}>Đăng ký</button>
+        </div>
       </nav>
-      <div style={{ maxWidth: 400, margin: '60px auto 0', padding: '0 24px' }}>
-        {successMessage && <div style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid #34D399', color: '#34D399', padding: 12, borderRadius: 8, marginBottom: 16 }}>{successMessage}</div>}
-        {error && <div style={{ background: 'rgba(249,115,115,0.1)', border: '1px solid #F97373', color: '#F97373', padding: 12, borderRadius: 8, marginBottom: 16 }}>{error}</div>}
-        {isLogin ? (
-          <div>
-            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", marginBottom: 20 }}>Đăng nhập</h2>
-            <input placeholder="Email hoặc SĐT" value={loginIdentifier} onChange={e => setLoginIdentifier(e.target.value)}
-              style={{ width: '100%', padding: 12, marginBottom: 12, background: '#161618', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 15, outline: 'none' }} />
-            <input type="password" placeholder="Mật khẩu" value={loginPassword} onChange={e => setLoginPassword(e.target.value)}
-              style={{ width: '100%', padding: 12, marginBottom: 16, background: '#161618', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 15, outline: 'none' }} />
-            <button onClick={handleLogin} disabled={loading}
-              style={{ width: '100%', padding: 12, background: '#F5A623', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>
-              {loading ? '⏳...' : 'Đăng nhập'}
-            </button>
-            <button onClick={() => { setIsLogin(false); setError(''); setSuccessMessage('') }}
-              style={{ marginTop: 12, background: 'none', border: 'none', color: '#F5A623', cursor: 'pointer', fontWeight: 600 }}>
-              Chưa có tài khoản? Đăng ký
-            </button>
+
+      {/* Hero */}
+      <section style={{ position: 'relative', zIndex: 10, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '100px 16px 60px' }}>
+        <div>
+          <div className="fade-up" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(245,166,35,0.1)', border: '1px solid rgba(245,166,35,0.25)', color: '#F5A623', padding: '6px 16px', borderRadius: 100, fontSize: 13, marginBottom: 24 }}>
+            🐝 Nền tảng việc làm vi mô
           </div>
-        ) : (
-          <div>
-            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", marginBottom: 20 }}>Tạo tài khoản</h2>
-            {[
-              { placeholder: 'Họ và tên', value: regFullName, onChange: setRegFullName },
-              { placeholder: 'Email', value: regEmail, onChange: setRegEmail, type: 'email' },
-              { placeholder: 'Số điện thoại', value: regPhone, onChange: setRegPhone, type: 'tel' },
-              { placeholder: 'Mật khẩu', value: regPassword, onChange: setRegPassword, type: 'password' },
-              { placeholder: 'Xác nhận mật khẩu', value: regConfirm, onChange: setRegConfirm, type: 'password' },
-            ].map((f, i) => (
-              <input key={i} placeholder={f.placeholder} type={f.type || 'text'} value={f.value} onChange={e => f.onChange(e.target.value)}
-                style={{ width: '100%', padding: 12, marginBottom: 12, background: '#161618', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 15, outline: 'none' }} />
-            ))}
-            <label style={{ display: 'flex', gap: 8, fontSize: 13, color: '#8A857D', marginBottom: 16 }}>
-              <input type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} />
-              Tôi đồng ý với Điều khoản sử dụng
-            </label>
-            <button onClick={handleRegister} disabled={loading}
-              style={{ width: '100%', padding: 12, background: '#F5A623', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>
-              {loading ? '⏳...' : 'Tạo tài khoản'}
-            </button>
-            <button onClick={() => { setIsLogin(true); setError(''); setSuccessMessage('') }}
-              style={{ marginTop: 12, background: 'none', border: 'none', color: '#F5A623', cursor: 'pointer', fontWeight: 600 }}>
-              Đã có tài khoản? Đăng nhập
-            </button>
+          <h1 className="fade-up" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(40px, 7vw, 72px)', lineHeight: 1.05, letterSpacing: -1.5, maxWidth: 700, margin: '0 auto' }}>
+            Điện thoại của bạn<br /> là <span style={{ color: '#F5A623' }}>công cụ kiếm tiền</span>
+          </h1>
+          <p className="fade-up" style={{ marginTop: 20, fontSize: 17, color: '#8A857D', maxWidth: 480, lineHeight: 1.7, margin: '20px auto 0' }}>
+            Làm những công việc nhỏ thực sự — gắn thẻ ảnh, nhập liệu — ngay trên điện thoại. Được trả tiền thật, minh bạch, trong 24 giờ.
+          </p>
+          <div className="fade-up" style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 32, flexWrap: 'wrap' }}>
+            <button onClick={() => router.push('/auth?mode=register')} style={{ background: '#F5A623', color: '#000', border: 'none', padding: '16px 36px', borderRadius: 8, fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>Bắt đầu kiếm tiền</button>
+            <button onClick={() => router.push('/auth?mode=login')} style={{ background: 'transparent', color: '#EDEBE7', border: '1px solid #1C1C1E', padding: '16px 36px', borderRadius: 8, fontWeight: 500, fontSize: 16, cursor: 'pointer' }}>Đăng nhập</button>
           </div>
-        )}
-      </div>
+        </div>
+      </section>
+
+      {/* Cách hoạt động */}
+      <section style={{ position: 'relative', zIndex: 10, maxWidth: 960, margin: '0 auto', padding: '60px 16px' }}>
+        <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: 'uppercase', color: '#F5A623', marginBottom: 16 }}>Cách hoạt động</div>
+        <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(28px, 4vw, 42px)', maxWidth: 600, marginBottom: 40 }}>Ba bước để bắt đầu kiếm tiền ngay hôm nay</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+          {[
+            { icon: '📱', num: '01', title: 'Đăng ký miễn phí', desc: '30 giây, không cần hồ sơ. Bất kỳ ai cũng có thể tham gia.' },
+            { icon: '✅', num: '02', title: 'Làm task đơn giản', desc: 'Gắn thẻ ảnh, nhập liệu hóa đơn. Không cần kỹ năng đặc biệt.' },
+            { icon: '💰', num: '03', title: 'Nhận tiền trong 24 giờ', desc: 'Rút về MoMo hoặc ngân hàng bất cứ lúc nào, tối thiểu 50.000đ.' },
+          ].map(({ icon, num, title, desc }) => (
+            <div key={num} className="card-hover" style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 16, padding: '28px 24px', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 64, color: 'rgba(245,166,35,0.06)', position: 'absolute', top: 12, right: 20, lineHeight: 1 }}>{num}</div>
+              <div style={{ width: 44, height: 44, background: 'rgba(245,166,35,0.1)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, marginBottom: 16 }}>{icon}</div>
+              <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, marginBottom: 8 }}>{title}</div>
+              <div style={{ fontSize: 14, color: '#8A857D', lineHeight: 1.7 }}>{desc}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Trust */}
+      <section style={{ position: 'relative', zIndex: 10, maxWidth: 960, margin: '0 auto', padding: '60px 16px' }}>
+        <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: 'uppercase', color: '#F5A623', marginBottom: 16 }}>Cam kết của TaskBee</div>
+        <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(24px, 3vw, 36px)', maxWidth: 600, marginBottom: 32 }}>Minh bạch từ ngày đầu tiên</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 2, borderRadius: 16, overflow: 'hidden' }}>
+          {[
+            { title: 'Tiền được bảo vệ 100%', desc: 'Doanh nghiệp nạp tiền vào escrow trước khi đăng task. Tiền của bạn luôn được đảm bảo.' },
+            { title: 'Không phải đa cấp', desc: 'Không yêu cầu nạp tiền, mua gói, hay giới thiệu người khác. Làm task → nhận tiền.' },
+            { title: 'Lịch sử công khai', desc: 'Mọi giao dịch rút tiền thành công đều hiển thị công khai (ẩn danh).' },
+          ].map(({ title, desc }) => (
+            <div key={title} style={{ background: '#161618', padding: '24px 20px', display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#F5A623', marginTop: 6, flexShrink: 0 }} />
+              <div style={{ fontSize: 14, color: '#8A857D', lineHeight: 1.7 }}><strong style={{ color: '#EDEBE7' }}>{title}</strong><br /><br />{desc}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section style={{ position: 'relative', zIndex: 10, maxWidth: 700, margin: '50px auto', background: 'linear-gradient(135deg, #1a1508, #0f0e0c)', border: '1px solid rgba(245,166,35,0.2)', borderRadius: 24, padding: '60px 24px', textAlign: 'center' }}>
+        <div style={{ fontSize: 40, marginBottom: 16 }}>🐝</div>
+        <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(24px, 3vw, 36px)', marginBottom: 12 }}>Sẵn sàng bắt đầu<br />kiếm tiền chưa?</h2>
+        <p style={{ color: '#8A857D', marginBottom: 24, fontSize: 15 }}>Hàng nghìn người đang kiếm thêm thu nhập mỗi ngày. Chỉ cần điện thoại và 2 phút đăng ký.</p>
+        <button onClick={() => router.push('/auth?mode=register')} style={{ background: '#F5A623', color: '#000', border: 'none', padding: '16px 40px', borderRadius: 8, fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>Đăng ký miễn phí →</button>
+        <p style={{ fontSize: 13, color: '#8A857D', marginTop: 16 }}>Không cần thẻ tín dụng · Nhận tiền trong 24h</p>
+      </section>
+
+      {/* Footer */}
+      <footer style={{ position: 'relative', zIndex: 10, borderTop: '1px solid #1C1C1E', padding: 24, textAlign: 'center', fontSize: 13, color: '#8A857D' }}>
+        🐝 TaskBee &nbsp;·&nbsp; © 2025 TaskBee. Nền tảng việc làm vi mô Việt Nam.
+      </footer>
     </div>
   )
 }
