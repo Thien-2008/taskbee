@@ -36,19 +36,61 @@ function AuthForm() {
     setLoading(true)
     const normalizedPhone = normalizePhone(regPhone)
     try {
+      // Kiểm tra SĐT trùng
       const { data: existing } = await supabase.from('users').select('id').eq('phone', normalizedPhone).maybeSingle()
       if (existing) { setError('Số điện thoại đã đăng ký'); return }
-      const { data, error: signUpError } = await supabase.auth.signUp({ email: regEmail.trim(), password: regPassword, options: { data: { full_name: regFullName.trim() } } })
-      if (signUpError) { setError(signUpError.message.includes('already registered') ? 'Email đã đăng ký' : 'Đăng ký thất bại'); return }
-      if (data.user) {
-        await supabase.from('users').upsert({ id: data.user.id, email: regEmail.trim(), phone: normalizedPhone, full_name: regFullName.trim(), balance: 0, role: 'user', terms_accepted_at: new Date().toISOString() }, { onConflict: 'id' })
+
+      // Đăng ký
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: regEmail.trim(),
+        password: regPassword,
+        options: { data: { full_name: regFullName.trim() } }
+      })
+      if (signUpError) {
+        setError(signUpError.message.includes('already registered') ? 'Email đã đăng ký' : 'Đăng ký thất bại')
+        return
       }
+
+      if (data.user) {
+        const userId = data.user.id
+        // Kiểm tra xem trigger đã tạo row chưa
+        const { data: existingUser } = await supabase.from('users').select('id').eq('id', userId).maybeSingle()
+        
+        if (existingUser) {
+          // Update nếu đã tồn tại (trigger đã tạo)
+          const { error: updateError } = await supabase.from('users').update({
+            email: regEmail.trim(),
+            phone: normalizedPhone,
+            full_name: regFullName.trim(),
+            terms_accepted_at: new Date().toISOString()
+          }).eq('id', userId)
+          if (updateError) console.error('Update user failed:', updateError)
+        } else {
+          // Insert nếu chưa có
+          const { error: insertError } = await supabase.from('users').insert({
+            id: userId,
+            email: regEmail.trim(),
+            phone: normalizedPhone,
+            full_name: regFullName.trim(),
+            balance: 0,
+            role: 'user',
+            terms_accepted_at: new Date().toISOString()
+          })
+          if (insertError) console.error('Insert user failed:', insertError)
+        }
+      }
+
       await supabase.auth.signOut()
       setSuccessMessage('✅ Đăng ký thành công! Vui lòng đăng nhập.')
       setLoginIdentifier(regEmail.trim())
       setIsLogin(true)
       setRegFullName(''); setRegEmail(''); setRegPhone(''); setRegPassword(''); setRegConfirm(''); setTermsAccepted(false)
-    } finally { setLoading(false) }
+    } catch (e: any) {
+      console.error('Register error:', e)
+      setError('Lỗi không xác định, vui lòng thử lại')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleLogin = async () => {
@@ -60,13 +102,29 @@ function AuthForm() {
       if (isPhoneNumber(loginIdentifier)) {
         const normalizedPhone = normalizePhone(loginIdentifier)
         const { data, error: lookupError } = await supabase.from('users').select('email').eq('phone', normalizedPhone).maybeSingle()
-        if (lookupError || !data?.email) { setError('Số điện thoại chưa đăng ký'); return }
+        if (lookupError) {
+          console.error('Phone lookup error:', lookupError)
+          setError('Lỗi hệ thống, vui lòng thử lại')
+          return
+        }
+        if (!data?.email) {
+          setError('Số điện thoại chưa đăng ký')
+          return
+        }
         email = data.email
       }
       const { error: loginError } = await supabase.auth.signInWithPassword({ email, password: loginPassword })
-      if (loginError) { setError(loginError.message.includes('Email not confirmed') ? 'Email chưa xác nhận' : 'Thông tin đăng nhập không đúng'); return }
+      if (loginError) {
+        setError(loginError.message.includes('Email not confirmed') ? 'Email chưa xác nhận' : 'Thông tin đăng nhập không đúng')
+        return
+      }
       router.push('/dashboard')
-    } finally { setLoading(false) }
+    } catch (e: any) {
+      console.error('Login error:', e)
+      setError('Lỗi không xác định')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const inputStyle = { width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 15, outline: 'none' }
