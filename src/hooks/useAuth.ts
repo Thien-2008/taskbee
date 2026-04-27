@@ -13,6 +13,7 @@ interface RegisterInput {
 interface AuthResult {
   success: boolean
   error?: string
+  autoLogin?: boolean
 }
 
 export function useAuth() {
@@ -22,12 +23,10 @@ export function useAuth() {
     setLoading(true)
     const normalizedPhone = normalizePhone(input.phone)
     try {
-      // Kiểm tra SĐT đã tồn tại chưa
       const { data: existingPhone } = await supabase
         .from("users").select("id").eq("phone", normalizedPhone).maybeSingle()
       if (existingPhone) return { success: false, error: "Số điện thoại này đã được đăng ký" }
 
-      // Đăng ký - Supabase sẽ tự động đăng nhập nếu Confirm email đã tắt
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: input.email,
         password: input.password,
@@ -37,7 +36,6 @@ export function useAuth() {
         return { success: false, error: "Đăng ký thất bại, vui lòng thử lại" }
       }
 
-      // Lưu thông tin vào bảng users
       if (data.user) {
         const { error: insertError } = await supabase.from("users").upsert({
           id: data.user.id,
@@ -64,7 +62,6 @@ export function useAuth() {
     try {
       let email = identifier
 
-      // Nếu là SĐT -> lookup email từ bảng users
       if (isPhoneNumber(identifier)) {
         const normalizedPhone = normalizePhone(identifier)
         const { data, error } = await supabase
