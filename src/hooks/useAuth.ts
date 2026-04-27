@@ -13,7 +13,6 @@ interface RegisterInput {
 interface AuthResult {
   success: boolean
   error?: string
-  autoLogin?: boolean
 }
 
 export function useAuth() {
@@ -22,22 +21,38 @@ export function useAuth() {
   async function register(input: RegisterInput): Promise<AuthResult> {
     setLoading(true)
     const normalizedPhone = normalizePhone(input.phone)
-    try {
-      const { data: existingPhone } = await supabase
-        .from("users").select("id").eq("phone", normalizedPhone).maybeSingle()
-      if (existingPhone) return { success: false, error: "Số điện thoại này đã được đăng ký" }
 
+    try {
+      // Kiểm tra SĐT trùng
+      const { data: existingPhone } = await supabase
+        .from("users")
+        .select("id")
+        .eq("phone", normalizedPhone)
+        .maybeSingle()
+
+      if (existingPhone) {
+        return { success: false, error: "Số điện thoại này đã được đăng ký" }
+      }
+
+      // Tạo tài khoản
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: input.email,
         password: input.password,
+        options: {
+          data: { full_name: input.fullName }
+        }
       })
+
       if (signUpError) {
-        if (signUpError.message.includes("already registered")) return { success: false, error: "Email này đã được đăng ký" }
+        if (signUpError.message.includes("already registered")) {
+          return { success: false, error: "Email này đã được đăng ký" }
+        }
         return { success: false, error: "Đăng ký thất bại, vui lòng thử lại" }
       }
 
+      // Lưu vào bảng users
       if (data.user) {
-        const { error: insertError } = await supabase.from("users").upsert({
+        await supabase.from("users").insert({
           id: data.user.id,
           email: input.email,
           phone: normalizedPhone,
@@ -45,34 +60,42 @@ export function useAuth() {
           balance: 0,
           role: "user",
           terms_accepted_at: new Date().toISOString(),
-        }, { onConflict: 'id' })
-        
-        if (insertError) {
-          console.error("Insert user failed:", insertError)
-          return { success: false, error: "Đăng ký thất bại, vui lòng thử lại" }
-        }
+        })
       }
 
-      return { success: true, autoLogin: !!data.session }
-    } finally { setLoading(false) }
+      // Luôn đăng xuất sau khi đăng ký để buộc user đăng nhập thủ công
+      await supabase.auth.signOut()
+
+      return { success: true }
+
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function login(identifier: string, password: string): Promise<AuthResult> {
     setLoading(true)
-    try {
-      let email = identifier
 
+    try {
+      let email = identifier.trim()
+
+      // Nếu là SĐT -> lookup email từ bảng users
       if (isPhoneNumber(identifier)) {
         const normalizedPhone = normalizePhone(identifier)
+
         const { data, error } = await supabase
           .from("users")
           .select("email")
           .eq("phone", normalizedPhone)
           .maybeSingle()
 
-        if (error || !data?.email) {
+        if (error) {
+          return { success: false, error: "Lỗi hệ thống, vui lòng thử lại" }
+        }
+        if (!data?.email) {
           return { success: false, error: "Số điện thoại chưa được đăng ký" }
         }
+
         email = data.email
       }
 
@@ -85,11 +108,17 @@ export function useAuth() {
         if (loginError.message.includes("Email not confirmed")) {
           return { success: false, error: "EMAIL_NOT_CONFIRMED" }
         }
-        return { success: false, error: "Thông tin đăng nhập không đúng" }
+        if (loginError.message.includes("Invalid login credentials")) {
+          return { success: false, error: "Thông tin đăng nhập không đúng" }
+        }
+        return { success: false, error: "Đăng nhập thất bại, vui lòng thử lại" }
       }
 
       return { success: true }
-    } finally { setLoading(false) }
+
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function logout(): Promise<void> { await supabase.auth.signOut() }
