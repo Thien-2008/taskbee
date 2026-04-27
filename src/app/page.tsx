@@ -212,3 +212,36 @@ function ProfileTab({ user, displayName, balance, tasksDone, userRole, onLogout,
     </div>
   )
 }
+
+function TasksTab({ user, onStartTask }: { user: any; onStartTask: (b: DbTaskBatch) => void }) {
+  const [batches, setBatches] = useState<DbTaskBatch[]>([])
+  const [loading, setLoading] = useState(true)
+  
+  useEffect(() => {
+    supabase.from('task_batches').select('*').eq('status', 'active').order('id', { ascending: false })
+      .then(({ data }) => { if (data) setBatches(data); setLoading(false) })
+  }, [])
+  
+  const reward = (b: DbTaskBatch) => Math.round(b.budget_total / b.total_items)
+  
+  if (loading) return <div style={{ textAlign: 'center', padding: 40, color: '#8A857D' }}>⏳ Đang tải task...</div>
+  if (batches.length === 0) return <div style={{ textAlign: 'center', padding: 40, background: '#161618', borderRadius: 12, color: '#8A857D' }}>📋 Chưa có task nào.</div>
+  
+  return (
+    <div>
+      <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 16 }}>📋 Danh sách task</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {batches.map(batch => (
+          <div key={batch.id} style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 16 }}>
+            <div style={{ fontWeight: 600, fontSize: 15 }}>{batch.task_type}</div>
+            <div style={{ fontSize: 12, color: '#8A857D', marginTop: 6 }}>
+              {reward(batch).toLocaleString()}đ/task · {batch.total_items - batch.completed_items} còn lại · {batch.instructions?.slice(0, 60)}...
+            </div>
+            <div style={{ fontSize: 10, color: '#34D399', marginTop: 6 }}>🔒 Tiền đã được bảo vệ</div>
+            <button onClick={() => onStartTask(batch)} style={{ marginTop: 10, background: '#F5A623', color: '#000', border: 'none', padding: '8px 16px', borderRadius: 6, fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Làm ngay</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
