@@ -48,18 +48,6 @@ export function useAuth() {
     } finally { setLoading(false) }
   }
 
-  async function savePhone(userId: string, phone: string): Promise<AuthResult> {
-    setLoading(true)
-    try {
-      const digits = phone.replace(/\D/g, '')
-      const normalized = digits.startsWith('0') ? '84' + digits.slice(1) : digits
-      if (!/^84\d{9}$/.test(normalized)) return { success: false, error: 'Số điện thoại không hợp lệ' }
-      const { error } = await supabase.from('users').update({ phone: normalized }).eq('id', userId)
-      if (error) return { success: false, error: 'Lưu thất bại, thử lại' }
-      return { success: true }
-    } finally { setLoading(false) }
-  }
-
   async function logout() { await supabase.auth.signOut() }
-  return { loading, register, login, savePhone, logout }
+  return { loading, register, login, logout }
 }
