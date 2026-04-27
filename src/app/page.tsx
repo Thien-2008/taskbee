@@ -28,6 +28,16 @@ interface DbTaskBatch {
   status: string
 }
 
+interface WithdrawalRecord {
+  id: number
+  amount: number
+  method: string
+  account_info: string
+  status: string
+  requested_at: string
+  completed_at: string | null
+}
+
 // ─── Main App ────────────────────────────────
 export default function Home() {
   const [email, setEmail] = useState('')
@@ -43,6 +53,9 @@ export default function Home() {
   const [selectedAnswer, setSelectedAnswer] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [notification, setNotification] = useState('')
+  const [balance, setBalance] = useState(0)
+  const [tasksDone, setTasksDone] = useState(0)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -53,6 +66,21 @@ export default function Home() {
     })
     return () => subscription.unsubscribe()
   }, [])
+
+  // Load balance và tasksDone mỗi khi refreshTrigger thay đổi
+  useEffect(() => {
+    if (!user) return
+    loadUserStats()
+  }, [user, refreshTrigger])
+
+  const loadUserStats = async () => {
+    if (!user) return
+    const { data: userData } = await supabase.from('users').select('balance').eq('id', user.id).single()
+    if (userData) setBalance(userData.balance || 0)
+    
+    const { count } = await supabase.from('assignments').select('id', { count: 'exact' }).eq('user_id', user.id).eq('reward_paid', true)
+    if (count) setTasksDone(count)
+  }
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -91,7 +119,7 @@ export default function Home() {
     }
     setSubmitting(true)
     try {
-      // Lấy task item hiện tại
+      // Lấy task item đầu tiên còn pending trong batch
       const { data: items } = await supabase
         .from('task_items')
         .select('id')
@@ -129,7 +157,7 @@ export default function Home() {
 
       if (updateError) throw updateError
 
-      // Cập nhật completed_items trong batch
+      // Cập nhật completed_items
       const { error: batchError } = await supabase
         .from('task_batches')
         .update({ 
@@ -140,21 +168,26 @@ export default function Home() {
 
       if (batchError) throw batchError
 
-      // Cập nhật số dư người dùng (tạm tính)
+      // Cộng tiền cho user qua RPC
       const reward = Math.round(selectedBatch.budget_total / selectedBatch.total_items)
-      const { error: balanceError } = await supabase.rpc('update_user_balance', { 
+      const { error: rpcError } = await supabase.rpc('update_user_balance', { 
         user_id: user.id, 
         amount: reward 
       })
 
-      if (balanceError) {
-        console.log('Balance update skipped (RPC not ready):', balanceError.message)
+      if (rpcError) {
+        console.log('RPC error (non-critical):', rpcError.message)
       }
+
+      // Đánh dấu assignment đã trả thưởng
+      await supabase.from('assignments').update({ reward_paid: true }).eq('task_item_id', taskItemId).eq('user_id', user.id)
 
       setNotification(`✅ Hoàn thành! +${reward.toLocaleString()}đ`)
       setTimeout(() => setNotification(''), 3000)
 
-      // Chuyển sang task tiếp theo hoặc quay về
+      // Refresh số liệu
+      setRefreshTrigger(prev => prev + 1)
+
       const nextIndex = currentTaskIndex + 1
       if (nextIndex < selectedBatch.total_items) {
         setCurrentTaskIndex(nextIndex)
@@ -256,7 +289,6 @@ export default function Home() {
       <div style={{ fontFamily: "'DM Sans', sans-serif", background: '#0a0a0b', color: '#EDEBE7', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <style>{`@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap');`}</style>
         
-        {/* Header */}
         <header style={{ background: '#111113', borderBottom: '1px solid #1C1C1E', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 12, position: 'sticky', top: 0, zIndex: 50 }}>
           <button onClick={() => setCurrentView('main')} style={{ background: 'none', border: 'none', color: '#8A857D', fontSize: 18, cursor: 'pointer' }}>← Quay lại</button>
           <div style={{ flex: 1 }}>
@@ -265,14 +297,11 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Progress bar */}
         <div style={{ width: '100%', height: 4, background: '#1C1C1E' }}>
           <div style={{ width: `${((currentTaskIndex + 1) / selectedBatch.total_items) * 100}%`, height: '100%', background: '#F5A623', transition: 'width 0.3s' }} />
         </div>
 
-        {/* Content */}
         <div style={{ flex: 1, padding: 20, maxWidth: 600, margin: '0 auto', width: '100%' }}>
-          {/* Ảnh task */}
           <div style={{ background: '#161618', borderRadius: 12, overflow: 'hidden', marginBottom: 20 }}>
             <img 
               src={`https://picsum.photos/seed/task${selectedBatch.id}_${currentTaskIndex}/400/${selectedBatch.task_type.includes('Nhập') ? '600' : '400'}`}
@@ -282,13 +311,11 @@ export default function Home() {
             />
           </div>
 
-          {/* Hướng dẫn */}
           <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 10, padding: 16, marginBottom: 20 }}>
             <div style={{ fontWeight: 600, marginBottom: 8 }}>📋 Hướng dẫn</div>
             <div style={{ fontSize: 14, color: '#8A857D', lineHeight: 1.6 }}>{selectedBatch.instructions}</div>
           </div>
 
-          {/* Câu hỏi & đáp án */}
           <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 10, padding: 16 }}>
             <div style={{ fontWeight: 600, marginBottom: 12 }}>
               {selectedBatch.task_type.includes('Nhập') ? 'Nhập thông tin từ ảnh:' : 'Chọn đáp án phù hợp:'}
@@ -321,7 +348,6 @@ export default function Home() {
             )}
           </div>
 
-          {/* Nút submit */}
           {selectedAnswer && (
             <button onClick={submitTaskAnswer} disabled={submitting}
               style={{ width: '100%', marginTop: 16, padding: '14px 0', background: submitting ? '#8A857D' : '#F5A623', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 16, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
@@ -338,33 +364,27 @@ export default function Home() {
     <div style={{ fontFamily: "'DM Sans', sans-serif", background: '#0a0a0b', color: '#EDEBE7', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap');`}</style>
       
-      {/* Header */}
       <header style={{ background: '#111113', borderBottom: '1px solid #1C1C1E', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 50 }}>
         <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 18, color: '#F5A623' }}>🐝 TaskBee</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <button style={{ background: 'none', border: 'none', color: '#8A857D', fontSize: 20, cursor: 'pointer', position: 'relative' }}>
-            🔔
-          </button>
+          <button style={{ background: 'none', border: 'none', color: '#8A857D', fontSize: 20, cursor: 'pointer', position: 'relative' }}>🔔</button>
           <button onClick={handleLogout} style={{ background: 'transparent', border: '1px solid #1C1C1E', color: '#EDEBE7', padding: '6px 14px', borderRadius: 6, fontSize: 13, cursor: 'pointer' }}>Đăng xuất</button>
         </div>
       </header>
 
-      {/* Notification toast */}
       {notification && (
         <div style={{ position: 'fixed', top: 70, left: '50%', transform: 'translateX(-50%)', zIndex: 100, background: '#34D399', color: '#000', padding: '10px 24px', borderRadius: 20, fontWeight: 600, fontSize: 14, boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
           {notification}
         </div>
       )}
 
-      {/* Content */}
       <div style={{ flex: 1, overflow: 'auto', paddingBottom: 80 }}>
-        {activeTab === 'dashboard' && <DashboardTab user={user} onNavigate={(tab: Tab) => setActiveTab(tab)} />}
+        {activeTab === 'dashboard' && <DashboardTab user={user} balance={balance} tasksDone={tasksDone} onNavigate={(tab: Tab) => setActiveTab(tab)} />}
         {activeTab === 'tasks' && <TasksTab user={user} onStartTask={startTask} />}
-        {activeTab === 'withdraw' && <WithdrawTab />}
-        {activeTab === 'profile' && <ProfileTab user={user} onLogout={handleLogout} />}
+        {activeTab === 'withdraw' && <WithdrawTab user={user} balance={balance} onRefresh={() => setRefreshTrigger(prev => prev + 1)} />}
+        {activeTab === 'profile' && <ProfileTab user={user} balance={balance} tasksDone={tasksDone} onLogout={handleLogout} />}
       </div>
 
-      {/* Bottom Navigation */}
       <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#111113', borderTop: '1px solid #1C1C1E', display: 'flex', justifyContent: 'space-around', padding: '8px 0', zIndex: 50 }}>
         {([
           { key: 'dashboard' as Tab, icon: '🏠', label: 'Tổng quan' },
@@ -388,19 +408,7 @@ export default function Home() {
 }
 
 // ─── Dashboard Tab ────────────────────────────
-function DashboardTab({ user, onNavigate }: { user: any; onNavigate: (tab: Tab) => void }) {
-  const [balance, setBalance] = useState(0)
-  const [tasksDone, setTasksDone] = useState(0)
-
-  useEffect(() => {
-    supabase.from('users').select('balance').eq('id', user.id).single().then(({ data }) => {
-      if (data) setBalance(data.balance || 0)
-    })
-    supabase.from('assignments').select('id', { count: 'exact' }).eq('user_id', user.id).eq('reward_paid', true).then(({ count }) => {
-      if (count) setTasksDone(count)
-    })
-  }, [user.id])
-
+function DashboardTab({ user, balance, tasksDone, onNavigate }: { user: any; balance: number; tasksDone: number; onNavigate: (tab: Tab) => void }) {
   const isNewUser = balance === 0 && tasksDone === 0
 
   return (
@@ -472,15 +480,11 @@ function TasksTab({ user, onStartTask }: { user: any; onStartTask: (batch: DbTas
       .eq('status', 'active')
       .order('id', { ascending: false })
 
-    if (!error && data) {
-      setBatches(data)
-    }
+    if (!error && data) setBatches(data)
     setLoading(false)
   }
 
-  const getRewardPerItem = (batch: DbTaskBatch) => {
-    return Math.round(batch.budget_total / batch.total_items)
-  }
+  const getRewardPerItem = (batch: DbTaskBatch) => Math.round(batch.budget_total / batch.total_items)
 
   return (
     <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
@@ -520,9 +524,67 @@ function TasksTab({ user, onStartTask }: { user: any; onStartTask: (batch: DbTas
 }
 
 // ─── Withdraw Tab ─────────────────────────────
-function WithdrawTab() {
+function WithdrawTab({ user, balance, onRefresh }: { user: any; balance: number; onRefresh: () => void }) {
   const [amount, setAmount] = useState('')
-  const balance = 0 // Sẽ kết nối thật sau
+  const [method, setMethod] = useState('momo')
+  const [accountInfo, setAccountInfo] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [history, setHistory] = useState<WithdrawalRecord[]>([])
+
+  useEffect(() => {
+    if (!user) return
+    supabase.from('withdrawals').select('*').eq('user_id', user.id).order('requested_at', { ascending: false }).then(({ data }) => {
+      if (data) setHistory(data)
+    })
+  }, [user])
+
+  const handleWithdraw = async () => {
+    const amt = parseInt(amount)
+    if (!amt || amt < 50000) {
+      alert('Số tiền tối thiểu là 50.000đ')
+      return
+    }
+    if (amt > balance) {
+      alert('Số dư không đủ')
+      return
+    }
+    if (!accountInfo.trim()) {
+      alert('Vui lòng nhập số tài khoản/SĐT')
+      return
+    }
+
+    setSubmitting(true)
+    try {
+      const { error } = await supabase.from('withdrawals').insert({
+        user_id: user.id,
+        amount: amt,
+        method,
+        account_info: accountInfo,
+        status: 'pending',
+        requested_at: new Date().toISOString()
+      })
+
+      if (error) throw error
+
+      alert('✅ Yêu cầu rút tiền đã được ghi nhận! Chúng tôi sẽ xử lý trong 24h.')
+      setAmount('')
+      onRefresh()
+    } catch (error: any) {
+      alert('Lỗi: ' + error.message)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'pending': return '⏳ Đang xử lý'
+      case 'processing': return '🔄 Đang chuyển'
+      case 'completed': return '✅ Đã nhận'
+      case 'failed': return '❌ Từ chối'
+      default: return status
+    }
+  }
 
   return (
     <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
@@ -538,34 +600,57 @@ function WithdrawTab() {
       <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 20, marginBottom: 20 }}>
         <div style={{ marginBottom: 12 }}>
           <label style={{ display: 'block', fontSize: 13, color: '#8A857D', marginBottom: 6 }}>Phương thức</label>
-          <select style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none' }}>
-            <option>📱 Ví MoMo</option>
-            <option>🏦 Tài khoản ngân hàng</option>
+          <select value={method} onChange={e => setMethod(e.target.value)}
+            style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none' }}>
+            <option value="momo">📱 Ví MoMo</option>
+            <option value="bank">🏦 Tài khoản ngân hàng</option>
           </select>
         </div>
         <div style={{ marginBottom: 12 }}>
           <label style={{ display: 'block', fontSize: 13, color: '#8A857D', marginBottom: 6 }}>Số tài khoản / SĐT</label>
-          <input type="text" placeholder="Nhập số tài khoản hoặc SĐT MoMo"
+          <input type="text" value={accountInfo} onChange={e => setAccountInfo(e.target.value)} placeholder="Nhập số tài khoản hoặc SĐT MoMo"
             style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none' }} />
         </div>
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', fontSize: 13, color: '#8A857D', marginBottom: 6 }}>Số tiền muốn rút</label>
-          <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="Nhập số tiền"
+          <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder={`Tối đa ${balance.toLocaleString()}đ`}
             style={{ width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 14, outline: 'none' }} />
         </div>
         <div style={{ fontSize: 12, color: '#8A857D', marginBottom: 16 }}>
           ⏱ Thời gian xử lý: 24h · 💸 Phí: 0đ · 📌 Tối thiểu: 50.000đ
         </div>
-        <button style={{ width: '100%', padding: '12px 0', background: '#F5A623', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
-          Xác nhận rút tiền
+        <button onClick={handleWithdraw} disabled={submitting}
+          style={{ width: '100%', padding: '12px 0', background: submitting ? '#8A857D' : '#F5A623', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
+          {submitting ? '⏳ Đang xử lý...' : 'Xác nhận rút tiền'}
         </button>
       </div>
+
+      {history.length > 0 && (
+        <div>
+          <div style={{ fontWeight: 600, marginBottom: 12 }}>📜 Lịch sử rút tiền</div>
+          <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 16 }}>
+            {history.map((tx, i) => (
+              <div key={tx.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: i < history.length - 1 ? '1px solid #1C1C1E' : 'none' }}>
+                <div>
+                  <div style={{ fontSize: 14 }}>{tx.amount.toLocaleString()}đ</div>
+                  <div style={{ fontSize: 12, color: '#8A857D' }}>
+                    {new Date(tx.requested_at).toLocaleDateString('vi-VN')} · {getStatusText(tx.status)}
+                  </div>
+                </div>
+                <span style={{ color: tx.status === 'completed' ? '#34D399' : tx.status === 'failed' ? '#F97373' : '#F5A623' }}>
+                  {getStatusText(tx.status)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
 // ─── Profile Tab ──────────────────────────────
-function ProfileTab({ user, onLogout }: { user: any; onLogout: () => void }) {
+function ProfileTab({ user, balance, tasksDone, onLogout }: { user: any; balance: number; tasksDone: number; onLogout: () => void }) {
   return (
     <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
       <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 20 }}>👤 Hồ sơ</h2>
@@ -574,6 +659,16 @@ function ProfileTab({ user, onLogout }: { user: any; onLogout: () => void }) {
         <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(245,166,35,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, margin: '0 auto 12px' }}>🐝</div>
         <div style={{ fontWeight: 600, fontSize: 16 }}>{user.email}</div>
         <div style={{ fontSize: 13, color: '#8A857D', marginTop: 4 }}>Thành viên từ: Tháng 4/2025</div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 16 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 18, color: '#F5A623' }}>{balance.toLocaleString()}đ</div>
+            <div style={{ fontSize: 11, color: '#8A857D' }}>Số dư</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 18 }}>{tasksDone}</div>
+            <div style={{ fontSize: 11, color: '#8A857D' }}>Task đã làm</div>
+          </div>
+        </div>
       </div>
 
       <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, overflow: 'hidden' }}>
