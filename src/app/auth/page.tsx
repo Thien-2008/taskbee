@@ -3,128 +3,49 @@
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
-import { normalizePhone, isPhoneNumber } from '@/utils/phone'
+import { useAuth } from '@/hooks/useAuth'
 
 function AuthForm() {
   const router = useRouter()
   const params = useSearchParams()
   const mode = params.get('mode') || 'login'
   const [isLogin, setIsLogin] = useState(mode === 'login')
-  const [loading, setLoading] = useState(false)
+  const { loading, register, login } = useAuth()
   const [error, setError] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
+  const [success, setSuccess] = useState('')
 
-  const [loginIdentifier, setLoginIdentifier] = useState('')
+  const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
   const [showLoginPassword, setShowLoginPassword] = useState(false)
 
   const [regFullName, setRegFullName] = useState('')
   const [regEmail, setRegEmail] = useState('')
-  const [regPhone, setRegPhone] = useState('')
   const [regPassword, setRegPassword] = useState('')
   const [regConfirm, setRegConfirm] = useState('')
   const [showRegPassword, setShowRegPassword] = useState(false)
-  const [termsAccepted, setTermsAccepted] = useState(false)
 
-  const handleRegister = async () => {
+  async function handleRegister() {
     setError('')
-    if (!regFullName.trim() || !regEmail.trim() || !regPhone.trim()) { setError('Vui lòng nhập đầy đủ thông tin'); return }
-    if (regPassword.length < 6) { setError('Mật khẩu tối thiểu 6 ký tự'); return }
-    if (regPassword !== regConfirm) { setError('Mật khẩu không khớp'); return }
-    if (!termsAccepted) { setError('Vui lòng đồng ý điều khoản'); return }
+    if (!regFullName.trim()) return setError('Vui lòng nhập họ và tên')
+    if (!regEmail.trim()) return setError('Vui lòng nhập email')
+    if (regPassword.length < 6) return setError('Mật khẩu tối thiểu 6 ký tự')
+    if (regPassword !== regConfirm) return setError('Mật khẩu không khớp')
 
-    setLoading(true)
-    const normalizedPhone = normalizePhone(regPhone)
-    try {
-      // Kiểm tra SĐT trùng
-      const { data: existing } = await supabase.from('users').select('id').eq('phone', normalizedPhone).maybeSingle()
-      if (existing) { setError('Số điện thoại đã đăng ký'); return }
+    const result = await register({ email: regEmail, password: regPassword, fullName: regFullName })
+    if (!result.success) { setError(result.error!); return }
 
-      // Đăng ký
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email: regEmail.trim(),
-        password: regPassword,
-        options: { data: { full_name: regFullName.trim() } }
-      })
-      if (signUpError) {
-        setError(signUpError.message.includes('already registered') ? 'Email đã đăng ký' : 'Đăng ký thất bại')
-        return
-      }
-
-      if (data.user) {
-        const userId = data.user.id
-        // Kiểm tra xem trigger đã tạo row chưa
-        const { data: existingUser } = await supabase.from('users').select('id').eq('id', userId).maybeSingle()
-        
-        if (existingUser) {
-          // Update nếu đã tồn tại (trigger đã tạo)
-          const { error: updateError } = await supabase.from('users').update({
-            email: regEmail.trim(),
-            phone: normalizedPhone,
-            full_name: regFullName.trim(),
-            terms_accepted_at: new Date().toISOString()
-          }).eq('id', userId)
-          if (updateError) console.error('Update user failed:', updateError)
-        } else {
-          // Insert nếu chưa có
-          const { error: insertError } = await supabase.from('users').insert({
-            id: userId,
-            email: regEmail.trim(),
-            phone: normalizedPhone,
-            full_name: regFullName.trim(),
-            balance: 0,
-            role: 'user',
-            terms_accepted_at: new Date().toISOString()
-          })
-          if (insertError) console.error('Insert user failed:', insertError)
-        }
-      }
-
-      await supabase.auth.signOut()
-      setSuccessMessage('✅ Đăng ký thành công! Vui lòng đăng nhập.')
-      setLoginIdentifier(regEmail.trim())
-      setIsLogin(true)
-      setRegFullName(''); setRegEmail(''); setRegPhone(''); setRegPassword(''); setRegConfirm(''); setTermsAccepted(false)
-    } catch (e: any) {
-      console.error('Register error:', e)
-      setError('Lỗi không xác định, vui lòng thử lại')
-    } finally {
-      setLoading(false)
-    }
+    setSuccess('✅ Đăng ký thành công! Vui lòng đăng nhập.')
+    setLoginEmail(regEmail)
+    setIsLogin(true)
+    setRegFullName(''); setRegEmail(''); setRegPassword(''); setRegConfirm('')
   }
 
-  const handleLogin = async () => {
-    setError(''); setSuccessMessage('')
-    if (!loginIdentifier || !loginPassword) { setError('Vui lòng nhập đầy đủ thông tin'); return }
-    setLoading(true)
-    try {
-      let email = loginIdentifier.trim()
-      if (isPhoneNumber(loginIdentifier)) {
-        const normalizedPhone = normalizePhone(loginIdentifier)
-        const { data, error: lookupError } = await supabase.from('users').select('email').eq('phone', normalizedPhone).maybeSingle()
-        if (lookupError) {
-          console.error('Phone lookup error:', lookupError)
-          setError('Lỗi hệ thống, vui lòng thử lại')
-          return
-        }
-        if (!data?.email) {
-          setError('Số điện thoại chưa đăng ký')
-          return
-        }
-        email = data.email
-      }
-      const { error: loginError } = await supabase.auth.signInWithPassword({ email, password: loginPassword })
-      if (loginError) {
-        setError(loginError.message.includes('Email not confirmed') ? 'Email chưa xác nhận' : 'Thông tin đăng nhập không đúng')
-        return
-      }
-      router.push('/dashboard')
-    } catch (e: any) {
-      console.error('Login error:', e)
-      setError('Lỗi không xác định')
-    } finally {
-      setLoading(false)
-    }
+  async function handleLogin() {
+    setError(''); setSuccess('')
+    if (!loginEmail || !loginPassword) return setError('Vui lòng nhập đầy đủ')
+    const result = await login(loginEmail, loginPassword)
+    if (!result.success) { setError(result.error!); return }
+    router.push('/dashboard')
   }
 
   const inputStyle = { width: '100%', padding: '10px 14px', background: '#0a0a0b', border: '1px solid #1C1C1E', borderRadius: 8, color: '#EDEBE7', fontSize: 15, outline: 'none' }
@@ -139,12 +60,12 @@ function AuthForm() {
           <button onClick={() => router.push('/')} style={{ background: 'none', border: 'none', color: '#8A857D', fontSize: 20, cursor: 'pointer' }}>✕</button>
         </div>
         <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, marginBottom: 20, textAlign: 'center' }}>{isLogin ? 'Đăng nhập' : 'Tạo tài khoản mới'}</h2>
-        {successMessage && <div style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid #34D399', color: '#34D399', padding: '10px 14px', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>{successMessage}</div>}
+        {success && <div style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid #34D399', color: '#34D399', padding: '10px 14px', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>{success}</div>}
         {error && <div style={{ background: 'rgba(249,115,115,0.1)', border: '1px solid #F97373', color: '#F97373', padding: '10px 14px', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>{error}</div>}
 
         {isLogin ? (
           <form onSubmit={e => { e.preventDefault(); handleLogin() }} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div><label style={labelStyle}>Email hoặc SĐT</label><input type="text" required value={loginIdentifier} onChange={e => setLoginIdentifier(e.target.value)} placeholder="example@mail.com hoặc 0912 345 678" style={inputStyle} /></div>
+            <div><label style={labelStyle}>Email</label><input type="email" required value={loginEmail} onChange={e => setLoginEmail(e.target.value)} placeholder="example@gmail.com" style={inputStyle} /></div>
             <div style={{ position: 'relative' }}><label style={labelStyle}>Mật khẩu</label><input type={showLoginPassword ? 'text' : 'password'} required value={loginPassword} onChange={e => setLoginPassword(e.target.value)} placeholder="••••••" style={inputStyle} /><button type="button" onClick={() => setShowLoginPassword(!showLoginPassword)} style={{ position: 'absolute', right: 10, bottom: 10, background: 'none', border: 'none', color: '#8A857D', cursor: 'pointer' }}>{showLoginPassword ? '🙈' : '👁'}</button></div>
             <button type="submit" disabled={loading} style={{ width: '100%', padding: '12px 0', background: '#F5A623', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>{loading ? '⏳...' : '🔐 Đăng nhập'}</button>
           </form>
@@ -152,16 +73,14 @@ function AuthForm() {
           <form onSubmit={e => { e.preventDefault(); handleRegister() }} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div><label style={labelStyle}>Họ và tên</label><input type="text" required value={regFullName} onChange={e => setRegFullName(e.target.value)} placeholder="Nguyễn Văn A" style={inputStyle} /></div>
             <div><label style={labelStyle}>Email</label><input type="email" required value={regEmail} onChange={e => setRegEmail(e.target.value)} placeholder="example@gmail.com" style={inputStyle} /></div>
-            <div><label style={labelStyle}>Số điện thoại</label><input type="tel" required value={regPhone} onChange={e => setRegPhone(e.target.value)} placeholder="0912 345 678" maxLength={15} style={inputStyle} /></div>
             <div style={{ position: 'relative' }}><label style={labelStyle}>Mật khẩu</label><input type={showRegPassword ? 'text' : 'password'} required value={regPassword} onChange={e => setRegPassword(e.target.value)} placeholder="••••••" style={inputStyle} /><button type="button" onClick={() => setShowRegPassword(!showRegPassword)} style={{ position: 'absolute', right: 10, bottom: 10, background: 'none', border: 'none', color: '#8A857D', cursor: 'pointer' }}>{showRegPassword ? '🙈' : '👁'}</button></div>
             <div><label style={labelStyle}>Xác nhận mật khẩu</label><input type="password" required value={regConfirm} onChange={e => setRegConfirm(e.target.value)} placeholder="••••••" style={inputStyle} /></div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#8A857D', cursor: 'pointer' }}><input type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} />Tôi đồng ý với Điều khoản và Chính sách bảo mật</label>
             <button type="submit" disabled={loading} style={{ width: '100%', padding: '12px 0', background: '#F5A623', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>{loading ? '⏳...' : '📝 Tạo tài khoản'}</button>
           </form>
         )}
         <p style={{ textAlign: 'center', fontSize: 14, marginTop: 16, color: '#8A857D' }}>
           {isLogin ? "Chưa có tài khoản? " : "Đã có tài khoản? "}
-          <button onClick={() => { setIsLogin(!isLogin); setError(''); setSuccessMessage('') }} style={{ background: 'none', border: 'none', color: '#F5A623', cursor: 'pointer', fontWeight: 600, fontSize: 14 }}>{isLogin ? 'Đăng ký ngay' : 'Đăng nhập'}</button>
+          <button onClick={() => { setIsLogin(!isLogin); setError(''); setSuccess('') }} style={{ background: 'none', border: 'none', color: '#F5A623', cursor: 'pointer', fontWeight: 600, fontSize: 14 }}>{isLogin ? 'Đăng ký ngay' : 'Đăng nhập'}</button>
         </p>
       </div>
     </div>

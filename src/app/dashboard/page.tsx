@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import { useAuth } from '@/hooks/useAuth'
 import { formatPhoneDisplay } from '@/utils/phone'
 
 type Tab = 'dashboard' | 'tasks' | 'withdraw' | 'profile'
@@ -10,44 +11,54 @@ type View = 'main' | 'taskHistory' | 'txHistory' | 'settings' | 'help'
 
 export default function DashboardPage() {
   const router = useRouter()
+  const { savePhone, loading: phoneLoading } = useAuth()
   const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const [pageLoading, setPageLoading] = useState(true)
   const [displayName, setDisplayName] = useState('')
   const [balance, setBalance] = useState(0)
   const [tasksDone, setTasksDone] = useState(0)
+  const [phone, setPhone] = useState<string | null>(null)
   const [userRole, setUserRole] = useState('user')
   const [activeTab, setActiveTab] = useState<Tab>('dashboard')
   const [currentView, setCurrentView] = useState<View>('main')
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        router.replace('/')
-        return
-      }
-      setUser(session.user)
-      loadUserStats(session.user)
-    })
+  // Input SĐT
+  const [phoneInput, setPhoneInput] = useState('')
+  const [phoneError, setPhoneError] = useState('')
+  const [phoneSaved, setPhoneSaved] = useState(false)
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) router.replace('/')
-    })
-    return () => subscription.unsubscribe()
+  useEffect(() => {
+    async function load() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) { router.replace('/'); return }
+      setUser(session.user)
+
+      const { data: ud } = await supabase.from('users').select('balance, role, phone, full_name, email').eq('id', session.user.id).single()
+      if (ud) {
+        setBalance(ud.balance || 0)
+        setUserRole(ud.role || 'user')
+        setPhone(ud.phone || null)
+        if (ud.full_name) setDisplayName(ud.full_name)
+        else if (ud.phone) setDisplayName(formatPhoneDisplay(ud.phone))
+        else if (ud.email) setDisplayName(ud.email)
+        else setDisplayName('Người dùng')
+        if (ud.phone) setPhoneSaved(true)
+      }
+      const { count } = await supabase.from('assignments').select('id', { count: 'exact' }).eq('user_id', session.user.id).eq('reward_paid', true)
+      if (count) setTasksDone(count)
+      setPageLoading(false)
+    }
+    load()
   }, [])
 
-  const loadUserStats = async (u: any) => {
-    const { data: ud } = await supabase.from('users').select('balance, role, phone, full_name, email').eq('id', u.id).single()
-    if (ud) {
-      setBalance(ud.balance || 0)
-      setUserRole(ud.role || 'user')
-      if (ud.full_name) setDisplayName(ud.full_name)
-      else if (ud.phone) setDisplayName(formatPhoneDisplay(ud.phone))
-      else if (ud.email) setDisplayName(ud.email)
-      else setDisplayName('Người dùng')
-    }
-    const { count } = await supabase.from('assignments').select('id', { count: 'exact' }).eq('user_id', u.id).eq('reward_paid', true)
-    if (count) setTasksDone(count)
-    setLoading(false)
+  async function handleSavePhone() {
+    if (!user) return
+    setPhoneError('')
+    const result = await savePhone(user.id, phoneInput)
+    if (!result.success) { setPhoneError(result.error!); return }
+    setPhone(phoneInput)
+    setPhoneSaved(true)
+    setDisplayName(formatPhoneDisplay(phoneInput))
   }
 
   const handleLogout = async () => {
@@ -55,7 +66,9 @@ export default function DashboardPage() {
     router.push('/')
   }
 
-  if (loading) return <div style={{ color: '#fff', textAlign: 'center', padding: 40 }}>⏳ Đang tải...</div>
+  if (pageLoading) return <div style={{ color: '#fff', textAlign: 'center', padding: 60 }}>⏳ Đang tải...</div>
+
+  const needPhone = !phone && !phoneSaved
 
   return (
     <div style={{ fontFamily: "'DM Sans', sans-serif", background: '#0a0a0b', color: '#EDEBE7', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -65,16 +78,30 @@ export default function DashboardPage() {
         <button onClick={handleLogout} style={{ background: 'transparent', border: '1px solid #1C1C1E', color: '#EDEBE7', padding: '6px 14px', borderRadius: 6, fontSize: 13, cursor: 'pointer' }}>Đăng xuất</button>
       </header>
       <div style={{ flex: 1, overflow: 'auto', paddingBottom: 80 }}>
-        {currentView === 'taskHistory' && <div style={{ padding: 20, textAlign: 'center', color: '#8A857D' }}>📋 Lịch sử làm task</div>}
-        {currentView === 'txHistory' && <div style={{ padding: 20, textAlign: 'center', color: '#8A857D' }}>💳 Lịch sử giao dịch</div>}
-        {currentView === 'settings' && <div style={{ padding: 20, textAlign: 'center', color: '#8A857D' }}>🔔 Cài đặt thông báo</div>}
-        {currentView === 'help' && <div style={{ padding: 20, textAlign: 'center', color: '#8A857D' }}>❓ Hướng dẫn sử dụng</div>}
+        {/* Banner nhập SĐT */}
+        {needPhone && (
+          <div style={{ margin: 20, maxWidth: 800, marginLeft: 'auto', marginRight: 'auto', background: 'rgba(245,166,35,0.1)', border: '1px solid rgba(245,166,35,0.3)', borderRadius: 12, padding: 20 }}>
+            <div style={{ fontWeight: 600, marginBottom: 6, color: '#F5A623' }}>⚠️ Nhập số điện thoại để làm task</div>
+            <div style={{ fontSize: 13, color: '#8A857D', marginBottom: 16 }}>Bắt buộc để xác minh danh tính và nhận thanh toán.</div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input type="tel" placeholder="0912 345 678" value={phoneInput} onChange={e => { setPhoneInput(e.target.value); setPhoneError('') }}
+                style={{ flex: 1, padding: '10px 14px', background: '#0a0a0b', border: `1px solid ${phoneError ? '#F97373' : '#1C1C1E'}`, borderRadius: 8, color: '#EDEBE7', fontSize: 15, outline: 'none' }} />
+              <button onClick={handleSavePhone} disabled={phoneLoading || !phoneInput}
+                style={{ padding: '10px 20px', background: '#F5A623', color: '#000', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: 'pointer', opacity: !phoneInput ? 0.6 : 1 }}>
+                {phoneLoading ? '...' : 'Lưu'}
+              </button>
+            </div>
+            {phoneError && <div style={{ color: '#F97373', fontSize: 13, marginTop: 8 }}>{phoneError}</div>}
+          </div>
+        )}
+
+        {/* Nội dung chính */}
         {currentView === 'main' && (
           <>
             {activeTab === 'dashboard' && (
               <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
                 <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 16 }}>Xin chào, {displayName} 👋</h2>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
                   <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 16 }}>
                     <div style={{ fontSize: 12, color: '#8A857D' }}>💰 Số dư</div>
                     <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 24, color: '#F5A623' }}>{balance.toLocaleString()}đ</div>
@@ -84,10 +111,30 @@ export default function DashboardPage() {
                     <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 24 }}>{tasksDone}</div>
                   </div>
                 </div>
+                {needPhone ? (
+                  <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 28, textAlign: 'center' }}>
+                    <div style={{ fontSize: 40, marginBottom: 12 }}>🔒</div>
+                    <div style={{ fontWeight: 600, marginBottom: 8, color: '#EDEBE7' }}>Nhập số điện thoại để mở khóa task</div>
+                    <div style={{ color: '#8A857D', fontSize: 14 }}>Điền số điện thoại vào ô phía trên để bắt đầu làm task.</div>
+                  </div>
+                ) : (
+                  <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 28, textAlign: 'center' }}>
+                    <div style={{ fontSize: 40, marginBottom: 12 }}>📋</div>
+                    <div style={{ color: '#8A857D' }}>Danh sách task sẽ hiển thị ở đây.</div>
+                  </div>
+                )}
               </div>
             )}
-            {activeTab === 'tasks' && <div style={{ textAlign: 'center', padding: 40, color: '#8A857D' }}>📋 Danh sách task sẽ hiển thị ở đây</div>}
-            {activeTab === 'withdraw' && <div style={{ textAlign: 'center', padding: 40, color: '#8A857D' }}>💰 Rút tiền sẽ hiển thị ở đây</div>}
+            {activeTab === 'tasks' && (
+              <div style={{ padding: 20, textAlign: 'center', color: '#8A857D' }}>
+                {needPhone ? '🔒 Vui lòng nhập SĐT trước' : '📋 Danh sách task sẽ hiển thị ở đây'}
+              </div>
+            )}
+            {activeTab === 'withdraw' && (
+              <div style={{ padding: 20, textAlign: 'center', color: '#8A857D' }}>
+                {needPhone ? '🔒 Vui lòng nhập SĐT trước' : '💰 Rút tiền sẽ hiển thị ở đây'}
+              </div>
+            )}
             {activeTab === 'profile' && (
               <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
                 <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 20 }}>👤 Hồ sơ</h2>
@@ -117,6 +164,10 @@ export default function DashboardPage() {
             )}
           </>
         )}
+        {currentView === 'taskHistory' && <div style={{ padding: 20, textAlign: 'center', color: '#8A857D' }}>📋 Lịch sử làm task</div>}
+        {currentView === 'txHistory' && <div style={{ padding: 20, textAlign: 'center', color: '#8A857D' }}>💳 Lịch sử giao dịch</div>}
+        {currentView === 'settings' && <div style={{ padding: 20, textAlign: 'center', color: '#8A857D' }}>🔔 Cài đặt thông báo</div>}
+        {currentView === 'help' && <div style={{ padding: 20, textAlign: 'center', color: '#8A857D' }}>❓ Hướng dẫn sử dụng</div>}
       </div>
       <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#111113', borderTop: '1px solid #1C1C1E', display: 'flex', justifyContent: 'space-around', padding: '8px 0', zIndex: 50 }}>
         {[
