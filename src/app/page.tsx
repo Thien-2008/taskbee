@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabaseClient'
-import { useAuth } from '../hooks/useAuth'
-import { validateEmail, validatePhone, validatePassword, validatePasswordMatch, validateFullName, checkPasswordStrength, formatPhoneDisplay } from '../utils/validation'
+import { supabase } from '@/lib/supabaseClient'
+import { useAuth } from '@/hooks/useAuth'
+import { validateEmail, validatePhone, validatePassword, validatePasswordMatch, validateFullName, checkPasswordStrength, formatPhoneDisplay } from '@/utils/validation'
 
 type Tab = 'dashboard' | 'tasks' | 'postTask' | 'withdraw' | 'profile'
 type View = 'main' | 'taskDetail' | 'taskHistory' | 'txHistory' | 'settings' | 'help' | 'admin'
