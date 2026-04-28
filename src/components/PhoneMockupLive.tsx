@@ -6,7 +6,10 @@ import Logo from '@/components/Logo'
 
 function PhoneStatusBar() {
   const [time, setTime] = useState('')
+  const [batteryLevel, setBatteryLevel] = useState<number | null>(null)
+  const [isCharging, setIsCharging] = useState(false)
 
+  // Đồng hồ thời gian thực
   useEffect(() => {
     const update = () => {
       const now = new Date()
@@ -16,6 +19,34 @@ function PhoneStatusBar() {
     const timer = setInterval(update, 1000)
     return () => clearInterval(timer)
   }, [])
+
+  // Pin thực tế từ thiết bị
+  useEffect(() => {
+    const getBattery = async () => {
+      try {
+        // @ts-ignore: Battery API
+        if (navigator.getBattery) {
+          // @ts-ignore
+          const battery = await navigator.getBattery()
+          setBatteryLevel(battery.level)
+          setIsCharging(battery.charging)
+
+          battery.addEventListener('levelchange', () => setBatteryLevel(battery.level))
+          battery.addEventListener('chargingchange', () => setIsCharging(battery.charging))
+        } else {
+          // Fallback nếu không hỗ trợ Battery API
+          setBatteryLevel(0.85)
+        }
+      } catch {
+        // Fallback
+        setBatteryLevel(0.85)
+      }
+    }
+    getBattery()
+  }, [])
+
+  const batteryPercent = batteryLevel !== null ? Math.round(batteryLevel * 100) : 85
+  const batteryColor = batteryPercent <= 10 ? '#F97373' : batteryPercent <= 20 ? '#F5A623' : '#EDEBE7'
 
   return (
     <div style={{
@@ -28,18 +59,29 @@ function PhoneStatusBar() {
       color: '#EDEBE7',
     }}>
       <span>{time}</span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
-          <rect x="0" y="7" width="2" height="3" rx="0.5" fill="#EDEBE7"/>
-          <rect x="3" y="4" width="2" height="6" rx="0.5" fill="#EDEBE7"/>
-          <rect x="6" y="1" width="2" height="9" rx="0.5" fill="#EDEBE7"/>
-          <rect x="9" y="0" width="2" height="10" rx="0.5" fill="#EDEBE7" opacity="0.4"/>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Wifi mạnh - 4 vạch đầy đủ */}
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+          <path d="M8 10.5a1 1 0 1 1 0 1.5" fill="#EDEBE7"/>
+          <path d="M5.5 8.5a3.5 3.5 0 0 1 5 0" stroke="#EDEBE7" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+          <path d="M3 5.5a6.5 6.5 0 0 1 10 0" stroke="#EDEBE7" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+          <path d="M1 2.5a9.5 9.5 0 0 1 14 0" stroke="#EDEBE7" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
         </svg>
-        <svg width="22" height="10" viewBox="0 0 22 10" fill="none">
-          <rect x="0" y="0" width="18" height="10" rx="2" stroke="#EDEBE7" strokeWidth="1" fill="none"/>
-          <rect x="2" y="2" width="12" height="6" rx="1" fill="#EDEBE7"/>
-          <rect x="18" y="3" width="3" height="4" rx="1" fill="#EDEBE7"/>
-        </svg>
+
+        {/* Pin với % thực tế */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ fontSize: 10, color: batteryColor, minWidth: 28, textAlign: 'right' }}>
+            {isCharging ? '⚡' : ''}{batteryPercent}%
+          </span>
+          <svg width="22" height="11" viewBox="0 0 22 11" fill="none">
+            {/* Thân pin */}
+            <rect x="0" y="0" width="18" height="11" rx="2" stroke={batteryColor} strokeWidth="1" fill="none"/>
+            {/* Mức pin */}
+            <rect x="2" y="2" width={Math.max(2, (batteryPercent / 100) * 14)} height="7" rx="1" fill={batteryColor}/>
+            {/* Đầu pin */}
+            <rect x="18" y="3.5" width="3" height="4" rx="1" fill={batteryColor}/>
+          </svg>
+        </div>
       </div>
     </div>
   )
