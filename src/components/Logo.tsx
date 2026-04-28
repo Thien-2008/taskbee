@@ -15,34 +15,34 @@ export default function Logo({ size = 28, variant = 'full' }: LogoProps) {
       <svg
         width={iconSize}
         height={iconSize}
-        viewBox="-4 -4 56 56"
+        viewBox="-4 -4 40 40"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        aria-label="TaskBee"
         style={{ overflow: 'visible', display: 'block' }}
       >
         <path
-          d="M24 8L35.5 15V31L24 38L12.5 31V15L24 8Z"
+          d="M16 2L27.5 9V23L16 30L4.5 23V9L16 2Z"
           stroke="#F5A623"
           strokeWidth="1.8"
           strokeLinejoin="round"
+          fill="none"
+        />
+        <path
+          d="M14 12C11 10 7 11.5 7.5 15C8 18.5 12 18 14 16.5"
+          stroke="#F5A623"
+          strokeWidth="1.6"
           strokeLinecap="round"
           fill="none"
         />
         <path
-          d="M16 21 C13 20, 11 22, 13 24 C11 26, 13 28, 16 27"
+          d="M18 12C21 10 25 11.5 24.5 15C24 18.5 20 18 18 16.5"
           stroke="#F5A623"
-          strokeWidth="1.5"
+          strokeWidth="1.6"
           strokeLinecap="round"
           fill="none"
         />
-        <path
-          d="M32 21 C35 20, 37 22, 35 24 C37 26, 35 28, 32 27"
-          stroke="#F5A623"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          fill="none"
-        />
-        <circle cx="24" cy="24" r="2" fill="#F5A623" />
+        <circle cx="16" cy="14.5" r="1.8" fill="#F5A623" />
       </svg>
     )
   }
@@ -52,82 +52,80 @@ export default function Logo({ size = 28, variant = 'full' }: LogoProps) {
       <svg
         width={iconSize}
         height={iconSize}
-        viewBox="-4 -4 56 56"
+        viewBox="-4 -4 40 40"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        aria-label="TaskBee"
         style={{ overflow: 'visible', display: 'block' }}
       >
         <path
-          d="M24 8L35.5 15V31L24 38L12.5 31V15L24 8Z"
-          stroke="#6B6B70"
+          d="M16 2L27.5 9V23L16 30L4.5 23V9L16 2Z"
+          stroke="#EDEBE7"
           strokeWidth="1.8"
           strokeLinejoin="round"
+          fill="rgba(245,166,35,0.08)"
+        />
+        <path
+          d="M14 12C11 10 7 11.5 7.5 15C8 18.5 12 18 14 16.5"
+          stroke="#EDEBE7"
+          strokeWidth="1.6"
           strokeLinecap="round"
           fill="none"
         />
         <path
-          d="M16 21 C13 20, 11 22, 13 24 C11 26, 13 28, 16 27"
-          stroke="#6B6B70"
-          strokeWidth="1.5"
+          d="M18 12C21 10 25 11.5 24.5 15C24 18.5 20 18 18 16.5"
+          stroke="#EDEBE7"
+          strokeWidth="1.6"
           strokeLinecap="round"
           fill="none"
         />
-        <path
-          d="M32 21 C35 20, 37 22, 35 24 C37 26, 35 28, 32 27"
-          stroke="#6B6B70"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          fill="none"
-        />
-        <circle cx="24" cy="24" r="2" fill="#6B6B70" />
+        <circle cx="16" cy="14.5" r="1.8" fill="#EDEBE7" />
       </svg>
     )
   }
 
-  // Full logo: icon + text
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
       <svg
         width={iconSize}
         height={iconSize}
-        viewBox="-4 -4 56 56"
+        viewBox="-4 -4 40 40"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         style={{ overflow: 'visible', display: 'block', flexShrink: 0 }}
       >
         <path
-          d="M24 8L35.5 15V31L24 38L12.5 31V15L24 8Z"
+          d="M16 2L27.5 9V23L16 30L4.5 23V9L16 2Z"
           stroke="#F5A623"
           strokeWidth="1.8"
           strokeLinejoin="round"
+          fill="none"
+        />
+        <path
+          d="M14 12C11 10 7 11.5 7.5 15C8 18.5 12 18 14 16.5"
+          stroke="#F5A623"
+          strokeWidth="1.6"
           strokeLinecap="round"
           fill="none"
         />
         <path
-          d="M16 21 C13 20, 11 22, 13 24 C11 26, 13 28, 16 27"
+          d="M18 12C21 10 25 11.5 24.5 15C24 18.5 20 18 18 16.5"
           stroke="#F5A623"
-          strokeWidth="1.5"
+          strokeWidth="1.6"
           strokeLinecap="round"
           fill="none"
         />
-        <path
-          d="M32 21 C35 20, 37 22, 35 24 C37 26, 35 28, 32 27"
-          stroke="#F5A623"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          fill="none"
-        />
-        <circle cx="24" cy="24" r="2" fill="#F5A623" />
+        <circle cx="16" cy="14.5" r="1.8" fill="#F5A623" />
       </svg>
-
       <span style={{
         fontFamily: "'Space Grotesk', sans-serif",
-        fontWeight: 700,
-        fontSize: size * 0.75,
+        fontWeight: 400,
+        fontSize: 18,
         color: '#EDEBE7',
-        letterSpacing: '-0.3px',
+        letterSpacing: -0.5,
       }}>
-        Task<span style={{ color: '#F5A623' }}>Bee</span>
+        Task
+        <span style={{ fontWeight: 700, color: '#F5A623' }}>Bee</span>
       </span>
     </div>
   )
