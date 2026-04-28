@@ -9,7 +9,6 @@ function PhoneStatusBar() {
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null)
   const [isCharging, setIsCharging] = useState(false)
 
-  // Đồng hồ thời gian thực
   useEffect(() => {
     const update = () => {
       const now = new Date()
@@ -20,25 +19,21 @@ function PhoneStatusBar() {
     return () => clearInterval(timer)
   }, [])
 
-  // Pin thực tế từ thiết bị
   useEffect(() => {
     const getBattery = async () => {
       try {
-        // @ts-ignore: Battery API
+        // @ts-ignore
         if (navigator.getBattery) {
           // @ts-ignore
           const battery = await navigator.getBattery()
           setBatteryLevel(battery.level)
           setIsCharging(battery.charging)
-
           battery.addEventListener('levelchange', () => setBatteryLevel(battery.level))
           battery.addEventListener('chargingchange', () => setIsCharging(battery.charging))
         } else {
-          // Fallback nếu không hỗ trợ Battery API
           setBatteryLevel(0.85)
         }
       } catch {
-        // Fallback
         setBatteryLevel(0.85)
       }
     }
@@ -59,20 +54,20 @@ function PhoneStatusBar() {
     }}>
       <span>{time}</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        {/* Sóng di động - 4 vạch */}
-        <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-          <rect x="0" y="7" width="2" height="3" rx="0.5" fill="#EDEBE7"/>
-          <rect x="3" y="4" width="2" height="6" rx="0.5" fill="#EDEBE7"/>
-          <rect x="6" y="1" width="2" height="9" rx="0.5" fill="#EDEBE7"/>
-          <rect x="9" y="0" width="2" height="10" rx="0.5" fill="#EDEBE7"/>
+        {/* Sóng di động - 4 vạch nhỏ gọn */}
+        <svg width="12" height="10" viewBox="0 0 12 10" fill="none" style={{ flexShrink: 0 }}>
+          <rect x="0" y="7" width="2" height="3" rx="0.4" fill="#EDEBE7"/>
+          <rect x="3" y="4" width="2" height="6" rx="0.4" fill="#EDEBE7"/>
+          <rect x="6" y="1" width="2" height="9" rx="0.4" fill="#EDEBE7"/>
+          <rect x="9" y="0" width="2" height="10" rx="0.4" fill="#EDEBE7"/>
         </svg>
 
-        {/* Wifi */}
-        <svg width="14" height="12" viewBox="0 0 14 12" fill="none">
-          <path d="M7 10.5a0.8 0.8 0 1 1 0 1.3" fill="#EDEBE7"/>
-          <path d="M4.5 8a4 4 0 0 1 5 0" stroke="#EDEBE7" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-          <path d="M2.5 5a7 7 0 0 1 9 0" stroke="#EDEBE7" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-          <path d="M0.5 2a10 10 0 0 1 13 0" stroke="#EDEBE7" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+        {/* Wifi - thiết kế lại nhỏ gọn, không bị cắt */}
+        <svg width="14" height="10" viewBox="0 0 14 10" fill="none" style={{ flexShrink: 0 }}>
+          <path d="M7 8.2a0.7 0.7 0 1 1 0 1.2" fill="#EDEBE7"/>
+          <path d="M4.8 6.2a3.2 3.2 0 0 1 4.4 0" stroke="#EDEBE7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
+          <path d="M2.5 3.8a6.5 6.5 0 0 1 9 0" stroke="#EDEBE7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
+          <path d="M0.5 1.5a9.5 9.5 0 0 1 13 0" stroke="#EDEBE7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
         </svg>
 
         {/* Pin */}
@@ -81,12 +76,9 @@ function PhoneStatusBar() {
           <span style={{ fontSize: 10, color: '#EDEBE7', minWidth: 26, textAlign: 'right' }}>
             {batteryPercent}%
           </span>
-          <svg width="22" height="11" viewBox="0 0 22 11" fill="none">
-            {/* Thân pin */}
+          <svg width="22" height="11" viewBox="0 0 22 11" fill="none" style={{ flexShrink: 0 }}>
             <rect x="0" y="0" width="18" height="11" rx="2" stroke="#EDEBE7" strokeWidth="1" fill="none"/>
-            {/* Mức pin - luôn màu trắng */}
             <rect x="2" y="2" width={Math.max(2, (batteryPercent / 100) * 14)} height="7" rx="1" fill="#EDEBE7"/>
-            {/* Đầu pin */}
             <rect x="18" y="3.5" width="3" height="4" rx="1" fill="#EDEBE7"/>
           </svg>
         </div>
