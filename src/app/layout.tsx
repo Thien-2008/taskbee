@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import NoSelectWrapper from '@/components/NoSelectWrapper'
+import NoCopyScript from '@/components/NoCopyScript'
 
 export const metadata: Metadata = {
   title: 'TaskBee - Nền tảng việc làm vi mô',
@@ -15,9 +15,8 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body>
-        <NoSelectWrapper>
-          {children}
-        </NoSelectWrapper>
+        <NoCopyScript />
+        {children}
       </body>
     </html>
   )
