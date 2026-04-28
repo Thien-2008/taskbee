@@ -30,9 +30,9 @@ export default function LogoReveal() {
           }}
         >
           <motion.svg
-            width="120"
-            height="120"
-            viewBox="0 0 40 40"
+            width="140"
+            height="140"
+            viewBox="0 0 48 48"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             initial={{ scale: 0.6, opacity: 0 }}
@@ -42,7 +42,7 @@ export default function LogoReveal() {
           >
             {/* Lục giác ngoài */}
             <motion.path
-              d="M20 4L31.5 11V27L20 34L8.5 27V11L20 4Z"
+              d="M24 8L35.5 15V31L24 38L12.5 31V15L24 8Z"
               stroke="#F5A623"
               strokeWidth="1.8"
               fill="none"
@@ -53,7 +53,7 @@ export default function LogoReveal() {
 
             {/* Cánh trái */}
             <motion.path
-              d="M18 16C15 14 11 15.5 11.5 19C12 22.5 16 22 18 20.5"
+              d="M22 20C19 18 15 19.5 15.5 23C16 26.5 20 26 22 24.5"
               stroke="#F5A623"
               strokeWidth="1.6"
               strokeLinecap="round"
@@ -69,7 +69,7 @@ export default function LogoReveal() {
 
             {/* Cánh phải */}
             <motion.path
-              d="M22 16C25 14 29 15.5 28.5 19C28 22.5 24 22 22 20.5"
+              d="M26 20C29 18 33 19.5 32.5 23C32 26.5 28 26 26 24.5"
               stroke="#F5A623"
               strokeWidth="1.6"
               strokeLinecap="round"
@@ -85,8 +85,8 @@ export default function LogoReveal() {
 
             {/* Chấm trung tâm */}
             <motion.circle
-              cx="20"
-              cy="18.5"
+              cx="24"
+              cy="22.5"
               r="1.8"
               fill="#F5A623"
               initial={{ scale: 0 }}
@@ -96,8 +96,8 @@ export default function LogoReveal() {
 
             {/* Tia sáng quét */}
             <motion.circle
-              cx="20"
-              cy="18"
+              cx="24"
+              cy="22"
               r="22"
               fill="none"
               stroke="#F5A623"
