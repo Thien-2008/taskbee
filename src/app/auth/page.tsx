@@ -6,11 +6,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { createBrowserClient } from '@supabase/ssr'
 import { Eye, EyeOff, ArrowLeft, Shield, Check, X, Mail, Lock, User, Loader2 } from 'lucide-react'
 import Logo from '@/components/Logo'
+import SignatureMoment from '@/components/SignatureMoment'
+import HexPasswordStrength from '@/components/HexPasswordStrength'
+import BeeMascot from '@/components/BeeMascot'
 
 function AuthForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const referralParam = searchParams.get('ref') || ''
 
   const [supabase] = useState(() =>
     createBrowserClient(
@@ -20,16 +22,18 @@ function AuthForm() {
   )
 
   const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login')
+  const [showSignature, setShowSignature] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [showPass, setShowPass] = useState(false)
+  const [passwordFocused, setPasswordFocused] = useState(false)
+  const [holdProgress, setHoldProgress] = useState(0)
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [username, setUsername] = useState('')
-  const [refCode, setRefCode] = useState(referralParam)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,7 +57,7 @@ function AuthForm() {
       email,
       password,
       options: {
-        data: { username, full_name: fullName, referred_by: refCode },
+        data: { username, full_name: fullName },
       },
     })
     if (error) {
@@ -76,10 +80,30 @@ function AuthForm() {
     setLoading(false)
   }
 
+  const handleHoldStart = () => {
+    const startTime = Date.now()
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime
+      const progress = Math.min(elapsed / 1500, 1)
+      setHoldProgress(progress)
+      if (progress >= 1) {
+        clearInterval(interval)
+        handleLogin(new Event('submit') as any)
+      }
+    }, 16)
+    return () => clearInterval(interval)
+  }
+
+  const handleHoldEnd = () => {
+    setHoldProgress(0)
+  }
+
   const inputClass = "w-full px-4 py-3 bg-[#0a0a0b] border border-[#1C1C1E] rounded-xl text-[#EDEBE7] focus:border-[#F5A623] focus:ring-1 focus:ring-[#F5A623] outline-none transition-all font-dm-sans"
 
   return (
     <div className="min-h-screen bg-[#0a0a0b] flex items-center justify-center p-4 font-dm-sans">
+      {showSignature && <SignatureMoment onComplete={() => setShowSignature(false)} />}
+
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#F5A62322,transparent_70%)]" />
       </div>
@@ -87,6 +111,7 @@ function AuthForm() {
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 2.2 }}
         className="w-full max-w-md bg-[#161618] border border-[#1C1C1E] rounded-3xl p-8 shadow-2xl relative z-10"
       >
         <AnimatePresence mode="wait">
@@ -100,8 +125,11 @@ function AuthForm() {
               </div>
               <form onSubmit={handleLogin} className="space-y-4">
                 <InputField icon={Mail} type="email" required value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} placeholder="Email của bạn" className={`${inputClass} pl-10`} />
-                <InputField icon={Lock} type={showPass ? 'text' : 'password'} required value={password} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} pl-10 pr-12`} />
-                <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">{showPass ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+                <div className="relative">
+                  <InputField icon={Lock} type={showPass ? 'text' : 'password'} required value={password} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} pl-10 pr-12`} onFocus={() => setPasswordFocused(true)} onBlur={() => setPasswordFocused(false)} />
+                  <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">{showPass ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+                  <BeeMascot isFocused={passwordFocused} />
+                </div>
                 <div className="flex items-center justify-between text-sm">
                   <label className="flex items-center gap-2 text-gray-400 cursor-pointer">
                     <input type="checkbox" className="accent-[#F5A623] w-4 h-4" required />
@@ -111,8 +139,17 @@ function AuthForm() {
                 </div>
                 {error && <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm flex items-center gap-2"><X size={16} /> {error}</div>}
                 {success && <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-green-500 text-sm flex items-center gap-2"><Check size={16} /> {success}</div>}
-                <button disabled={loading} className="w-full bg-[#F5A623] text-black font-bold py-3 rounded-xl hover:bg-[#FFC04D] transition-all flex items-center justify-center gap-2">
-                  {loading ? <Loader2 className="animate-spin" size={20} /> : 'Đăng nhập'}
+                <button
+                  disabled={loading}
+                  onMouseDown={handleHoldStart}
+                  onMouseUp={handleHoldEnd}
+                  onMouseLeave={handleHoldEnd}
+                  onTouchStart={handleHoldStart}
+                  onTouchEnd={handleHoldEnd}
+                  className="w-full bg-[#F5A623] text-black font-bold py-3 rounded-xl hover:bg-[#FFC04D] transition-all flex items-center justify-center gap-2 relative overflow-hidden"
+                >
+                  <span className="relative z-10">{loading ? <Loader2 className="animate-spin" size={20} /> : 'Đăng nhập'}</span>
+                  <div className="absolute inset-0 bg-black/20 rounded-xl" style={{ transform: `scaleX(${holdProgress})`, transformOrigin: 'left', transition: 'transform 0.1s' }}></div>
                 </button>
               </form>
               <p className="text-center mt-6 text-gray-400 text-sm">
@@ -132,8 +169,11 @@ function AuthForm() {
                 <InputField icon={User} type="text" value={fullName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFullName(e.target.value)} placeholder="Họ và tên" required />
                 <InputField icon={Mail} type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} placeholder="Email" required />
                 <InputField icon={User} type="text" value={username} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)} placeholder="Tên đăng nhập (tùy chọn)" />
-                <InputField icon={Lock} type="password" value={password} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)} placeholder="Mật khẩu" required />
-                <InputField icon={Shield} type="text" value={refCode} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRefCode(e.target.value)} placeholder="Mã giới thiệu (nếu có)" disabled={!!referralParam} />
+                <div className="relative">
+                  <InputField icon={Lock} type="password" value={password} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)} placeholder="Mật khẩu" required onFocus={() => setPasswordFocused(true)} onBlur={() => setPasswordFocused(false)} />
+                  <BeeMascot isFocused={passwordFocused} />
+                </div>
+                <HexPasswordStrength password={password} />
                 <div className="flex items-start gap-2 text-xs text-gray-400">
                   <input type="checkbox" className="accent-[#F5A623] mt-1" required />
                   <span>Tôi đồng ý với <a href="/terms" target="_blank" className="text-[#F5A623] underline">điều khoản</a> và <a href="/privacy" target="_blank" className="text-[#F5A623] underline">chính sách bảo mật</a></span>
