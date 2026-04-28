@@ -46,7 +46,6 @@ function PhoneStatusBar() {
   }, [])
 
   const batteryPercent = batteryLevel !== null ? Math.round(batteryLevel * 100) : 85
-  const batteryColor = batteryPercent <= 10 ? '#F97373' : batteryPercent <= 20 ? '#F5A623' : '#EDEBE7'
 
   return (
     <div style={{
@@ -59,27 +58,36 @@ function PhoneStatusBar() {
       color: '#EDEBE7',
     }}>
       <span>{time}</span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        {/* Wifi mạnh - 4 vạch đầy đủ */}
-        <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
-          <path d="M8 10.5a1 1 0 1 1 0 1.5" fill="#EDEBE7"/>
-          <path d="M5.5 8.5a3.5 3.5 0 0 1 5 0" stroke="#EDEBE7" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-          <path d="M3 5.5a6.5 6.5 0 0 1 10 0" stroke="#EDEBE7" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-          <path d="M1 2.5a9.5 9.5 0 0 1 14 0" stroke="#EDEBE7" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        {/* Sóng di động - 4 vạch */}
+        <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+          <rect x="0" y="7" width="2" height="3" rx="0.5" fill="#EDEBE7"/>
+          <rect x="3" y="4" width="2" height="6" rx="0.5" fill="#EDEBE7"/>
+          <rect x="6" y="1" width="2" height="9" rx="0.5" fill="#EDEBE7"/>
+          <rect x="9" y="0" width="2" height="10" rx="0.5" fill="#EDEBE7"/>
         </svg>
 
-        {/* Pin với % thực tế */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{ fontSize: 10, color: batteryColor, minWidth: 28, textAlign: 'right' }}>
-            {isCharging ? '⚡' : ''}{batteryPercent}%
+        {/* Wifi */}
+        <svg width="14" height="12" viewBox="0 0 14 12" fill="none">
+          <path d="M7 10.5a0.8 0.8 0 1 1 0 1.3" fill="#EDEBE7"/>
+          <path d="M4.5 8a4 4 0 0 1 5 0" stroke="#EDEBE7" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+          <path d="M2.5 5a7 7 0 0 1 9 0" stroke="#EDEBE7" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+          <path d="M0.5 2a10 10 0 0 1 13 0" stroke="#EDEBE7" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+        </svg>
+
+        {/* Pin */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+          {isCharging && <span style={{ fontSize: 9, color: '#EDEBE7' }}>⚡</span>}
+          <span style={{ fontSize: 10, color: '#EDEBE7', minWidth: 26, textAlign: 'right' }}>
+            {batteryPercent}%
           </span>
           <svg width="22" height="11" viewBox="0 0 22 11" fill="none">
             {/* Thân pin */}
-            <rect x="0" y="0" width="18" height="11" rx="2" stroke={batteryColor} strokeWidth="1" fill="none"/>
-            {/* Mức pin */}
-            <rect x="2" y="2" width={Math.max(2, (batteryPercent / 100) * 14)} height="7" rx="1" fill={batteryColor}/>
+            <rect x="0" y="0" width="18" height="11" rx="2" stroke="#EDEBE7" strokeWidth="1" fill="none"/>
+            {/* Mức pin - luôn màu trắng */}
+            <rect x="2" y="2" width={Math.max(2, (batteryPercent / 100) * 14)} height="7" rx="1" fill="#EDEBE7"/>
             {/* Đầu pin */}
-            <rect x="18" y="3.5" width="3" height="4" rx="1" fill={batteryColor}/>
+            <rect x="18" y="3.5" width="3" height="4" rx="1" fill="#EDEBE7"/>
           </svg>
         </div>
       </div>
