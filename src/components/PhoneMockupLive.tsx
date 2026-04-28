@@ -91,14 +91,14 @@ function PhoneStatusBar() {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '8px 14px 2px',
+      padding: '12px 14px 4px',
       fontSize: 10,
       fontWeight: 600,
       color: '#EDEBE7',
     }}>
       <span>{time}</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        {/* Wifi (thu nhỏ) */}
+        {/* Wifi */}
         <svg width="12" height="8" viewBox="0 0 14 10" fill="none" style={{ flexShrink: 0 }}>
           <path d="M7 8.2a0.7 0.7 0 1 1 0 1.2" fill="#EDEBE7"/>
           <path d="M4.8 6.2a3.2 3.2 0 0 1 4.4 0" stroke="#EDEBE7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
@@ -106,7 +106,7 @@ function PhoneStatusBar() {
           <path d="M0.5 1.5a9.5 9.5 0 0 1 13 0" stroke="#EDEBE7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
         </svg>
 
-        {/* Tín hiệu di động (2 cột nhỏ gọn) */}
+        {/* Tín hiệu di động */}
         <CellularSignal />
 
         {/* Pin */}
@@ -174,22 +174,22 @@ export default function PhoneMockupLive() {
         />
       )}
 
-      {/* Khung điện thoại */}
+      {/* Khung điện thoại với viền mỏng hơn */}
       <div style={{
         width: 280,
         height: 570,
         background: '#0a0a0b',
         border: '2px solid #1C1C1E',
         borderRadius: 36,
-        padding: '12px 8px',
+        padding: '6px 6px',
         position: 'relative',
         overflow: 'hidden',
         boxShadow: '0 0 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,166,35,0.1)',
       }}>
-        {/* Màn hình */}
+        {/* Màn hình với bo góc ít hơn */}
         <div style={{
           background: '#0a0a0b',
-          borderRadius: 24,
+          borderRadius: 16,
           height: '100%',
           overflow: 'hidden',
           display: 'flex',
