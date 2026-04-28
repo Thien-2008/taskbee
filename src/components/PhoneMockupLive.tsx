@@ -91,7 +91,7 @@ function PhoneStatusBar() {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '12px 14px 4px',
+      padding: '14px 14px 4px',
       fontSize: 10,
       fontWeight: 600,
       color: '#EDEBE7',
