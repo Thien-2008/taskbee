@@ -51,7 +51,7 @@ export default function Footer() {
         borderTop: '1px solid #1C1C1E',
         paddingTop: 16,
       }}>
-        © 2025 TaskBee. Tất cả các quyền được bảo lưu.
+        © 2026 TaskBee. Tất cả các quyền được bảo lưu.
       </div>
     </footer>
   )
