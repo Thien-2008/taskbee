@@ -99,6 +99,7 @@ export default function LandingPage() {
       `}</style>
 
       {/* Navigation */}
+      <LogoReveal />
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px', background: 'rgba(10,10,11,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #1C1C1E' }}>
         <Logo size={28} variant="full" />
         <div style={{ display: 'flex', gap: 10 }}>
