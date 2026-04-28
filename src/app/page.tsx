@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { Smartphone, CheckCircle, Wallet, Shield, Lock, Eye } from 'lucide-react'
 import ScrollReveal from '@/components/ScrollReveal'
 import HexagonBackground from '@/components/HexagonBackground'
-import PhoneMockup from '@/components/PhoneMockup'
+import PhoneMockupLive from '@/components/PhoneMockupLive'
 import FAQ from '@/components/FAQ'
 import Logo from '@/components/Logo'
 import Footer from '@/components/Footer'
@@ -171,7 +171,7 @@ export default function LandingPage() {
 
       {/* Phone Mockup */}
       <ScrollReveal delay={0.1}>
-        <PhoneMockup />
+        <PhoneMockupLive />
       </ScrollReveal>
 
       {/* How it Works */}
