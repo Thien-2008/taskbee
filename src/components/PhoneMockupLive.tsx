@@ -84,17 +84,14 @@ function PhoneStatusBar() {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '8px 16px 4px',
+      padding: '12px 16px 2px',
       fontSize: 11,
       fontWeight: 600,
       color: '#EDEBE7',
     }}>
       <span>{time}</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        {/* Sóng di động thực tế */}
-        <CellularSignal />
-
-        {/* Wifi */}
+        {/* Wifi (trước tín hiệu, theo kiểu Samsung) */}
         <svg width="14" height="10" viewBox="0 0 14 10" fill="none" style={{ flexShrink: 0 }}>
           <path d="M7 8.2a0.7 0.7 0 1 1 0 1.2" fill="#EDEBE7"/>
           <path d="M4.8 6.2a3.2 3.2 0 0 1 4.4 0" stroke="#EDEBE7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
@@ -102,7 +99,10 @@ function PhoneStatusBar() {
           <path d="M0.5 1.5a9.5 9.5 0 0 1 13 0" stroke="#EDEBE7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
         </svg>
 
-        {/* Pin */}
+        {/* Tín hiệu di động (sau wifi) */}
+        <CellularSignal />
+
+        {/* Pin (sau cùng) */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
           {isCharging && <span style={{ fontSize: 9, color: '#EDEBE7' }}>⚡</span>}
           <span style={{ fontSize: 10, color: '#EDEBE7', minWidth: 26, textAlign: 'right' }}>
