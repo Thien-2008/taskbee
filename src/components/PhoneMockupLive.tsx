@@ -32,7 +32,7 @@ function CellularSignal() {
   }, [])
 
   const SignalBar = () => (
-    <svg width="12" height="10" viewBox="0 0 12 10" fill="none" style={{ flexShrink: 0 }}>
+    <svg width="10" height="8" viewBox="0 0 12 10" fill="none" style={{ flexShrink: 0 }}>
       <rect x="0" y="7" width="2" height="3" rx="0.4" fill={bars >= 1 ? '#EDEBE7' : '#5C5A55'} />
       <rect x="3" y="4" width="2" height="6" rx="0.4" fill={bars >= 2 ? '#EDEBE7' : '#5C5A55'} />
       <rect x="6" y="1" width="2" height="9" rx="0.4" fill={bars >= 3 ? '#EDEBE7' : '#5C5A55'} />
@@ -41,7 +41,7 @@ function CellularSignal() {
   )
 
   return (
-    <div style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+    <div style={{ display: 'flex', gap: 1, alignItems: 'center' }}>
       <SignalBar />
       <SignalBar />
     </div>
@@ -91,31 +91,31 @@ function PhoneStatusBar() {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '18px 16px 2px',
-      fontSize: 11,
+      padding: '8px 14px 2px',
+      fontSize: 10,
       fontWeight: 600,
       color: '#EDEBE7',
     }}>
       <span>{time}</span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        {/* Wifi */}
-        <svg width="14" height="10" viewBox="0 0 14 10" fill="none" style={{ flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        {/* Wifi (thu nhỏ) */}
+        <svg width="12" height="8" viewBox="0 0 14 10" fill="none" style={{ flexShrink: 0 }}>
           <path d="M7 8.2a0.7 0.7 0 1 1 0 1.2" fill="#EDEBE7"/>
           <path d="M4.8 6.2a3.2 3.2 0 0 1 4.4 0" stroke="#EDEBE7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
           <path d="M2.5 3.8a6.5 6.5 0 0 1 9 0" stroke="#EDEBE7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
           <path d="M0.5 1.5a9.5 9.5 0 0 1 13 0" stroke="#EDEBE7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
         </svg>
 
-        {/* Tín hiệu di động (2 cột) */}
+        {/* Tín hiệu di động (2 cột nhỏ gọn) */}
         <CellularSignal />
 
         {/* Pin */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-          {isCharging && <span style={{ fontSize: 9, color: '#EDEBE7' }}>⚡</span>}
-          <span style={{ fontSize: 10, color: '#EDEBE7', minWidth: 26, textAlign: 'right' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {isCharging && <span style={{ fontSize: 8, color: '#EDEBE7' }}>⚡</span>}
+          <span style={{ fontSize: 9, color: '#EDEBE7', minWidth: 24, textAlign: 'right' }}>
             {batteryPercent}%
           </span>
-          <svg width="22" height="11" viewBox="0 0 22 11" fill="none" style={{ flexShrink: 0 }}>
+          <svg width="20" height="10" viewBox="0 0 22 11" fill="none" style={{ flexShrink: 0 }}>
             <rect x="0" y="0" width="18" height="11" rx="2" stroke="#EDEBE7" strokeWidth="1" fill="none"/>
             <rect x="2" y="2" width={Math.max(2, (batteryPercent / 100) * 14)} height="7" rx="1" fill="#EDEBE7"/>
             <rect x="18" y="3.5" width="3" height="4" rx="1" fill="#EDEBE7"/>
@@ -143,7 +143,7 @@ export default function PhoneMockupLive() {
         position: 'relative',
       }}
     >
-      {/* Lớp phủ tối biến mất dần */}
+      {/* Lớp phủ tối */}
       <motion.div
         style={{
           position: 'absolute',
@@ -198,14 +198,14 @@ export default function PhoneMockupLive() {
           <PhoneStatusBar />
 
           {/* App header */}
-          <div style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ padding: '6px 16px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Logo size={22} variant="icon" />
-              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 15, color: '#F5A623' }}>TaskBee</span>
+              <Logo size={20} variant="icon" />
+              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 14, color: '#F5A623' }}>TaskBee</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#34D399', boxShadow: '0 0 6px rgba(52,211,153,0.4)' }} />
-              <span style={{ fontSize: 10, color: '#8A857D' }}>Trực tuyến</span>
+              <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#34D399', boxShadow: '0 0 6px rgba(52,211,153,0.4)' }} />
+              <span style={{ fontSize: 9, color: '#8A857D' }}>Trực tuyến</span>
             </div>
           </div>
 
@@ -215,28 +215,28 @@ export default function PhoneMockupLive() {
             animate={isInView ? { y: 0, opacity: 1 } : {}}
             transition={{ delay: 0.3, duration: 0.5, ease: 'easeOut' }}
             style={{
-              margin: '8px 16px',
-              padding: '16px',
+              margin: '0 16px 8px',
+              padding: '14px',
               background: 'rgba(22,22,24,0.8)',
               backdropFilter: 'blur(12px)',
-              borderRadius: 16,
+              borderRadius: 14,
               border: '1px solid rgba(245,166,35,0.15)',
             }}
           >
-            <div style={{ fontSize: 11, color: '#8A857D', marginBottom: 4 }}>Số dư khả dụng</div>
-            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 28, color: '#EDEBE7', letterSpacing: -0.5 }}>
+            <div style={{ fontSize: 10, color: '#8A857D', marginBottom: 4 }}>Số dư khả dụng</div>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 26, color: '#EDEBE7', letterSpacing: -0.5 }}>
               248.500đ
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
-              <div style={{ fontSize: 11, color: '#8A857D' }}>Cập nhật cách đây 2 phút</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
+              <div style={{ fontSize: 10, color: '#8A857D' }}>Cập nhật cách đây 2 phút</div>
               <button style={{
                 background: '#F5A623',
                 color: '#000',
                 border: 'none',
-                padding: '6px 16px',
-                borderRadius: 20,
+                padding: '5px 14px',
+                borderRadius: 18,
                 fontWeight: 700,
-                fontSize: 12,
+                fontSize: 11,
                 cursor: 'default',
               }}>Rút tiền</button>
             </div>
@@ -247,7 +247,7 @@ export default function PhoneMockupLive() {
             initial={{ y: 20, opacity: 0 }}
             animate={isInView ? { y: 0, opacity: 1 } : {}}
             transition={{ delay: 0.45, duration: 0.5, ease: 'easeOut' }}
-            style={{ display: 'flex', gap: 8, margin: '8px 16px' }}
+            style={{ display: 'flex', gap: 6, margin: '0 16px 8px' }}
           >
             {[
               { label: 'Đang thực hiện', value: '2', color: '#F5A623' },
@@ -258,12 +258,12 @@ export default function PhoneMockupLive() {
                 flex: 1,
                 background: '#161618',
                 border: '1px solid #1C1C1E',
-                borderRadius: 12,
-                padding: '12px 8px',
+                borderRadius: 10,
+                padding: '10px 6px',
                 textAlign: 'center',
               }}>
-                <div style={{ fontSize: 18, fontWeight: 700, color: stat.color, fontFamily: "'Space Grotesk', sans-serif" }}>{stat.value}</div>
-                <div style={{ fontSize: 10, color: '#8A857D', marginTop: 2 }}>{stat.label}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: stat.color, fontFamily: "'Space Grotesk', sans-serif" }}>{stat.value}</div>
+                <div style={{ fontSize: 9, color: '#8A857D', marginTop: 2 }}>{stat.label}</div>
               </div>
             ))}
           </motion.div>
@@ -273,9 +273,9 @@ export default function PhoneMockupLive() {
             initial={{ y: 20, opacity: 0 }}
             animate={isInView ? { y: 0, opacity: 1 } : {}}
             transition={{ delay: 0.6, duration: 0.5, ease: 'easeOut' }}
-            style={{ margin: '8px 16px', flex: 1 }}
+            style={{ margin: '0 16px', flex: 1 }}
           >
-            <div style={{ fontSize: 12, fontWeight: 600, color: '#8A857D', marginBottom: 8 }}>Hoạt động gần đây</div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#8A857D', marginBottom: 6 }}>Hoạt động gần đây</div>
             {[
               { label: 'Nhiệm vụ được duyệt', status: '+15.000đ', time: 'Vừa xong', color: '#34D399' },
               { label: 'Nhiệm vụ đã gửi kết quả', status: 'Đang kiểm tra', time: '12 phút trước', color: '#F5A623' },
@@ -290,22 +290,22 @@ export default function PhoneMockupLive() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '10px 12px',
+                  padding: '8px 10px',
                   background: i === 0 ? 'rgba(52,211,153,0.05)' : 'transparent',
-                  borderRadius: 10,
-                  marginBottom: 4,
+                  borderRadius: 8,
+                  marginBottom: 2,
                 }}
               >
-                <div style={{ fontSize: 12, color: '#EDEBE7' }}>{item.label}</div>
+                <div style={{ fontSize: 11, color: '#EDEBE7' }}>{item.label}</div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: item.color }}>{item.status}</div>
-                  <div style={{ fontSize: 10, color: '#5C5A55' }}>{item.time}</div>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: item.color }}>{item.status}</div>
+                  <div style={{ fontSize: 9, color: '#5C5A55' }}>{item.time}</div>
                 </div>
               </motion.div>
             ))}
           </motion.div>
 
-          <div style={{ height: 20 }} />
+          <div style={{ height: 16 }} />
         </div>
       </div>
     </motion.div>
