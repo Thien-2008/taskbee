@@ -20,8 +20,11 @@ export default function LogoReveal() {
           transition={{ duration: 0.5, ease: 'easeInOut' }}
           style={{
             position: 'fixed',
-            inset: 0,
-            zIndex: 9999,
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            zIndex: 99999,
             background: '#0a0a0b',
             display: 'flex',
             alignItems: 'center',
