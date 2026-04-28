@@ -4,6 +4,43 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Logo from '@/components/Logo'
 
+function CellularSignal() {
+  const [bars, setBars] = useState(4)
+
+  useEffect(() => {
+    const updateSignal = () => {
+      const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
+      
+      if (connection) {
+        const type = connection.effectiveType
+        switch (type) {
+          case '4g': setBars(4); break
+          case '3g': setBars(3); break
+          case '2g': setBars(2); break
+          case 'slow-2g': setBars(1); break
+          default: setBars(4)
+        }
+
+        connection.addEventListener('change', updateSignal)
+        return () => connection.removeEventListener('change', updateSignal)
+      } else {
+        setBars(4)
+      }
+    }
+
+    updateSignal()
+  }, [])
+
+  return (
+    <svg width="12" height="10" viewBox="0 0 12 10" fill="none" style={{ flexShrink: 0 }}>
+      <rect x="0" y="7" width="2" height="3" rx="0.4" fill={bars >= 1 ? '#EDEBE7' : '#5C5A55'} />
+      <rect x="3" y="4" width="2" height="6" rx="0.4" fill={bars >= 2 ? '#EDEBE7' : '#5C5A55'} />
+      <rect x="6" y="1" width="2" height="9" rx="0.4" fill={bars >= 3 ? '#EDEBE7' : '#5C5A55'} />
+      <rect x="9" y="0" width="2" height="10" rx="0.4" fill={bars >= 4 ? '#EDEBE7' : '#5C5A55'} />
+    </svg>
+  )
+}
+
 function PhoneStatusBar() {
   const [time, setTime] = useState('')
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null)
@@ -54,15 +91,10 @@ function PhoneStatusBar() {
     }}>
       <span>{time}</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        {/* Sóng di động - 4 vạch nhỏ gọn */}
-        <svg width="12" height="10" viewBox="0 0 12 10" fill="none" style={{ flexShrink: 0 }}>
-          <rect x="0" y="7" width="2" height="3" rx="0.4" fill="#EDEBE7"/>
-          <rect x="3" y="4" width="2" height="6" rx="0.4" fill="#EDEBE7"/>
-          <rect x="6" y="1" width="2" height="9" rx="0.4" fill="#EDEBE7"/>
-          <rect x="9" y="0" width="2" height="10" rx="0.4" fill="#EDEBE7"/>
-        </svg>
+        {/* Sóng di động thực tế */}
+        <CellularSignal />
 
-        {/* Wifi - thiết kế lại nhỏ gọn, không bị cắt */}
+        {/* Wifi */}
         <svg width="14" height="10" viewBox="0 0 14 10" fill="none" style={{ flexShrink: 0 }}>
           <path d="M7 8.2a0.7 0.7 0 1 1 0 1.2" fill="#EDEBE7"/>
           <path d="M4.8 6.2a3.2 3.2 0 0 1 4.4 0" stroke="#EDEBE7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
