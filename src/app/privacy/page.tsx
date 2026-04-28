@@ -47,11 +47,11 @@ export default function PrivacyPage() {
         </section>
         <section style={{ marginBottom: 32 }}>
           <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, color: '#F5A623', marginBottom: 12 }}>5. Quyền của bạn</h2>
-          <p style={{ color: '#8A857D', lineHeight: 1.8 }}>Bạn có quyền truy cập, chỉnh sửa hoặc yêu cầu xóa dữ liệu cá nhân. Gửi yêu cầu về privacy@taskbee.vn – phản hồi trong 5 ngày làm việc. Dữ liệu giao dịch sẽ được ẩn danh hóa và lưu trữ 5 năm theo quy định pháp luật.</p>
+          <p style={{ color: '#8A857D', lineHeight: 1.8 }}>Bạn có quyền truy cập, chỉnh sửa hoặc yêu cầu xóa dữ liệu cá nhân. Gửi yêu cầu về taskbee.support@gmail.com – phản hồi trong 5 ngày làm việc. Dữ liệu giao dịch sẽ được ẩn danh hóa và lưu trữ 5 năm theo quy định pháp luật.</p>
         </section>
         <section>
           <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, color: '#F5A623', marginBottom: 12 }}>6. Liên hệ</h2>
-          <p style={{ color: '#8A857D', lineHeight: 1.8 }}>Mọi thắc mắc về bảo mật, vui lòng liên hệ: privacy@taskbee.vn</p>
+          <p style={{ color: '#8A857D', lineHeight: 1.8 }}>Mọi thắc mắc về bảo mật, vui lòng liên hệ: taskbee.support@gmail.com</p>
         </section>
       </main>
       <Footer />
