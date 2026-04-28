@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { Smartphone, CheckCircle, Wallet, Shield, Lock, Eye } from 'lucide-react'
 import ScrollReveal from '@/components/ScrollReveal'
 import HexagonBackground from '@/components/HexagonBackground'
+import BreathingHexagons from '@/components/BreathingHexagons'
 import PhoneMockupLive from '@/components/PhoneMockupLive'
 import FAQ from '@/components/FAQ'
 import Logo from '@/components/Logo'
@@ -110,7 +111,7 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section style={{ position: 'relative', zIndex: 10, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '100px 16px 40px' }}>
-        <HexagonBackground />
+        <BreathingHexagons />
         <div>
           <ScrollReveal>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(245,166,35,0.1)', border: '1px solid rgba(245,166,35,0.25)', color: '#F5A623', padding: '6px 16px', borderRadius: 100, fontSize: 13, marginBottom: 24 }}>
