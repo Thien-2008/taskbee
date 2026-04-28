@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, Suspense, ComponentType } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createBrowserClient } from '@supabase/ssr'
@@ -99,15 +99,9 @@ function AuthForm() {
                 <p className="text-gray-400 text-sm mt-2">Chào mừng trở lại</p>
               </div>
               <form onSubmit={handleLogin} className="space-y-4">
-                <div className="relative group">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#F5A623]"><Mail size={18} /></div>
-                  <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Email của bạn" className={`${inputClass} pl-10`} />
-                </div>
-                <div className="relative group">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#F5A623]"><Lock size={18} /></div>
-                  <input type={showPass ? 'text' : 'password'} required value={password} onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} pl-10 pr-12`} />
-                  <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">{showPass ? <EyeOff size={18} /> : <Eye size={18} />}</button>
-                </div>
+                <InputField icon={Mail} type="email" required value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} placeholder="Email của bạn" className={`${inputClass} pl-10`} />
+                <InputField icon={Lock} type={showPass ? 'text' : 'password'} required value={password} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} pl-10 pr-12`} />
+                <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">{showPass ? <EyeOff size={18} /> : <Eye size={18} />}</button>
                 <div className="flex items-center justify-between text-sm">
                   <label className="flex items-center gap-2 text-gray-400 cursor-pointer">
                     <input type="checkbox" className="accent-[#F5A623] w-4 h-4" required />
@@ -135,11 +129,11 @@ function AuthForm() {
               </button>
               <h2 className="text-2xl font-space-grotesk font-bold text-white mb-6">Tạo tài khoản mới</h2>
               <form onSubmit={handleRegister} className="space-y-4">
-                <InputField icon={User} type="text" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Họ và tên" required />
-                <InputField icon={Mail} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" required />
-                <InputField icon={User} type="text" value={username} onChange={e => setUsername(e.target.value)} placeholder="Tên đăng nhập (tùy chọn)" />
-                <InputField icon={Lock} type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu" required />
-                <InputField icon={Shield} type="text" value={refCode} onChange={e => setRefCode(e.target.value)} placeholder="Mã giới thiệu (nếu có)" disabled={!!referralParam} />
+                <InputField icon={User} type="text" value={fullName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFullName(e.target.value)} placeholder="Họ và tên" required />
+                <InputField icon={Mail} type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} placeholder="Email" required />
+                <InputField icon={User} type="text" value={username} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)} placeholder="Tên đăng nhập (tùy chọn)" />
+                <InputField icon={Lock} type="password" value={password} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)} placeholder="Mật khẩu" required />
+                <InputField icon={Shield} type="text" value={refCode} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRefCode(e.target.value)} placeholder="Mã giới thiệu (nếu có)" disabled={!!referralParam} />
                 <div className="flex items-start gap-2 text-xs text-gray-400">
                   <input type="checkbox" className="accent-[#F5A623] mt-1" required />
                   <span>Tôi đồng ý với <a href="/terms" target="_blank" className="text-[#F5A623] underline">điều khoản</a> và <a href="/privacy" target="_blank" className="text-[#F5A623] underline">chính sách bảo mật</a></span>
@@ -158,13 +152,13 @@ function AuthForm() {
               <h2 className="text-2xl font-space-grotesk font-bold text-white mb-2">Quên mật khẩu</h2>
               <p className="text-gray-400 text-sm mb-6">Nhập Email đã đăng ký để nhận hướng dẫn khôi phục.</p>
               <form onSubmit={handleForgot} className="space-y-6">
-                <InputField icon={Mail} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email của bạn" required />
+                <InputField icon={Mail} type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} placeholder="Email của bạn" required />
                 {error && <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm flex items-center gap-2"><X size={16} /> {error}</div>}
                 {success && <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-green-500 text-sm flex items-center gap-2"><Check size={16} /> {success}</div>}
                 <button disabled={loading} className="w-full bg-[#F5A623] text-black font-bold py-3 rounded-xl hover:bg-[#FFC04D] transition-all flex items-center justify-center gap-2">
                   {loading ? <Loader2 className="animate-spin" size={20} /> : 'Gửi yêu cầu'}
                 </button>
-                <button onClick={() => setMode('login')} className="w-full text-center text-sm text-gray-400">← Trở về đăng nhập</button>
+                <button type="button" onClick={() => setMode('login')} className="w-full text-center text-sm text-gray-400">← Trở về đăng nhập</button>
               </form>
             </motion.div>
           )}
@@ -174,13 +168,17 @@ function AuthForm() {
   )
 }
 
-function InputField({ icon: Icon, ...props }: any) {
+interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  icon: ComponentType<{ size?: number | string }>
+}
+
+function InputField({ icon: Icon, ...props }: InputFieldProps) {
   return (
     <div className="relative group">
       <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#F5A623] transition-colors">
         <Icon size={18} />
       </div>
-      <input {...props} className="w-full bg-[#0a0a0b] border border-[#1C1C1E] text-white pl-10 pr-4 py-3 rounded-xl focus:border-[#F5A623] focus:ring-1 focus:ring-[#F5A623] outline-none transition-all font-dm-sans" />
+      <input {...props} className={`w-full bg-[#0a0a0b] border border-[#1C1C1E] text-white pl-10 pr-4 py-3 rounded-xl focus:border-[#F5A623] focus:ring-1 focus:ring-[#F5A623] outline-none transition-all font-dm-sans ${props.className ?? ''}`} />
     </div>
   )
 }
