@@ -13,6 +13,9 @@ import BeeTrailScroll from '@/components/BeeTrailScroll'
 import AmberParticleField from '@/components/AmberParticleField'
 import TiltCard from '@/components/TiltCard'
 import { useTimeGreeting } from '@/components/TimeGreeting'
+import KineticHeadline from '@/components/KineticHeadline'
+import EmpathyMode from '@/components/EmpathyMode'
+import TorchCursor from '@/components/TorchCursor'
 
 export default function LandingPage() {
   const router = useRouter()
@@ -38,10 +41,15 @@ export default function LandingPage() {
         .card-hover { transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); cursor: default; }
         .card-hover:hover { border-color: rgba(245,166,35,0.35) !important; transform: translateY(-4px); box-shadow: 0 0 30px rgba(245,166,35,0.08), 0 8px 32px rgba(0,0,0,0.4); }
         :focus-visible { outline: 2px solid rgba(245,166,35,0.8); outline-offset: 3px; border-radius: 4px; }
+        /* Empathy Mode styles */
+        body.low-power-mode .btn-primary, body.low-power-mode .btn-primary::before { animation: none !important; transition: none !important; }
+        body.low-power-mode canvas, body.low-power-mode [class*="particle"] { opacity: 0.3 !important; }
       `}</style>
 
       <LogoReveal />
       <BeeTrailScroll />
+      <EmpathyMode />
+      <TorchCursor />
 
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px', background: 'rgba(10,10,11,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #1C1C1E' }}>
         <Logo size={28} variant="full" />
@@ -61,10 +69,7 @@ export default function LandingPage() {
             </div>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
-            <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(40px, 7vw, 72px)', lineHeight: 1.05, letterSpacing: -1.5, maxWidth: 700, margin: '0 auto' }}>
-              {greeting}<br />
-              <span style={{ color: '#F5A623' }}>Việc nhỏ, thu nhập thật.</span>
-            </h1>
+            <KineticHeadline text={greeting} amberText="Việc nhỏ, thu nhập thật." />
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p style={{ marginTop: 20, fontSize: 17, color: '#8A857D', maxWidth: 480, lineHeight: 1.7, margin: '20px auto 0' }}>
