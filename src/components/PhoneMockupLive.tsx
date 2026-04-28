@@ -31,13 +31,20 @@ function CellularSignal() {
     updateSignal()
   }, [])
 
-  return (
+  const SignalBar = () => (
     <svg width="12" height="10" viewBox="0 0 12 10" fill="none" style={{ flexShrink: 0 }}>
       <rect x="0" y="7" width="2" height="3" rx="0.4" fill={bars >= 1 ? '#EDEBE7' : '#5C5A55'} />
       <rect x="3" y="4" width="2" height="6" rx="0.4" fill={bars >= 2 ? '#EDEBE7' : '#5C5A55'} />
       <rect x="6" y="1" width="2" height="9" rx="0.4" fill={bars >= 3 ? '#EDEBE7' : '#5C5A55'} />
       <rect x="9" y="0" width="2" height="10" rx="0.4" fill={bars >= 4 ? '#EDEBE7' : '#5C5A55'} />
     </svg>
+  )
+
+  return (
+    <div style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+      <SignalBar />
+      <SignalBar />
+    </div>
   )
 }
 
@@ -84,14 +91,14 @@ function PhoneStatusBar() {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '12px 16px 2px',
+      padding: '18px 16px 2px',
       fontSize: 11,
       fontWeight: 600,
       color: '#EDEBE7',
     }}>
       <span>{time}</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        {/* Wifi (trước tín hiệu, theo kiểu Samsung) */}
+        {/* Wifi */}
         <svg width="14" height="10" viewBox="0 0 14 10" fill="none" style={{ flexShrink: 0 }}>
           <path d="M7 8.2a0.7 0.7 0 1 1 0 1.2" fill="#EDEBE7"/>
           <path d="M4.8 6.2a3.2 3.2 0 0 1 4.4 0" stroke="#EDEBE7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
@@ -99,10 +106,10 @@ function PhoneStatusBar() {
           <path d="M0.5 1.5a9.5 9.5 0 0 1 13 0" stroke="#EDEBE7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
         </svg>
 
-        {/* Tín hiệu di động (sau wifi) */}
+        {/* Tín hiệu di động (2 cột) */}
         <CellularSignal />
 
-        {/* Pin (sau cùng) */}
+        {/* Pin */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
           {isCharging && <span style={{ fontSize: 9, color: '#EDEBE7' }}>⚡</span>}
           <span style={{ fontSize: 10, color: '#EDEBE7', minWidth: 26, textAlign: 'right' }}>
