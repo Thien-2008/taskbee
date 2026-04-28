@@ -98,15 +98,7 @@ function PhoneStatusBar() {
     }}>
       <span>{time}</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        {/* Wifi */}
-        <svg width="12" height="8" viewBox="0 0 14 10" fill="none" style={{ flexShrink: 0 }}>
-          <path d="M7 8.2a0.7 0.7 0 1 1 0 1.2" fill="#EDEBE7"/>
-          <path d="M4.8 6.2a3.2 3.2 0 0 1 4.4 0" stroke="#EDEBE7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
-          <path d="M2.5 3.8a6.5 6.5 0 0 1 9 0" stroke="#EDEBE7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
-          <path d="M0.5 1.5a9.5 9.5 0 0 1 13 0" stroke="#EDEBE7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
-        </svg>
-
-        {/* Tín hiệu di động */}
+        {/* Tín hiệu di động (2 cột) */}
         <CellularSignal />
 
         {/* Pin */}
