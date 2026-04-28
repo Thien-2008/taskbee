@@ -32,7 +32,7 @@ export default function LogoReveal() {
           <motion.svg
             width="140"
             height="140"
-            viewBox="0 0 48 48"
+            viewBox="-4 -4 56 56"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             initial={{ scale: 0.6, opacity: 0 }}
@@ -40,11 +40,13 @@ export default function LogoReveal() {
             transition={{ duration: 0.6, ease: 'easeOut' }}
             style={{ overflow: 'visible' }}
           >
-            {/* Lục giác ngoài */}
+            {/* Lục giác */}
             <motion.path
               d="M24 8L35.5 15V31L24 38L12.5 31V15L24 8Z"
               stroke="#F5A623"
               strokeWidth="1.8"
+              strokeLinejoin="round"
+              strokeLinecap="round"
               fill="none"
               initial={{ pathLength: 0, opacity: 0 }}
               animate={{ pathLength: 1, opacity: 1 }}
@@ -53,9 +55,9 @@ export default function LogoReveal() {
 
             {/* Cánh trái */}
             <motion.path
-              d="M22 20C19 18 15 19.5 15.5 23C16 26.5 20 26 22 24.5"
+              d="M16 21 C13 20, 11 22, 13 24 C11 26, 13 28, 16 27"
               stroke="#F5A623"
-              strokeWidth="1.6"
+              strokeWidth="1.5"
               strokeLinecap="round"
               fill="none"
               initial={{ opacity: 0 }}
@@ -69,9 +71,9 @@ export default function LogoReveal() {
 
             {/* Cánh phải */}
             <motion.path
-              d="M26 20C29 18 33 19.5 32.5 23C32 26.5 28 26 26 24.5"
+              d="M32 21 C35 20, 37 22, 35 24 C37 26, 35 28, 32 27"
               stroke="#F5A623"
-              strokeWidth="1.6"
+              strokeWidth="1.5"
               strokeLinecap="round"
               fill="none"
               initial={{ opacity: 0 }}
@@ -86,8 +88,8 @@ export default function LogoReveal() {
             {/* Chấm trung tâm */}
             <motion.circle
               cx="24"
-              cy="22.5"
-              r="1.8"
+              cy="24"
+              r="2"
               fill="#F5A623"
               initial={{ scale: 0 }}
               animate={{ scale: [0, 1.3, 1] }}
@@ -97,7 +99,7 @@ export default function LogoReveal() {
             {/* Tia sáng quét */}
             <motion.circle
               cx="24"
-              cy="22"
+              cy="24"
               r="22"
               fill="none"
               stroke="#F5A623"
