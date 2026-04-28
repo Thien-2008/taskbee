@@ -3,15 +3,21 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createBrowserClient } from '@supabase/ssr'
 import { Eye, EyeOff, ArrowLeft, Shield, Check, X, Mail, Lock, User, Loader2 } from 'lucide-react'
 import Logo from '@/components/Logo'
 
 function AuthForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const supabase = createClientComponentClient()
   const referralParam = searchParams.get('ref') || ''
+
+  const [supabase] = useState(() =>
+    createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+  )
 
   const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login')
   const [loading, setLoading] = useState(false)
@@ -100,7 +106,7 @@ function AuthForm() {
                 <div className="relative group">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#F5A623]"><Lock size={18} /></div>
                   <input type={showPass ? 'text' : 'password'} required value={password} onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} pl-10 pr-12`} />
-                  <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"><Eye size={18} /></button>
+                  <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">{showPass ? <EyeOff size={18} /> : <Eye size={18} />}</button>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <label className="flex items-center gap-2 text-gray-400 cursor-pointer">
