@@ -47,7 +47,7 @@ export default function ContactPage() {
               <Mail size={22} color="#F5A623" style={{ marginBottom: 12 }} />
               <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 17, marginBottom: 8 }}>Email hỗ trợ</div>
               <p style={{ color: '#8A857D', fontSize: 14, lineHeight: 1.6, marginBottom: 12 }}>Phản hồi trong 24-48 giờ làm việc. Phù hợp với các vấn đề cần mô tả chi tiết hoặc đính kèm tài liệu.</p>
-              <div style={{ color: '#F5A623', fontWeight: 500, fontSize: 14 }}>support@taskbee.vn</div>
+              <div style={{ color: '#F5A623', fontWeight: 500, fontSize: 14 }}>taskbee.support@gmail.com</div>
             </div>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>

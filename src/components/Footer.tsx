@@ -39,7 +39,7 @@ export default function Footer() {
             <Link href="/terms" style={{ color: '#8A857D', textDecoration: 'none' }}>Điều khoản sử dụng</Link>
             <Link href="/privacy" style={{ color: '#8A857D', textDecoration: 'none' }}>Chính sách bảo mật</Link>
             <Link href="/contact" style={{ color: '#8A857D', textDecoration: 'none' }}>Liên hệ hỗ trợ</Link>
-            <span style={{ color: '#8A857D' }}>support@taskbee.vn</span>
+            <span style={{ color: '#8A857D' }}>taskbee.support@gmail.com</span>
           </div>
         </div>
       </div>
