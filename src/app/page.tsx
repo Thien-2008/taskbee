@@ -11,6 +11,8 @@ import Logo from '@/components/Logo'
 import Footer from '@/components/Footer'
 import StickyCTA from '@/components/StickyCTA'
 import BeeTrailScroll from '@/components/BeeTrailScroll'
+import TiltCard from '@/components/TiltCard'
+import AmberParticleField from '@/components/AmberParticleField'
 import LogoReveal from '@/components/LogoReveal'
 
 export default function LandingPage() {
@@ -159,7 +161,7 @@ export default function LandingPage() {
             { Icon: Eye, title: 'Lịch sử công khai', desc: 'Mọi giao dịch đều hiển thị minh bạch trong tài khoản của bạn.' },
           ].map(({ Icon, title, desc }, i) => (
             <ScrollReveal key={i} delay={0.1 + i * 0.1}>
-              <div className="card-hover" style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 16, padding: '28px 24px' }}>
+              <TiltCard className="card-hover" style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 16, padding: '28px 24px' }}>
                 <div style={{ width: 44, height: 44, background: 'rgba(245,166,35,0.1)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
                   <Icon size={20} color="#F5A623" />
                 </div>
