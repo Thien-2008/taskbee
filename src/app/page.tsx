@@ -10,6 +10,7 @@ import FAQ from '@/components/FAQ'
 import Logo from '@/components/Logo'
 import Footer from '@/components/Footer'
 import StickyCTA from '@/components/StickyCTA'
+import BeeTrailScroll from '@/components/BeeTrailScroll'
 import LogoReveal from '@/components/LogoReveal'
 
 export default function LandingPage() {
@@ -222,6 +223,7 @@ export default function LandingPage() {
       </ScrollReveal>
 
       <StickyCTA />
+      <BeeTrailScroll />
       <Footer />
     </div>
   )
