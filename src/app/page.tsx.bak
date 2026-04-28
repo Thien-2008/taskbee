@@ -7,8 +7,6 @@ import Counter from '@/components/Counter'
 import HexagonBackground from '@/components/HexagonBackground'
 import PhoneMockup from '@/components/PhoneMockup'
 import FAQ from '@/components/FAQ'
-import Logo from '@/components/Logo'
-import Footer from '@/components/Footer'
 
 export default function LandingPage() {
   const router = useRouter()
@@ -23,31 +21,33 @@ export default function LandingPage() {
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap');
-        .btn-primary { background: #F5A623; color: #000; border: none; padding: 14px 32px; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+        :root { --amber: #F5A623; --bg: #0a0a0b; --card: #161618; --fg: #EDEBE7; --muted: #8A857D; --border: #1C1C1E; }
+        .btn-primary { background: var(--amber); color: #000; border: none; padding: 14px 32px; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
         .btn-primary:hover { background: #FFC04D; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(245,166,35,0.25); }
-        .btn-ghost { background: transparent; color: #EDEBE7; border: 1px solid #1C1C1E; padding: 14px 32px; border-radius: 8px; font-weight: 500; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
-        .btn-ghost:hover { border-color: #F5A623; color: #F5A623; }
+        .btn-ghost { background: transparent; color: var(--fg); border: 1px solid var(--border); padding: 14px 32px; border-radius: 8px; font-weight: 500; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+        .btn-ghost:hover { border-color: var(--amber); color: var(--amber); }
         .card-hover { transition: all 0.3s; cursor: pointer; }
         .card-hover:hover { border-color: rgba(245,166,35,0.3) !important; transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
       `}</style>
 
       {/* Navigation */}
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px', background: 'rgba(10,10,11,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #1C1C1E' }}>
-        <Logo size={28} variant="full" />
+        <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 20, color: '#F5A623' }}>
+          🐝 TaskBee
+        </span>
         <div style={{ display: 'flex', gap: 10 }}>
           <button onClick={() => router.push('/auth?mode=login')} className="btn-ghost" style={{ padding: '10px 20px', fontSize: 14 }}>Đăng nhập</button>
           <button onClick={() => router.push('/auth?mode=register')} className="btn-primary" style={{ padding: '10px 20px', fontSize: 14 }}>Tạo tài khoản miễn phí</button>
         </div>
       </nav>
 
-      {/* Hero + Hexagon Background */}
+      {/* Hero với nền Hexagon */}
       <section style={{ position: 'relative', zIndex: 10, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '100px 16px 40px' }}>
         <HexagonBackground />
         <div>
           <ScrollReveal>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(245,166,35,0.1)', border: '1px solid rgba(245,166,35,0.25)', color: '#F5A623', padding: '6px 16px', borderRadius: 100, fontSize: 13, marginBottom: 24 }}>
-              <Logo size={16} variant="icon" />
-              Nền tảng việc làm vi mô
+              🐝 Nền tảng việc làm vi mô
             </div>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
@@ -74,12 +74,12 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Phone Mockup */}
+      {/* Mockup điện thoại */}
       <ScrollReveal delay={0.1}>
         <PhoneMockup />
       </ScrollReveal>
 
-      {/* How it Works */}
+      {/* Cách hoạt động */}
       <section style={{ position: 'relative', zIndex: 10, maxWidth: 960, margin: '0 auto', padding: '40px 16px 60px' }}>
         <ScrollReveal>
           <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: 'uppercase', color: '#F5A623', marginBottom: 16 }}>Cách hoạt động</div>
@@ -91,7 +91,7 @@ export default function LandingPage() {
           {[
             { Icon: Smartphone, title: 'Đăng ký miễn phí', desc: '30 giây, không cần hồ sơ. Bất kỳ ai cũng có thể tham gia.' },
             { Icon: CheckCircle, title: 'Chọn việc phù hợp', desc: 'Duyệt qua các công việc đơn giản, chọn việc bạn muốn làm.' },
-            { Icon: Wallet, title: 'Nhận tiền nhanh chóng', desc: 'Rút về ngân hàng bất cứ lúc nào, tối thiểu 50.000đ.' },
+            { Icon: Wallet, title: 'Nhận tiền nhanh chóng', desc: 'Rút về MoMo hoặc ngân hàng bất cứ lúc nào, tối thiểu 50.000đ.' },
           ].map(({ Icon, title, desc }, i) => (
             <ScrollReveal key={i} delay={0.1 + i * 0.1}>
               <div className="card-hover" style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 16, padding: '28px 24px', position: 'relative', overflow: 'hidden' }}>
@@ -157,13 +157,11 @@ export default function LandingPage() {
         </ScrollReveal>
       </section>
 
-      {/* CTA */}
+      {/* CTA cuối */}
       <ScrollReveal delay={0.2}>
         <section style={{ position: 'relative', zIndex: 10, maxWidth: 700, margin: '50px auto', background: 'linear-gradient(135deg, #1a1508, #0f0e0c)', border: '1px solid rgba(245,166,35,0.2)', borderRadius: 24, padding: '60px 24px', textAlign: 'center' }}>
-          <Logo size={48} variant="icon" />
-          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(24px, 3vw, 36px)', marginBottom: 12, marginTop: 16 }}>
-            Sẵn sàng bắt đầu?
-          </h2>
+          <div style={{ fontSize: 40, marginBottom: 16 }}>🐝</div>
+          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(24px, 3vw, 36px)', marginBottom: 12 }}>Sẵn sàng bắt đầu?</h2>
           <p style={{ color: '#8A857D', marginBottom: 24, fontSize: 15 }}>Tham gia cùng những người đang kiếm thêm thu nhập mỗi ngày. Chỉ cần điện thoại và 2 phút đăng ký.</p>
           <button onClick={() => router.push('/auth?mode=register')} style={{ background: '#F5A623', color: '#000', border: 'none', padding: '16px 40px', borderRadius: 8, fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>
             Tạo tài khoản miễn phí →
@@ -172,7 +170,34 @@ export default function LandingPage() {
         </section>
       </ScrollReveal>
 
-      <Footer />
+      {/* Footer */}
+      <footer style={{ position: 'relative', zIndex: 10, borderTop: '1px solid #1C1C1E', padding: '40px 24px', background: '#0a0a0b' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32 }}>
+          <div>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 16, color: '#F5A623', marginBottom: 12 }}>🐝 TaskBee</div>
+            <div style={{ fontSize: 13, color: '#8A857D', lineHeight: 1.8 }}>Nền tảng việc làm vi mô trên điện thoại. Kết nối người cần việc với người cần làm.</div>
+          </div>
+          <div>
+            <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 12, color: '#EDEBE7' }}>Sản phẩm</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13, color: '#8A857D' }}>
+              <a href="#" style={{ color: '#8A857D', textDecoration: 'none' }}>Cách hoạt động</a>
+              <a href="#" style={{ color: '#8A857D', textDecoration: 'none' }}>Dành cho doanh nghiệp</a>
+            </div>
+          </div>
+          <div>
+            <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 12, color: '#EDEBE7' }}>Hỗ trợ & Pháp lý</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13, color: '#8A857D' }}>
+              <a href="#" style={{ color: '#8A857D', textDecoration: 'none' }}>Điều khoản sử dụng</a>
+              <a href="#" style={{ color: '#8A857D', textDecoration: 'none' }}>Chính sách bảo mật</a>
+              <a href="#" style={{ color: '#8A857D', textDecoration: 'none' }}>Liên hệ hỗ trợ</a>
+              <span>support@taskbee.vn</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ textAlign: 'center', marginTop: 32, fontSize: 12, color: '#8A857D', borderTop: '1px solid #1C1C1E', paddingTop: 16 }}>
+          © 2025 TaskBee. Tất cả các quyền được bảo lưu.
+        </div>
+      </footer>
     </div>
   )
 }
