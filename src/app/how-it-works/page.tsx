@@ -48,7 +48,7 @@ export default function HowItWorksPage() {
   const router = useRouter()
 
   return (
-    <div style={{ fontFamily: "'DM Sans', sans-serif", background: '#0a0a0b', color: '#EDEBE7', minHeight: '100vh' }}>
+    <div style={{ fontFamily: "'DM Sans', sans-serif", background: '#0a0a0b', color: '#EDEBE7', minHeight: '100vh', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}>
       <style>{`
         .btn-primary { background: #F5A623; color: #000; border: none; padding: 14px 28px; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.2s; }
         .btn-primary:hover { background: #FFC04D; transform: translateY(-1px); }
@@ -63,7 +63,7 @@ export default function HowItWorksPage() {
       </nav>
 
       {/* Hero */}
-      <section style={{ maxWidth: 720, margin: '0 auto', padding: '64px 20px 32px', textAlign: 'center' }}>
+      <section style={{ maxWidth: 720, margin: '0 auto', padding: '64px 20px 32px', textAlign: 'center', userSelect: 'none', WebkitUserSelect: 'none' }}>
         <ScrollReveal>
           <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(32px, 5vw, 48px)', lineHeight: 1.15, marginBottom: 16 }}>
             TaskBee hoạt động như thế nào?
@@ -89,6 +89,8 @@ export default function HowItWorksPage() {
               borderRadius: 16,
               padding: '24px 20px',
               alignItems: 'flex-start',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
             }}>
               <div style={{
                 width: 48,
