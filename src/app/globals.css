@@ -5,3 +5,19 @@
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Ngăn chọn văn bản trên toàn bộ trang (trừ input) */
+body, html {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Cho phép chọn văn bản trong ô nhập liệu */
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
