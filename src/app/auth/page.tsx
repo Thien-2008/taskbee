@@ -4,8 +4,7 @@ import { useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createBrowserClient } from '@supabase/ssr'
-import { Eye, EyeOff, Check, X, Mail, User, Lock, Loader2, LogIn, Shield, AlertCircle, ArrowLeft, Home } from 'lucide-react'
-import Logo from '@/components/Logo'
+import { Eye, EyeOff, Check, X, Mail, User, Lock, Loader2, LogIn, Shield, AlertCircle, ArrowLeft } from 'lucide-react'
 import PasswordStrengthBar from '@/components/PasswordStrengthBar'
 import AuthBackground from '@/components/AuthBackground'
 
@@ -87,16 +86,16 @@ function AuthForm() {
         style={{ position: 'fixed', top: 0, width: 2, height: '100%', background: 'linear-gradient(180deg, transparent, #F5A623, transparent)', zIndex: 50, pointerEvents: 'none' }}
       />
 
-      {/* Nút quay về trang chủ - cố định góc trên trái */}
+      {/* Nút quay về trang chủ - pill nhỏ tinh tế */}
       <motion.button
         onClick={() => router.push('/')}
-        className="fixed top-6 left-6 z-20 flex items-center gap-2 text-[#6B6B70] hover:text-[#F5A623] transition-colors duration-300 group"
-        initial={{ opacity: 0, x: -12 }}
-        animate={{ opacity: 1, x: 0 }}
+        className="fixed top-6 left-6 z-20 flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#161618]/80 backdrop-blur-sm border border-[#2A2A2E] text-[#8A857D] hover:text-[#F5A623] hover:border-[#F5A623]/30 transition-all duration-300 group shadow-sm"
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6, duration: 0.4, ease: 'easeOut' }}
       >
-        <ArrowLeft size={18} className="transition-transform duration-300 group-hover:-translate-x-1" />
-        <span className="text-sm font-medium hidden sm:inline">Trang chủ</span>
+        <ArrowLeft size={14} className="transition-transform duration-300 group-hover:-translate-x-0.5" />
+        <span className="text-xs font-medium">Trang chủ</span>
       </motion.button>
 
       <motion.div
@@ -107,9 +106,7 @@ function AuthForm() {
         viewport={{ once: true }}
         className="w-full max-w-[400px] relative z-10"
       >
-        <div className="text-center mb-10">
-          <Logo size={36} variant="icon" />
-        </div>
+        {/* Không có logo ở đây nữa - giao diện sạch hơn */}
 
         <AnimatePresence mode="wait">
           {/* LOGIN */}
