@@ -4,8 +4,8 @@ import { useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createBrowserClient } from '@supabase/ssr'
-import { Eye, EyeOff, Check, X, Mail, User, Lock, Loader2, LogIn, Shield, AlertCircle, ArrowLeft }
-import Logo from '@/components/Logo' from 'lucide-react'
+import { Eye, EyeOff, Check, X, Mail, User, Lock, Loader2, LogIn, Shield, AlertCircle, ArrowLeft } from 'lucide-react'
+import Logo from '@/components/Logo'
 import PasswordStrengthBar from '@/components/PasswordStrengthBar'
 import AuthBackground from '@/components/AuthBackground'
 
@@ -107,7 +107,10 @@ function AuthForm() {
         viewport={{ once: true }}
         className="w-full max-w-[400px] relative z-10"
       >
-        {/* Không có logo ở đây nữa - giao diện sạch hơn */}
+        {/* Logo nhỏ để giữ nhận diện thương hiệu */}
+        <div className="text-center mb-8">
+          <Logo size={24} variant="icon" />
+        </div>
 
         <AnimatePresence mode="wait">
           {/* LOGIN */}
@@ -115,17 +118,17 @@ function AuthForm() {
             <motion.div key="login" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
               <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-8">Đăng nhập vào tài khoản</h1>
               <form onSubmit={handleLogin} className="space-y-6">
-                <div className={fieldBorder}><input type="email" autoComplete="email" inputMode="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
+                <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} aria-describedby={error ? "auth-error" : undefined} /></div>
                 <div className={fieldBorder}>
                   <div className="flex items-center">
-                    <input ref={passwordRef} type={showPass ? 'text' : 'password'} required maxLength={128} value={password} autoComplete="new-password" onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} flex-1`} />
+                    <input ref={passwordRef} type={showPass ? 'text' : 'password'} required maxLength={128} value={password} onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} flex-1`} />
                     <button type="button" onClick={() => setShowPass(!showPass)} className="text-gray-500 hover:text-gray-300 transition-colors ml-2">{showPass ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                   </div>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <button type="button" onClick={() => { setMode('forgot'); resetForm() }} className="text-[#F5A623] hover:underline">Quên mật khẩu?</button>
                 </div>
-                {error {error && <div className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}{error && <div className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>} <div id="auth-error" role="alert" aria-live="assertive" className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
+                {error && <div id="auth-error" role="alert" aria-live="assertive" className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
                 {success && <div className="flex items-center gap-2 text-[#4ADE80] text-sm"><Check size={16} /> {success}</div>}
                 <motion.button whileTap={{ scale: 0.98 }} disabled={loading} type="submit" className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">
                   {loading ? <Loader2 className="animate-spin" size={20} /> : <><LogIn size={18} /> Đăng nhập</>}
@@ -140,12 +143,12 @@ function AuthForm() {
             <motion.div key="register" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
               <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-8">Tạo tài khoản mới</h1>
               <form onSubmit={handleRegister} className="space-y-6">
-                <div className={fieldBorder}><input type="email" autoComplete="email" inputMode="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
-                <div className={fieldBorder}><input type="text" required maxLength={24} value={username} autoComplete="username" onChange={e => setUsername(e.target.value)} placeholder="Tên đăng nhập" className={inputClass} /></div>
+                <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
+                <div className={fieldBorder}><input type="text" required maxLength={24} value={username} onChange={e => setUsername(e.target.value)} placeholder="Tên đăng nhập" className={inputClass} /></div>
                 <div>
                   <div className={fieldBorder}>
                     <div className="flex items-center">
-                      <input ref={passwordRef} type={showPass ? 'text' : 'password'} required maxLength={128} value={password} autoComplete="new-password" onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} flex-1`} />
+                      <input ref={passwordRef} type={showPass ? 'text' : 'password'} required maxLength={128} value={password} onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} flex-1`} />
                       <button type="button" onClick={() => setShowPass(!showPass)} className="text-gray-500 hover:text-gray-300 transition-colors ml-2">{showPass ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                     </div>
                   </div>
@@ -153,7 +156,7 @@ function AuthForm() {
                 </div>
                 <div className={fieldBorder}>
                   <div className="flex items-center">
-                    <input type={showConfirm ? 'text' : 'password'} required maxLength={128} value={confirmPass} autoComplete="new-password" onChange={e => setConfirmPass(e.target.value)} placeholder="Xác nhận mật khẩu" className={`${inputClass} flex-1`} />
+                    <input type={showConfirm ? 'text' : 'password'} required maxLength={128} value={confirmPass} onChange={e => setConfirmPass(e.target.value)} placeholder="Xác nhận mật khẩu" className={`${inputClass} flex-1`} />
                     <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="text-gray-500 hover:text-gray-300 transition-colors ml-2">{showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                     {passMatch && <Check size={16} className="text-[#4ADE80] ml-2" />}
                     {passMismatch && <X size={16} className="text-[#F87171] ml-2" />}
@@ -164,7 +167,7 @@ function AuthForm() {
                   <input type="checkbox" checked={agreeTerms} onChange={e => setAgreeTerms(e.target.checked)} className="accent-[#F5A623] mt-0.5 w-4 h-4" />
                   <span>Tôi đồng ý với <a href="/terms" target="_blank" className="text-[#F5A623] hover:underline">điều khoản</a> và <a href="/privacy" target="_blank" className="text-[#F5A623] hover:underline">chính sách bảo mật</a></span>
                 </label>
-                {error {error && <div className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}{error && <div className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>} <div id="auth-error" role="alert" aria-live="assertive" className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
+                {error && <div id="auth-error" role="alert" aria-live="assertive" className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
                 {success && <div className="flex items-center gap-2 text-[#4ADE80] text-sm"><Check size={16} /> {success}</div>}
                 <motion.button whileTap={{ scale: 0.98 }} disabled={loading} type="submit" className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">
                   {loading ? <Loader2 className="animate-spin" size={20} /> : 'Đăng ký'}
@@ -180,8 +183,8 @@ function AuthForm() {
               <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-4">Lấy lại mật khẩu</h1>
               <p className="text-gray-400 text-sm text-center mb-8">Nhập email đã đăng ký, chúng tôi sẽ gửi link đặt lại mật khẩu.</p>
               <form onSubmit={handleForgot} className="space-y-6">
-                <div className={fieldBorder}><input type="email" autoComplete="email" inputMode="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
-                {error {error && <div className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}{error && <div className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>} <div id="auth-error" role="alert" aria-live="assertive" className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
+                <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
+                {error && <div id="auth-error" role="alert" aria-live="assertive" className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
                 {success && <div className="flex items-center gap-2 text-[#4ADE80] text-sm"><Check size={16} /> {success}</div>}
                 <motion.button whileTap={{ scale: 0.98 }} disabled={loading} type="submit" className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">
                   {loading ? <Loader2 className="animate-spin" size={20} /> : 'Gửi link'}
