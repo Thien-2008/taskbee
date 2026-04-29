@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useRef, useEffect, Suspense } from 'react'
+import { useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createBrowserClient } from '@supabase/ssr'
-import { Eye, EyeOff, Check, X, Mail, User, Lock, Loader2, LogIn, Shield, AlertCircle, ArrowLeft } from 'lucide-react'
+import { Eye, EyeOff, Check, X, Mail, User, Lock, Loader2, LogIn, Shield, AlertCircle } from 'lucide-react'
 import Logo from '@/components/Logo'
 
-/* ───── Hàm tính độ mạnh mật khẩu ───── */
 function getPasswordStrength(password: string): { label: string; percent: number; color: string } {
   if (!password) return { label: '', percent: 0, color: '#2A2A2E' }
   let score = 0
@@ -19,20 +18,16 @@ function getPasswordStrength(password: string): { label: string; percent: number
   const lower = password.toLowerCase()
   const common = ['password', '123456', '12345678', 'qwerty', 'abc123', '111111', 'admin', 'taskbee']
   if (common.some(w => lower.includes(w))) score = Math.max(0, score - 5)
-
   const clamped = Math.min(10, Math.max(0, score))
   const percent = clamped * 10
-
-  // Màu theo yêu cầu: Yếu -> đỏ, Trung bình -> vàng, Khá -> cam, Mạnh -> xanh nhạt, Rất mạnh -> xanh đậm
-  let label = 'Yếu', color = '#F87171'                   // đỏ
-  if (clamped >= 3) { label = 'Trung bình'; color = '#F5A623' } // vàng
-  if (clamped >= 5) { label = 'Khá'; color = '#D97706' }        // cam
-  if (clamped >= 7) { label = 'Mạnh'; color = '#4ADE80' }       // xanh nhạt
-  if (clamped >= 9) { label = 'Rất mạnh'; color = '#22C55E' }   // xanh đậm
+  let label = 'Yếu', color = '#F87171'
+  if (clamped >= 3) { label = 'Trung bình'; color = '#F5A623' }
+  if (clamped >= 5) { label = 'Khá'; color = '#D97706' }
+  if (clamped >= 7) { label = 'Mạnh'; color = '#4ADE80' }
+  if (clamped >= 9) { label = 'Rất mạnh'; color = '#22C55E' }
   return { label, percent, color }
 }
 
-/* ───── Auth Form ───── */
 function AuthForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -52,7 +47,6 @@ function AuthForm() {
   const [agreeTerms, setAgreeTerms] = useState(false)
 
   const passwordRef = useRef<HTMLInputElement>(null)
-  const confirmRef = useRef<HTMLInputElement>(null)
 
   const strength = getPasswordStrength(password)
   const showConfirm = password.length >= 8
@@ -60,9 +54,7 @@ function AuthForm() {
   const passMismatch = confirmPass.length > 0 && password !== confirmPass
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
+    e.preventDefault(); setError(''); setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) { setError('Email hoặc mật khẩu không đúng'); setShake(true); setTimeout(() => setShake(false), 600) }
     else router.push('/dashboard')
@@ -70,8 +62,7 @@ function AuthForm() {
   }
 
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault(); setError('')
     if (!agreeTerms) { setError('Vui lòng đồng ý điều khoản'); return }
     if (password.length < 8) { setError('Mật khẩu tối thiểu 8 ký tự'); return }
     if (password !== confirmPass) { setError('Mật khẩu không khớp'); return }
@@ -83,9 +74,7 @@ function AuthForm() {
   }
 
   const handleForgot = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
+    e.preventDefault(); setError(''); setLoading(true)
     const { error } = await supabase.auth.resetPasswordForEmail(email)
     if (error) setError(error.message || 'Gửi yêu cầu thất bại')
     else setSuccess('Email reset mật khẩu đã được gửi.')
@@ -99,7 +88,7 @@ function AuthForm() {
 
   return (
     <div className="min-h-[100dvh] bg-[#0a0a0b] flex items-center justify-center p-6 font-dm-sans overflow-hidden">
-      {/* Background */}
+      {/* Background glow */}
       <div className="absolute inset-0 pointer-events-none opacity-30">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(245,166,35,0.06),transparent_70%)]" />
       </div>
@@ -109,22 +98,15 @@ function AuthForm() {
         initial={{ left: '-100%' }}
         animate={{ left: '100%' }}
         transition={{ duration: 0.8, ease: 'easeInOut', delay: 0.2 }}
-        style={{
-          position: 'fixed',
-          top: 0,
-          width: 2,
-          height: '100%',
-          background: 'linear-gradient(180deg, transparent, #F5A623, transparent)',
-          zIndex: 50,
-          pointerEvents: 'none',
-        }}
+        style={{ position: 'fixed', top: 0, width: 2, height: '100%', background: 'linear-gradient(180deg, transparent, #F5A623, transparent)', zIndex: 50, pointerEvents: 'none' }}
       />
 
       <motion.div
         animate={shake ? { x: [0, -6, 6, -4, 4, 0] } : {}}
         transition={{ duration: 0.4 }}
         initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
         className="w-full max-w-[400px] relative z-10"
       >
         {/* Logo */}
@@ -133,7 +115,7 @@ function AuthForm() {
         </div>
 
         <AnimatePresence mode="wait">
-          {/* ───── LOGIN ───── */}
+          {/* LOGIN */}
           {mode === 'login' && (
             <motion.div key="login" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
               <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-8">Đăng nhập vào tài khoản</h1>
@@ -150,17 +132,15 @@ function AuthForm() {
                 </div>
                 {error && <div className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
                 {success && <div className="flex items-center gap-2 text-[#4ADE80] text-sm"><Check size={16} /> {success}</div>}
-                <motion.button whileTap={{ scale: 0.98 }} disabled={loading} className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">
+                <motion.button whileTap={{ scale: 0.98 }} disabled={loading} type="submit" className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">
                   {loading ? <Loader2 className="animate-spin" size={20} /> : <><LogIn size={18} /> Đăng nhập</>}
                 </motion.button>
               </form>
-              <p className="text-center mt-8 text-gray-400 text-sm">
-                Chưa có tài khoản? <button onClick={() => { setMode('register'); resetForm() }} className="text-[#F5A623] font-bold hover:underline">Đăng ký</button>
-              </p>
+              <p className="text-center mt-8 text-gray-400 text-sm">Chưa có tài khoản? <button onClick={() => { setMode('register'); resetForm() }} className="text-[#F5A623] font-bold hover:underline">Đăng ký</button></p>
             </motion.div>
           )}
 
-          {/* ───── REGISTER ───── */}
+          {/* REGISTER */}
           {mode === 'register' && (
             <motion.div key="register" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
               <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-8">Tạo tài khoản mới</h1>
@@ -177,13 +157,7 @@ function AuthForm() {
                   {password.length > 0 && (
                     <div className="mt-1.5">
                       <div className="h-[1.5px] w-full bg-[#2A2A2E] rounded-full overflow-hidden">
-                        <motion.div
-                          className="h-full rounded-full"
-                          style={{ width: `${strength.percent}%`, backgroundColor: strength.color, boxShadow: strength.percent >= 90 ? `0 0 6px ${strength.color}` : 'none' }}
-                          initial={{ width: '0%' }}
-                          animate={{ width: `${strength.percent}%` }}
-                          transition={{ duration: 0.3, ease: 'easeOut' }}
-                        />
+                        <motion.div className="h-full rounded-full" style={{ width: `${strength.percent}%`, backgroundColor: strength.color, boxShadow: strength.percent >= 90 ? `0 0 6px ${strength.color}` : 'none' }} initial={{ width: '0%' }} animate={{ width: `${strength.percent}%` }} transition={{ duration: 0.3, ease: 'easeOut' }} />
                       </div>
                       <p className="text-[11px] text-right mt-0.5" style={{ color: strength.color }}>{strength.label}</p>
                     </div>
@@ -194,7 +168,7 @@ function AuthForm() {
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.3 }} className="overflow-hidden">
                       <div className={fieldBorder}>
                         <div className="flex items-center">
-                          <input ref={confirmRef} type="password" required maxLength={128} value={confirmPass} onChange={e => setConfirmPass(e.target.value)} placeholder="Xác nhận mật khẩu" className={`${inputClass} flex-1`} />
+                          <input type="password" required maxLength={128} value={confirmPass} onChange={e => setConfirmPass(e.target.value)} placeholder="Xác nhận mật khẩu" className={`${inputClass} flex-1`} />
                           {passMatch && <Check size={16} className="text-[#4ADE80] ml-2" />}
                           {passMismatch && <X size={16} className="text-[#F87171] ml-2" />}
                         </div>
@@ -209,17 +183,15 @@ function AuthForm() {
                 </label>
                 {error && <div className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
                 {success && <div className="flex items-center gap-2 text-[#4ADE80] text-sm"><Check size={16} /> {success}</div>}
-                <motion.button whileTap={{ scale: 0.98 }} disabled={loading} className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">
+                <motion.button whileTap={{ scale: 0.98 }} disabled={loading} type="submit" className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">
                   {loading ? <Loader2 className="animate-spin" size={20} /> : 'Đăng ký'}
                 </motion.button>
               </form>
-              <p className="text-center mt-8 text-gray-400 text-sm">
-                Đã có tài khoản? <button onClick={() => { setMode('login'); resetForm() }} className="text-[#F5A623] font-bold hover:underline">Đăng nhập</button>
-              </p>
+              <p className="text-center mt-8 text-gray-400 text-sm">Đã có tài khoản? <button onClick={() => { setMode('login'); resetForm() }} className="text-[#F5A623] font-bold hover:underline">Đăng nhập</button></p>
             </motion.div>
           )}
 
-          {/* ───── FORGOT PASSWORD ───── */}
+          {/* FORGOT */}
           {mode === 'forgot' && (
             <motion.div key="forgot" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
               <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-4">Lấy lại mật khẩu</h1>
@@ -228,7 +200,7 @@ function AuthForm() {
                 <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
                 {error && <div className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
                 {success && <div className="flex items-center gap-2 text-[#4ADE80] text-sm"><Check size={16} /> {success}</div>}
-                <motion.button whileTap={{ scale: 0.98 }} disabled={loading} className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">
+                <motion.button whileTap={{ scale: 0.98 }} disabled={loading} type="submit" className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">
                   {loading ? <Loader2 className="animate-spin" size={20} /> : 'Gửi link'}
                 </motion.button>
                 <button type="button" onClick={() => { setMode('login'); resetForm() }} className="w-full text-center text-sm text-gray-400 hover:text-white transition-colors">← Trở về đăng nhập</button>
@@ -237,7 +209,6 @@ function AuthForm() {
           )}
         </AnimatePresence>
 
-        {/* Trust line */}
         <p className="text-center text-[11px] text-[#4A4A50] mt-10 flex items-center justify-center gap-1.5">
           <Shield size={12} /> Kết nối an toàn · Mã hóa dữ liệu
         </p>
@@ -248,7 +219,7 @@ function AuthForm() {
 
 export default function AuthPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0a0a0b] flex items-center justify-center text-white">Đang tải...</div>}>
+    <Suspense fallback={<div className="min-h-[100dvh] bg-[#0a0a0b] flex items-center justify-center text-white">Đang tải...</div>}>
       <AuthForm />
     </Suspense>
   )
