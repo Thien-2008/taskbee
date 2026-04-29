@@ -28,12 +28,13 @@ function AuthForm() {
   const searchParams = useSearchParams()
   const modeParam = searchParams.get('mode') || 'login'
   const reasonParam = searchParams.get('reason')
+  const confirmedParam = searchParams.get('confirmed')
   const [supabase] = useState(() => createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!))
 
   const [mode, setMode] = useState<'login' | 'register' | 'forgot'>(modeParam as 'login' | 'register' | 'forgot')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  const [success, setSuccess] = useState(confirmedParam === 'true' ? 'Xác nhận email thành công! Bạn có thể đăng nhập.' : '')
   const [showPass, setShowPass] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [shake, setShake] = useState(false)
@@ -48,10 +49,17 @@ function AuthForm() {
 
   const passwordRef = useRef<HTMLInputElement>(null)
 
+  // Chỉ tự động điền email khi ở mode LOGIN, không điền khi ở register
   useEffect(() => {
-    const saved = localStorage.getItem('taskbee_email')
-    if (saved) { setEmail(saved); setRememberEmail(true) }
-  }, [])
+    if (mode === 'login') {
+      const saved = localStorage.getItem('taskbee_email')
+      if (saved) {
+        setEmail(saved)
+        setRememberEmail(true)
+      }
+    }
+    // Khi sang register, không xóa email đã lưu, nhưng không điền vào ô
+  }, [mode])
 
   useEffect(() => {
     if (resetCooldown > 0) {
@@ -64,7 +72,7 @@ function AuthForm() {
   const passMismatch = confirmPass.length > 0 && password !== confirmPass
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); setError(''); setLoading(true)
+    e.preventDefault(); setError(''); setSuccess(''); setLoading(true)
     const cleanEmail = email.trim().toLowerCase()
     setEmail(cleanEmail)
     const { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password })
@@ -119,7 +127,7 @@ function AuthForm() {
     setLoading(false)
   }
 
-  const resetForm = () => { setError(''); setSuccess(''); setEmail(''); setPassword(''); setUsername(''); setConfirmPass(''); setAgreeTerms(false) }
+  const resetForm = () => { setError(''); setSuccess(''); setPassword(''); setUsername(''); setConfirmPass(''); setAgreeTerms(false) }
 
   const inputClass = "w-full px-0 py-3.5 bg-transparent border-0 text-[#EDEBE7] placeholder-gray-500 focus:outline-none font-dm-sans text-base caret-[#F5A623]"
   const fieldBorder = "border-b border-[#2A2A2E] focus-within:border-[#F5A623] transition-colors duration-300"
@@ -159,6 +167,11 @@ function AuthForm() {
             Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.
           </div>
         )}
+        {success && (
+          <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-green-500 text-sm flex items-center gap-2">
+            <Check size={16} /> {success}
+          </div>
+        )}
         <AnimatePresence mode="wait">
           {mode === 'login' && (
             <motion.div key="login" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
@@ -171,7 +184,6 @@ function AuthForm() {
                   <button type="button" onClick={() => { setMode('forgot'); resetForm() }} className="text-[#F5A623] hover:underline">Quên mật khẩu?</button>
                 </div>
                 {error && <div id="auth-error" role="alert" aria-live="assertive" className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
-                {success && <div className="flex items-center gap-2 text-[#4ADE80] text-sm"><Check size={16} /> {success}</div>}
                 <motion.button whileTap={{ scale: 0.98 }} disabled={loading} type="submit" className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">{loading ? <Loader2 className="animate-spin" size={20} /> : <><LogIn size={18} /> Đăng nhập</>}</motion.button>
               </form>
               <p className="text-center mt-8 text-gray-400 text-sm">Chưa có tài khoản? <button onClick={() => { setMode('register'); resetForm() }} className="text-[#F5A623] font-bold hover:underline">Đăng ký</button></p>
@@ -189,7 +201,6 @@ function AuthForm() {
                 {passMismatch && <p className="text-[#F87171] text-[11px] mt-1">Mật khẩu không khớp</p>}
                 <label className="flex items-start gap-2 text-sm text-gray-400 cursor-pointer"><input type="checkbox" checked={agreeTerms} onChange={e => setAgreeTerms(e.target.checked)} className="accent-[#F5A623] mt-0.5 w-4 h-4" /><span>Tôi đồng ý với <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#F5A623] hover:underline">điều khoản</a> và <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[#F5A623] hover:underline">chính sách bảo mật</a></span></label>
                 {error && <div id="auth-error" role="alert" aria-live="assertive" className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
-                {success && <div className="flex items-center gap-2 text-[#4ADE80] text-sm"><Check size={16} /> {success}</div>}
                 <motion.button whileTap={{ scale: 0.98 }} disabled={loading} type="submit" className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">{loading ? <Loader2 className="animate-spin" size={20} /> : 'Tạo tài khoản'}</motion.button>
               </form>
               <p className="text-center mt-8 text-gray-400 text-sm">Đã có tài khoản? <button onClick={() => { setMode('login'); resetForm() }} className="text-[#F5A623] font-bold hover:underline">Đăng nhập</button></p>
@@ -202,7 +213,6 @@ function AuthForm() {
               <form onSubmit={handleForgot} className="space-y-6">
                 <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
                 {error && <div id="auth-error" role="alert" aria-live="assertive" className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
-                {success && <div className="flex items-center gap-2 text-[#4ADE80] text-sm"><Check size={16} /> {success}</div>}
                 <motion.button whileTap={{ scale: 0.98 }} disabled={loading || resetCooldown > 0} type="submit" className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">
                   {loading ? <Loader2 className="animate-spin" size={20} /> : resetCooldown > 0 ? `Gửi lại sau ${resetCooldown}s` : 'Gửi link'}
                 </motion.button>
