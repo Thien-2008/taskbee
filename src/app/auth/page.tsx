@@ -4,7 +4,7 @@ import { useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createBrowserClient } from '@supabase/ssr'
-import { Eye, EyeOff, Check, X, Mail, User, Lock, Loader2, LogIn, Shield, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, Check, X, Mail, User, Lock, Loader2, LogIn, Shield, AlertCircle, ArrowLeft, Home } from 'lucide-react'
 import Logo from '@/components/Logo'
 import PasswordStrengthBar from '@/components/PasswordStrengthBar'
 import AuthBackground from '@/components/AuthBackground'
@@ -78,16 +78,26 @@ function AuthForm() {
 
   return (
     <div className="min-h-[100dvh] bg-[#0a0a0b] flex items-center justify-center p-6 font-dm-sans overflow-hidden">
-      {/* Background với hiệu ứng mới */}
       <AuthBackground />
 
-      {/* Amber Sweep signature moment */}
       <motion.div
         initial={{ left: '-100%' }}
         animate={{ left: '100%' }}
         transition={{ duration: 0.8, ease: 'easeInOut', delay: 0.2 }}
         style={{ position: 'fixed', top: 0, width: 2, height: '100%', background: 'linear-gradient(180deg, transparent, #F5A623, transparent)', zIndex: 50, pointerEvents: 'none' }}
       />
+
+      {/* Nút quay về trang chủ - cố định góc trên trái */}
+      <motion.button
+        onClick={() => router.push('/')}
+        className="fixed top-6 left-6 z-20 flex items-center gap-2 text-[#6B6B70] hover:text-[#F5A623] transition-colors duration-300 group"
+        initial={{ opacity: 0, x: -12 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.6, duration: 0.4, ease: 'easeOut' }}
+      >
+        <ArrowLeft size={18} className="transition-transform duration-300 group-hover:-translate-x-1" />
+        <span className="text-sm font-medium hidden sm:inline">Trang chủ</span>
+      </motion.button>
 
       <motion.div
         animate={shake ? { x: [0, -6, 6, -4, 4, 0] } : {}}
@@ -97,7 +107,9 @@ function AuthForm() {
         viewport={{ once: true }}
         className="w-full max-w-[400px] relative z-10"
       >
-        {/* Logo */}
+        <div className="text-center mb-10">
+          <Logo size={36} variant="icon" />
+        </div>
 
         <AnimatePresence mode="wait">
           {/* LOGIN */}
@@ -139,7 +151,6 @@ function AuthForm() {
                       <button type="button" onClick={() => setShowPass(!showPass)} className="text-gray-500 hover:text-gray-300 transition-colors ml-2">{showPass ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                     </div>
                   </div>
-                  {/* Thanh độ mạnh mật khẩu mới */}
                   <PasswordStrengthBar password={password} />
                 </div>
                 <div className={fieldBorder}>
