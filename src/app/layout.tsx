@@ -3,8 +3,15 @@ import './globals.css'
 import NoCopyScript from '@/components/NoCopyScript'
 
 export const metadata: Metadata = {
-  title: 'TaskBee - Nền tảng việc làm vi mô',
-  description: 'Kiếm tiền thật, minh bạch, không cần hồ sơ.',
+  title: 'TaskBee — Việc nhỏ, thu nhập thật',
+  description: 'Nền tảng việc làm vi mô. Làm trên điện thoại, nhận tiền minh bạch.',
+  openGraph: {
+    title: 'TaskBee — Việc nhỏ, thu nhập thật',
+    description: 'Không cần kinh nghiệm, không cần hồ sơ.',
+    siteName: 'TaskBee',
+    locale: 'vi_VN',
+    type: 'website',
+  },
 }
 
 export default function RootLayout({
@@ -20,17 +27,4 @@ export default function RootLayout({
       </body>
     </html>
   )
-}
-
-// Bổ sung metadata
-export const metadata = {
-  title: 'TaskBee — Việc nhỏ, thu nhập thật',
-  description: 'Nền tảng việc làm vi mô. Làm trên điện thoại, nhận tiền minh bạch.',
-  openGraph: {
-    title: 'TaskBee — Việc nhỏ, thu nhập thật',
-    description: 'Không cần kinh nghiệm, không cần hồ sơ.',
-    siteName: 'TaskBee',
-    locale: 'vi_VN',
-    type: 'website',
-  },
 }
