@@ -107,16 +107,16 @@ function AuthForm() {
         viewport={{ once: true }}
         className="w-full max-w-[400px] relative z-10"
       >
-        {/* Logo nhỏ để giữ nhận diện thương hiệu */}
-        <div className="text-center mb-8">
-          <Logo size={24} variant="icon" />
+        {/* Logo thương hiệu */}
+        <div className="flex justify-end mb-8">
+          <Logo size={32} variant="icon" />
         </div>
 
         <AnimatePresence mode="wait">
           {/* LOGIN */}
           {mode === 'login' && (
             <motion.div key="login" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
-              <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-8">Đăng nhập vào tài khoản</h1>
+              <h1 className="text-2xl font-space-grotesk font-bold text-white flex justify-end mb-8">Đăng nhập vào tài khoản</h1>
               <form onSubmit={handleLogin} className="space-y-6">
                 <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} aria-describedby={error ? "auth-error" : undefined} /></div>
                 <div className={fieldBorder}>
@@ -141,7 +141,7 @@ function AuthForm() {
           {/* REGISTER */}
           {mode === 'register' && (
             <motion.div key="register" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
-              <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-8">Tạo tài khoản mới</h1>
+              <h1 className="text-2xl font-space-grotesk font-bold text-white flex justify-end mb-8">Tạo tài khoản mới</h1>
               <form onSubmit={handleRegister} className="space-y-6">
                 <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
                 <div className={fieldBorder}><input type="text" required maxLength={24} value={username} onChange={e => setUsername(e.target.value)} placeholder="Tên đăng nhập" className={inputClass} /></div>
@@ -181,7 +181,7 @@ function AuthForm() {
           {mode === 'forgot' && (
             <motion.div key="forgot" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
               <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-4">Lấy lại mật khẩu</h1>
-              <p className="text-gray-400 text-sm text-center mb-8">Nhập email đã đăng ký, chúng tôi sẽ gửi link đặt lại mật khẩu.</p>
+              <p className="text-gray-400 text-sm flex justify-end mb-8">Nhập email đã đăng ký, chúng tôi sẽ gửi link đặt lại mật khẩu.</p>
               <form onSubmit={handleForgot} className="space-y-6">
                 <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
                 {error && <div id="auth-error" role="alert" aria-live="assertive" className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
