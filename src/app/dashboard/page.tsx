@@ -2,130 +2,151 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabaseClient'
-import { formatPhoneDisplay } from '@/utils/phone'
-
-type Tab = 'dashboard' | 'tasks' | 'withdraw' | 'profile'
-type View = 'main' | 'taskHistory' | 'txHistory' | 'settings' | 'help'
+import { createBrowserClient } from '@supabase/ssr'
+import { motion } from 'framer-motion'
+import { User, LogOut, Shield, Mail, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import Logo from '@/components/Logo'
 
 export default function DashboardPage() {
   const router = useRouter()
+  const [supabase] = useState(() => createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!))
   const [user, setUser] = useState<any>(null)
-  const [pageLoading, setPageLoading] = useState(true)
-  const [displayName, setDisplayName] = useState('')
-  const [balance, setBalance] = useState(0)
-  const [tasksDone, setTasksDone] = useState(0)
-  const [userRole, setUserRole] = useState('user')
-  const [activeTab, setActiveTab] = useState<Tab>('dashboard')
-  const [currentView, setCurrentView] = useState<View>('main')
+  const [profile, setProfile] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function load() {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { router.replace('/'); return }
-      setUser(session.user)
-
-      const { data: ud } = await supabase.from('users').select('balance, role, phone, full_name, email').eq('id', session.user.id).single()
-      if (ud) {
-        setBalance(ud.balance || 0)
-        setUserRole(ud.role || 'user')
-        if (ud.full_name) setDisplayName(ud.full_name)
-        else if (ud.phone) setDisplayName(formatPhoneDisplay(ud.phone))
-        else if (ud.email) setDisplayName(ud.email)
-        else setDisplayName('Người dùng')
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.replace('/auth?mode=login')
+        return
       }
-      const { count } = await supabase.from('assignments').select('id', { count: 'exact' }).eq('user_id', session.user.id).eq('reward_paid', true)
-      if (count) setTasksDone(count)
-      setPageLoading(false)
+      setUser(user)
+      
+      // Lấy thông tin profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+      
+      setProfile(profileData)
+      setLoading(false)
     }
-    load()
-  }, [])
+    getUser()
+  }, [supabase, router])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    router.push('/')
+    localStorage.removeItem('taskbee_email')
+    router.replace('/auth?mode=login')
   }
 
-  if (pageLoading) return <div style={{ color: '#fff', textAlign: 'center', padding: 60 }}>⏳ Đang tải...</div>
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0b] flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#F5A623]" size={48} />
+      </div>
+    )
+  }
 
   return (
-    <div style={{ fontFamily: "'DM Sans', sans-serif", background: '#0a0a0b', color: '#EDEBE7', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap');`}</style>
-      <header style={{ background: '#111113', borderBottom: '1px solid #1C1C1E', padding: '12px 20px', display: 'flex', justifyContent: 'space-between' }}>
-        <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 18, color: '#F5A623' }}>🐝 TaskBee</h1>
-        <button onClick={handleLogout} style={{ background: 'transparent', border: '1px solid #1C1C1E', color: '#EDEBE7', padding: '6px 14px', borderRadius: 6, fontSize: 13, cursor: 'pointer' }}>Đăng xuất</button>
-      </header>
-      <div style={{ flex: 1, overflow: 'auto', paddingBottom: 80 }}>
-        {currentView === 'taskHistory' && <div style={{ padding: 20, textAlign: 'center', color: '#9A9AA6' }}>📋 Lịch sử làm task</div>}
-        {currentView === 'txHistory' && <div style={{ padding: 20, textAlign: 'center', color: '#9A9AA6' }}>💳 Lịch sử giao dịch</div>}
-        {currentView === 'settings' && <div style={{ padding: 20, textAlign: 'center', color: '#9A9AA6' }}>🔔 Cài đặt thông báo</div>}
-        {currentView === 'help' && <div style={{ padding: 20, textAlign: 'center', color: '#9A9AA6' }}>❓ Hướng dẫn sử dụng</div>}
-        {currentView === 'main' && (
-          <>
-            {activeTab === 'dashboard' && (
-              <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
-                <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 16 }}>Xin chào, {displayName} 👋</h2>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
-                  <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 16 }}>
-                    <div style={{ fontSize: 12, color: '#9A9AA6' }}>💰 Số dư</div>
-                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 24, color: '#F5A623' }}>{balance.toLocaleString()}đ</div>
-                  </div>
-                  <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 16 }}>
-                    <div style={{ fontSize: 12, color: '#9A9AA6' }}>🐝 Task đã làm</div>
-                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 24 }}>{tasksDone}</div>
-                  </div>
-                </div>
-                <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 28, textAlign: 'center' }}>
-                  <div style={{ fontSize: 40, marginBottom: 12 }}>📋</div>
-                  <div style={{ color: '#9A9AA6' }}>Danh sách task sẽ hiển thị ở đây.</div>
-                </div>
-              </div>
-            )}
-            {activeTab === 'tasks' && <div style={{ padding: 20, textAlign: 'center', color: '#9A9AA6' }}>📋 Danh sách task sẽ hiển thị ở đây</div>}
-            {activeTab === 'withdraw' && <div style={{ padding: 20, textAlign: 'center', color: '#9A9AA6' }}>💰 Rút tiền sẽ hiển thị ở đây</div>}
-            {activeTab === 'profile' && (
-              <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
-                <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 20 }}>👤 Hồ sơ</h2>
-                <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 20, marginBottom: 20, textAlign: 'center' }}>
-                  <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(245,166,35,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, margin: '0 auto 12px' }}>🐝</div>
-                  <div style={{ fontWeight: 600, fontSize: 16 }}>{displayName}</div>
-                  <div style={{ fontSize: 13, color: '#9A9AA6', marginTop: 4 }}>Thành viên từ: Tháng 4/2025{userRole === 'admin' ? ' · 👑 Admin' : ''}</div>
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 16 }}>
-                    <div style={{ textAlign: 'center' }}><div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 18, color: '#F5A623' }}>{balance.toLocaleString()}đ</div><div style={{ fontSize: 11, color: '#9A9AA6' }}>Số dư</div></div>
-                    <div style={{ textAlign: 'center' }}><div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 18 }}>{tasksDone}</div><div style={{ fontSize: 11, color: '#9A9AA6' }}>Task đã làm</div></div>
-                  </div>
-                </div>
-                <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, overflow: 'hidden' }}>
-                  {[
-                    { icon: '📋', label: 'Lịch sử làm task', view: 'taskHistory' as View },
-                    { icon: '💳', label: 'Lịch sử giao dịch', view: 'txHistory' as View },
-                    { icon: '🔔', label: 'Cài đặt thông báo', view: 'settings' as View },
-                    { icon: '❓', label: 'Hướng dẫn sử dụng', view: 'help' as View },
-                  ].map((item, i, arr) => (
-                    <div key={i} onClick={() => setCurrentView(item.view)} style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 20px', borderBottom: i < arr.length - 1 ? '1px solid #1C1C1E' : 'none', cursor: 'pointer' }}>
-                      <span>{item.icon} {item.label}</span><span style={{ color: '#9A9AA6' }}>→</span>
-                    </div>
-                  ))}
-                </div>
-                <button onClick={handleLogout} style={{ width: '100%', marginTop: 20, padding: '12px 0', background: 'transparent', border: '1px solid #F97373', color: '#F97373', borderRadius: 8, fontWeight: 600, fontSize: 14 }}>🚪 Đăng xuất</button>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-      <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#111113', borderTop: '1px solid #1C1C1E', display: 'flex', justifyContent: 'space-around', padding: '8px 0', zIndex: 50 }}>
-        {[
-          { key: 'dashboard' as Tab, icon: '🏠', label: 'Tổng quan' },
-          { key: 'tasks' as Tab, icon: '📋', label: 'Làm task' },
-          { key: 'withdraw' as Tab, icon: '💰', label: 'Rút tiền' },
-          { key: 'profile' as Tab, icon: '👤', label: 'Hồ sơ' },
-        ].map(tab => (
-          <button key={tab.key} onClick={() => { setActiveTab(tab.key); setCurrentView('main') }}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: activeTab === tab.key ? '#F5A623' : '#9A9AA6', fontSize: 11, fontWeight: activeTab === tab.key ? 600 : 400 }}>
-            <span style={{ fontSize: 20 }}>{tab.icon}</span><span>{tab.label}</span>
-          </button>
-        ))}
+    <div className="min-h-screen bg-[#0a0a0b] font-dm-sans">
+      {/* Navbar đơn giản */}
+      <nav className="sticky top-0 z-50 bg-[#0a0a0b]/90 backdrop-blur-xl border-b border-[#1C1C1E] px-6 py-4 flex items-center justify-between">
+        <Logo size={28} variant="full" />
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#161618] border border-[#2A2A2E] text-[#9A9AA6] hover:text-[#F87171] hover:border-[#F87171]/30 transition-all duration-300 text-sm"
+        >
+          <LogOut size={16} />
+          <span>Đăng xuất</span>
+        </button>
       </nav>
+
+      {/* Nội dung chính */}
+      <main className="max-w-2xl mx-auto px-6 py-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          {/* Chào mừng */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-space-grotesk font-bold text-white mb-2">
+              Xin chào{profile?.username ? `, ${profile.username}` : ''}!
+            </h1>
+            <p className="text-[#9A9AA6]">
+              Chào mừng bạn đến với TaskBee. Dashboard đang được xây dựng.
+            </p>
+          </div>
+
+          {/* Card thông tin tài khoản */}
+          <div className="grid gap-4">
+            <div className="bg-[#161618] border border-[#1C1C1E] rounded-2xl p-6">
+              <h2 className="font-space-grotesk font-semibold text-white mb-4 flex items-center gap-2">
+                <Shield size={18} className="text-[#F5A623]" />
+                Thông tin tài khoản
+              </h2>
+              
+              <div className="space-y-4">
+                {/* Email */}
+                <div className="flex items-center gap-3">
+                  <Mail size={16} className="text-[#9A9AA6]" />
+                  <div>
+                    <p className="text-xs text-[#9A9AA6]">Email</p>
+                    <p className="text-white">{user?.email || '—'}</p>
+                  </div>
+                </div>
+
+                {/* Username */}
+                <div className="flex items-center gap-3">
+                  <User size={16} className="text-[#9A9AA6]" />
+                  <div>
+                    <p className="text-xs text-[#9A9AA6]">Tên đăng nhập</p>
+                    <p className="text-white">{profile?.username || 'Chưa đặt'}</p>
+                  </div>
+                </div>
+
+                {/* Trạng thái xác minh email */}
+                <div className="flex items-center gap-3">
+                  {user?.email_confirmed_at ? (
+                    <CheckCircle size={16} className="text-[#4ADE80]" />
+                  ) : (
+                    <XCircle size={16} className="text-[#F87171]" />
+                  )}
+                  <div>
+                    <p className="text-xs text-[#9A9AA6]">Trạng thái email</p>
+                    <p className={user?.email_confirmed_at ? 'text-[#4ADE80]' : 'text-[#F87171]'}>
+                      {user?.email_confirmed_at ? 'Đã xác minh' : 'Chưa xác minh'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Ngày tham gia */}
+                <div className="flex items-center gap-3">
+                  <Shield size={16} className="text-[#9A9AA6]" />
+                  <div>
+                    <p className="text-xs text-[#9A9AA6]">Tham gia từ</p>
+                    <p className="text-white">
+                      {profile?.created_at
+                        ? new Date(profile.created_at).toLocaleDateString('vi-VN')
+                        : '—'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Placeholder cho các tính năng sau */}
+            <div className="bg-[#161618] border border-[#1C1C1E] rounded-2xl p-8 text-center">
+              <div className="text-4xl mb-4 opacity-30">🚧</div>
+              <p className="text-[#9A9AA6]">Các tính năng đang được phát triển</p>
+              <p className="text-sm text-[#4A4A50] mt-1">Số dư · Nhiệm vụ · Rút tiền</p>
+            </div>
+          </div>
+        </motion.div>
+      </main>
     </div>
   )
 }
