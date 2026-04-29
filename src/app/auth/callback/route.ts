@@ -27,5 +27,6 @@ export async function GET(request: Request) {
     await supabase.auth.exchangeCodeForSession(code)
   }
 
-  return NextResponse.redirect(new URL('/auth?mode=login&confirmed=true', request.url))
+  // Chuyển thẳng vào Dashboard sau khi xác nhận email thành công
+  return NextResponse.redirect(new URL('/dashboard', request.url))
 }
