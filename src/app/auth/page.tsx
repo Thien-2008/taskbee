@@ -98,9 +98,6 @@ function AuthForm() {
         className="w-full max-w-[400px] relative z-10"
       >
         {/* Logo */}
-        <div className="text-center mb-10">
-          <Logo size={36} variant="icon" />
-        </div>
 
         <AnimatePresence mode="wait">
           {/* LOGIN */}
