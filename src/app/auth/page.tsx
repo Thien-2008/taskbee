@@ -10,7 +10,7 @@ import Logo from '@/components/Logo'
 function getPasswordStrength(password: string): { label: string; percent: number; color: string } {
   if (!password) return { label: '', percent: 0, color: '#2A2A2E' }
   let score = 0
-  if (password.length >= 8) score += 2
+  if (password.length >= 8) score += 3
   if (password.length >= 12) score += 2
   if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 1
   if (/\d/.test(password)) score += 1
@@ -18,6 +18,7 @@ function getPasswordStrength(password: string): { label: string; percent: number
   const lower = password.toLowerCase()
   const common = ['password', '123456', '12345678', 'qwerty', 'abc123', '111111', 'admin', 'taskbee']
   if (common.some(w => lower.includes(w))) score = Math.max(0, score - 5)
+
   const clamped = Math.min(10, Math.max(0, score))
   const percent = clamped * 10
   let label = 'Yếu', color = '#F87171'
@@ -49,7 +50,6 @@ function AuthForm() {
   const passwordRef = useRef<HTMLInputElement>(null)
 
   const strength = getPasswordStrength(password)
-  const showConfirm = password.length >= 8
   const passMatch = confirmPass.length > 0 && password === confirmPass
   const passMismatch = confirmPass.length > 0 && password !== confirmPass
 
@@ -88,12 +88,10 @@ function AuthForm() {
 
   return (
     <div className="min-h-[100dvh] bg-[#0a0a0b] flex items-center justify-center p-6 font-dm-sans overflow-hidden">
-      {/* Background glow */}
       <div className="absolute inset-0 pointer-events-none opacity-30">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(245,166,35,0.06),transparent_70%)]" />
       </div>
 
-      {/* Amber Sweep */}
       <motion.div
         initial={{ left: '-100%' }}
         animate={{ left: '100%' }}
@@ -109,7 +107,6 @@ function AuthForm() {
         viewport={{ once: true }}
         className="w-full max-w-[400px] relative z-10"
       >
-        {/* Logo */}
         <div className="text-center mb-10">
           <Logo size={36} variant="icon" />
         </div>
@@ -163,20 +160,14 @@ function AuthForm() {
                     </div>
                   )}
                 </div>
-                <AnimatePresence>
-                  {showConfirm && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.3 }} className="overflow-hidden">
-                      <div className={fieldBorder}>
-                        <div className="flex items-center">
-                          <input type="password" required maxLength={128} value={confirmPass} onChange={e => setConfirmPass(e.target.value)} placeholder="Xác nhận mật khẩu" className={`${inputClass} flex-1`} />
-                          {passMatch && <Check size={16} className="text-[#4ADE80] ml-2" />}
-                          {passMismatch && <X size={16} className="text-[#F87171] ml-2" />}
-                        </div>
-                      </div>
-                      {passMismatch && <p className="text-[#F87171] text-[11px] mt-1">Mật khẩu không khớp</p>}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <div className={fieldBorder}>
+                  <div className="flex items-center">
+                    <input type="password" required maxLength={128} value={confirmPass} onChange={e => setConfirmPass(e.target.value)} placeholder="Xác nhận mật khẩu" className={`${inputClass} flex-1`} />
+                    {passMatch && <Check size={16} className="text-[#4ADE80] ml-2" />}
+                    {passMismatch && <X size={16} className="text-[#F87171] ml-2" />}
+                  </div>
+                </div>
+                {passMismatch && <p className="text-[#F87171] text-[11px] mt-1">Mật khẩu không khớp</p>}
                 <label className="flex items-start gap-2 text-sm text-gray-400 cursor-pointer">
                   <input type="checkbox" checked={agreeTerms} onChange={e => setAgreeTerms(e.target.checked)} className="accent-[#F5A623] mt-0.5 w-4 h-4" />
                   <span>Tôi đồng ý với <a href="/terms" target="_blank" className="text-[#F5A623] hover:underline">điều khoản</a> và <a href="/privacy" target="_blank" className="text-[#F5A623] hover:underline">chính sách bảo mật</a></span>
