@@ -30,7 +30,7 @@ export default function BusinessPage() {
           <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(32px, 5vw, 48px)', lineHeight: 1.15, marginBottom: 16 }}>Giải pháp nhân lực linh hoạt cho doanh nghiệp</h1>
         </ScrollReveal>
         <ScrollReveal delay={0.1}>
-          <p style={{ color: '#8A857D', fontSize: 16, lineHeight: 1.7, margin: 0 }}>Thuê người làm việc theo từng công việc nhỏ. Chỉ trả tiền khi có kết quả – không rủi ro, không ràng buộc.</p>
+          <p style={{ color: '#9A9AA6', fontSize: 16, lineHeight: 1.7, margin: 0 }}>Thuê người làm việc theo từng công việc nhỏ. Chỉ trả tiền khi có kết quả – không rủi ro, không ràng buộc.</p>
         </ScrollReveal>
       </section>
       <section style={{ maxWidth: 960, margin: '0 auto', padding: '40px 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20 }}>
@@ -41,7 +41,7 @@ export default function BusinessPage() {
                 <item.icon size={20} color="#F5A623" />
               </div>
               <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, marginBottom: 8 }}>{item.title}</div>
-              <div style={{ fontSize: 14, color: '#8A857D', lineHeight: 1.7 }}>{item.desc}</div>
+              <div style={{ fontSize: 14, color: '#9A9AA6', lineHeight: 1.7 }}>{item.desc}</div>
             </div>
           </ScrollReveal>
         ))}
@@ -61,7 +61,7 @@ export default function BusinessPage() {
               <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#F5A623', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 16, flexShrink: 0 }}>{item.step}</div>
               <div>
                 <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>{item.title}</div>
-                <div style={{ fontSize: 14, color: '#8A857D', lineHeight: 1.6 }}>{item.desc}</div>
+                <div style={{ fontSize: 14, color: '#9A9AA6', lineHeight: 1.6 }}>{item.desc}</div>
               </div>
             </div>
           </ScrollReveal>
@@ -77,8 +77,8 @@ export default function BusinessPage() {
               <tr style={{ borderBottom: '1px solid #1C1C1E' }}>
                 <th style={{ padding: 12, textAlign: 'left', color: '#F5A623' }}>Tiêu chí</th>
                 <th style={{ padding: 12, textAlign: 'center', color: '#EDEBE7' }}>TaskBee</th>
-                <th style={{ padding: 12, textAlign: 'center', color: '#8A857D' }}>Thuê part‑time</th>
-                <th style={{ padding: 12, textAlign: 'center', color: '#8A857D' }}>Agency</th>
+                <th style={{ padding: 12, textAlign: 'center', color: '#9A9AA6' }}>Thuê part‑time</th>
+                <th style={{ padding: 12, textAlign: 'center', color: '#9A9AA6' }}>Agency</th>
               </tr>
             </thead>
             <tbody>

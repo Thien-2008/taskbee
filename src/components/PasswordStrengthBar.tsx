@@ -21,7 +21,7 @@ function getStrength(password: string) {
 
   const clamped = Math.min(10, Math.max(0, score))
   const percent = clamped * 10
-  let label = '', color = '#8A857D', glow = false
+  let label = '', color = '#9A9AA6', glow = false
   if (clamped >= 3) { label = 'Trung bình'; color = '#D89A3A' }
   if (clamped >= 5) { label = 'Khá'; color = '#F5A623' }
   if (clamped >= 7) { label = 'Mạnh'; color = '#FFC04D'; glow = true }

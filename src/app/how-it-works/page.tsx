@@ -61,7 +61,7 @@ export default function HowItWorksPage() {
           <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(32px, 5vw, 48px)', lineHeight: 1.15, marginBottom: 16 }}>TaskBee hoạt động như thế nào?</h1>
         </ScrollReveal>
         <ScrollReveal delay={0.1}>
-          <p style={{ color: '#8A857D', fontSize: 16, lineHeight: 1.7, margin: 0 }}>Từ lúc đăng ký đến lúc nhận tiền, mọi bước đều minh bạch và rõ ràng.</p>
+          <p style={{ color: '#9A9AA6', fontSize: 16, lineHeight: 1.7, margin: 0 }}>Từ lúc đăng ký đến lúc nhận tiền, mọi bước đều minh bạch và rõ ràng.</p>
         </ScrollReveal>
       </section>
       <section style={{ maxWidth: 800, margin: '0 auto', padding: '20px 20px 80px' }}>
@@ -73,7 +73,7 @@ export default function HowItWorksPage() {
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, marginBottom: 8 }}>{step.title}</div>
-                <div style={{ fontSize: 14, color: '#8A857D', lineHeight: 1.7, marginBottom: 8 }}>{step.desc}</div>
+                <div style={{ fontSize: 14, color: '#9A9AA6', lineHeight: 1.7, marginBottom: 8 }}>{step.desc}</div>
                 <div style={{ fontSize: 12, color: '#F5A623', fontWeight: 500 }}>{step.time}</div>
                 <div style={{ fontSize: 12, color: '#5C5A55', marginTop: 4, fontStyle: 'italic' }}>💡 {step.note}</div>
               </div>

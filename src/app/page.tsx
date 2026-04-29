@@ -72,7 +72,7 @@ export default function LandingPage() {
             <KineticHeadline text={greeting} amberText="Việc nhỏ, thu nhập thật." />
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
-            <p style={{ marginTop: 20, fontSize: 17, color: '#8A857D', maxWidth: 480, lineHeight: 1.7, margin: '20px auto 0' }}>
+            <p style={{ marginTop: 20, fontSize: 17, color: '#9A9AA6', maxWidth: 480, lineHeight: 1.7, margin: '20px auto 0' }}>
               {subtext}
             </p>
           </ScrollReveal>
@@ -95,7 +95,7 @@ export default function LandingPage() {
         </ScrollReveal>
         <ScrollReveal delay={0.1}>
           <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(24px, 3vw, 36px)', maxWidth: 600, margin: '0 auto 40px', textAlign: 'center' }}>Minh bạch từ ngày đầu tiên</h2>
-                    <p className="text-center text-sm text-[#8A857D] mb-8">Nhận việc → Hoàn thành → Được duyệt → Tiền về ví → Rút bất cứ lúc nào.</p>
+                    <p className="text-center text-sm text-[#9A9AA6] mb-8">Nhận việc → Hoàn thành → Được duyệt → Tiền về ví → Rút bất cứ lúc nào.</p>
         </ScrollReveal>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
           {[
@@ -109,7 +109,7 @@ export default function LandingPage() {
                   <Icon size={20} color="#F5A623" />
                 </div>
                 <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, marginBottom: 8 }}>{title}</div>
-                <div style={{ fontSize: 14, color: '#8A857D', lineHeight: 1.7 }}>{desc}</div>
+                <div style={{ fontSize: 14, color: '#9A9AA6', lineHeight: 1.7 }}>{desc}</div>
               </TiltCard>
             </ScrollReveal>
           ))}
@@ -139,7 +139,7 @@ export default function LandingPage() {
                   <Icon size={20} color="#F5A623" />
                 </div>
                 <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, marginBottom: 8 }}>{title}</div>
-                <div style={{ fontSize: 14, color: '#8A857D', lineHeight: 1.7 }}>{desc}</div>
+                <div style={{ fontSize: 14, color: '#9A9AA6', lineHeight: 1.7 }}>{desc}</div>
               </TiltCard>
             </ScrollReveal>
           ))}
@@ -156,7 +156,7 @@ export default function LandingPage() {
         <section style={{ position: 'relative', zIndex: 10, maxWidth: 700, margin: '50px auto', background: 'linear-gradient(135deg, #1a1508, #0f0e0c)', border: '1px solid rgba(245,166,35,0.2)', borderRadius: 24, padding: '60px 24px', textAlign: 'center' }}>
           <Logo size={48} variant="icon" />
           <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(24px, 3vw, 36px)', marginTop: 16 }}>Sẵn sàng bắt đầu?</h2>
-          <p style={{ color: '#8A857D', margin: '12px 0 24px', fontSize: 15 }}>Tham gia cùng cộng đồng người dùng đang kiếm thêm thu nhập mỗi ngày.</p>
+          <p style={{ color: '#9A9AA6', margin: '12px 0 24px', fontSize: 15 }}>Tham gia cùng cộng đồng người dùng đang kiếm thêm thu nhập mỗi ngày.</p>
           <button onClick={() => router.push('/auth?mode=register')} className="btn-primary" style={{ padding: '16px 40px', fontSize: 16 }}>
             Tạo tài khoản miễn phí →
           </button>

@@ -43,6 +43,7 @@ export default function AuthBackground() {
 
       <div
         className="absolute w-[500px] h-[500px] rounded-full top-[-100px] left-[-100px] hidden md:block"
+      style={{ willChange: "transform" }}
         style={{
           background: 'radial-gradient(circle, rgba(245,166,35,0.06) 0%, transparent 70%)',
           filter: 'blur(80px)',
@@ -51,6 +52,7 @@ export default function AuthBackground() {
       />
       <div
         className="absolute w-[400px] h-[400px] rounded-full bottom-[-80px] right-[-80px] hidden md:block"
+      style={{ willChange: "transform" }}
         style={{
           background: 'radial-gradient(circle, rgba(245,166,35,0.04) 0%, transparent 70%)',
           filter: 'blur(80px)',

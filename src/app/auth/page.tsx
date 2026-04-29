@@ -52,7 +52,7 @@ function AuthForm() {
   const passMatch = confirmPass.length > 0 && password === confirmPass
   const passMismatch = confirmPass.length > 0 && password !== confirmPass
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => { const cleanEmail = email.trim().toLowerCase(); setEmail(cleanEmail) => {
     e.preventDefault(); setError(''); setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) { setError(translateError(error.message)); setShake(true); setTimeout(() => setShake(false), 600) }
@@ -103,7 +103,7 @@ function AuthForm() {
       {/* Nút quay về trang chủ */}
       <motion.button
         onClick={() => router.push('/')}
-        className="fixed top-6 left-6 z-20 flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#161618]/80 backdrop-blur-sm border border-[#2A2A2E] text-[#8A857D] hover:text-[#F5A623] hover:border-[#F5A623]/30 transition-all duration-300 group shadow-sm"
+        className="fixed top-6 left-6 z-20 flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#161618]/80 backdrop-blur-sm border border-[#2A2A2E] text-[#9A9AA6] hover:text-[#F5A623] hover:border-[#F5A623]/30 transition-all duration-300 group shadow-sm"
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6, duration: 0.4, ease: 'easeOut' }}
@@ -140,7 +140,7 @@ function AuthForm() {
                 <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} aria-describedby={error ? "auth-error" : undefined} /></div>
                 <div className={fieldBorder}>
                   <div className="flex items-center">
-                    <input ref={passwordRef} type={showPass ? 'text' : 'password'} required maxLength={128} value={password} onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} flex-1`} />
+                    <input ref={passwordRef} type={showPass ? 'text' : 'password'} required maxLength={72} value={password} onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} flex-1`} />
                     <button type="button" onClick={() => setShowPass(!showPass)} className="text-gray-500 hover:text-gray-300 transition-colors ml-2">{showPass ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                   </div>
                 </div>
@@ -171,7 +171,7 @@ function AuthForm() {
                 <div>
                   <div className={fieldBorder}>
                     <div className="flex items-center">
-                      <input ref={passwordRef} type={showPass ? 'text' : 'password'} required maxLength={128} value={password} onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} flex-1`} />
+                      <input ref={passwordRef} type={showPass ? 'text' : 'password'} required maxLength={72} value={password} onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} flex-1`} />
                       <button type="button" onClick={() => setShowPass(!showPass)} className="text-gray-500 hover:text-gray-300 transition-colors ml-2">{showPass ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                     </div>
                   </div>
@@ -179,7 +179,7 @@ function AuthForm() {
                 </div>
                 <div className={fieldBorder}>
                   <div className="flex items-center">
-                    <input type={showConfirm ? 'text' : 'password'} required maxLength={128} value={confirmPass} onChange={e => setConfirmPass(e.target.value)} placeholder="Xác nhận mật khẩu" className={`${inputClass} flex-1`} />
+                    <input type={showConfirm ? 'text' : 'password'} required maxLength={72} value={confirmPass} onChange={e => setConfirmPass(e.target.value)} placeholder="Xác nhận mật khẩu" className={`${inputClass} flex-1`} />
                     <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="text-gray-500 hover:text-gray-300 transition-colors ml-2">{showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                     {passMatch && <Check size={16} className="text-[#4ADE80] ml-2" />}
                     {passMismatch && <X size={16} className="text-[#F87171] ml-2" />}
@@ -193,7 +193,7 @@ function AuthForm() {
                 {error && <div id="auth-error" role="alert" aria-live="assertive" className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
                 {success && <div className="flex items-center gap-2 text-[#4ADE80] text-sm"><Check size={16} /> {success}</div>}
                 <motion.button whileTap={{ scale: 0.98 }} disabled={loading} type="submit" className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">
-                  {loading ? <Loader2 className="animate-spin" size={20} /> : 'Đăng ký'}
+                  {loading ? <Loader2 className="animate-spin" size={20} /> : 'Tạo tài khoản'}
                 </motion.button>
               </form>
               <p className="text-center mt-8 text-gray-400 text-sm">Đã có tài khoản? <button onClick={() => { setMode('login'); resetForm() }} className="text-[#F5A623] font-bold hover:underline">Đăng nhập</button></p>

@@ -75,7 +75,7 @@ export default function FAQ() {
               <span>{item.question}</span>
               <ChevronDown
                 size={18}
-                color="#8A857D"
+                color="#9A9AA6"
                 style={{
                   transform: openIndex === i ? 'rotate(180deg)' : 'rotate(0deg)',
                   transition: 'transform 0.3s',
@@ -88,7 +88,7 @@ export default function FAQ() {
               <div style={{
                 padding: '0 20px 16px',
                 fontSize: 14,
-                color: '#8A857D',
+                color: '#9A9AA6',
                 lineHeight: 1.7,
               }}>
                 {item.answer}

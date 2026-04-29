@@ -38,7 +38,7 @@ export default function PhoneMockup() {
           alignItems: 'center',
           padding: '12px 20px 0',
           fontSize: '11px',
-          color: '#8A857D',
+          color: '#9A9AA6',
         }}>
           <span>9:41</span>
           <span>📶 🔋</span>
@@ -70,7 +70,7 @@ export default function PhoneMockup() {
             alignItems: 'center',
           }}>
             <div>
-              <div style={{ fontSize: 10, color: '#8A857D' }}>Số dư khả dụng</div>
+              <div style={{ fontSize: 10, color: '#9A9AA6' }}>Số dư khả dụng</div>
               <div style={{ fontSize: 20, fontWeight: 700, color: '#F5A623' }}>245.000đ</div>
             </div>
             <button style={{
@@ -109,7 +109,7 @@ export default function PhoneMockup() {
             }}>
               <div>
                 <div style={{ fontSize: 11, fontWeight: 500 }}>{task.title}</div>
-                <div style={{ fontSize: 9, color: '#8A857D' }}>{task.time}</div>
+                <div style={{ fontSize: 9, color: '#9A9AA6' }}>{task.time}</div>
               </div>
               <span style={{ fontSize: 11, fontWeight: 600, color: '#34D399' }}>{task.price}</span>
             </div>

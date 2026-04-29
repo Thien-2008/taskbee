@@ -197,7 +197,7 @@ export default function PhoneMockupLive() {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#34D399', boxShadow: '0 0 6px rgba(52,211,153,0.4)' }} />
-              <span style={{ fontSize: 9, color: '#8A857D' }}>Trực tuyến</span>
+              <span style={{ fontSize: 9, color: '#9A9AA6' }}>Trực tuyến</span>
             </div>
           </div>
 
@@ -215,12 +215,12 @@ export default function PhoneMockupLive() {
               border: '1px solid rgba(245,166,35,0.15)',
             }}
           >
-            <div style={{ fontSize: 10, color: '#8A857D', marginBottom: 4 }}>Số dư khả dụng</div>
+            <div style={{ fontSize: 10, color: '#9A9AA6', marginBottom: 4 }}>Số dư khả dụng</div>
             <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 26, color: '#EDEBE7', letterSpacing: -0.5 }}>
               248.500đ
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-              <div style={{ fontSize: 10, color: '#8A857D' }}>Cập nhật cách đây 2 phút</div>
+              <div style={{ fontSize: 10, color: '#9A9AA6' }}>Cập nhật cách đây 2 phút</div>
               <button style={{
                 background: '#F5A623',
                 color: '#000',
@@ -243,7 +243,7 @@ export default function PhoneMockupLive() {
           >
             {[
               { label: 'Đang thực hiện', value: '2', color: '#F5A623' },
-              { label: 'Chờ duyệt', value: '1', color: '#8A857D' },
+              { label: 'Chờ duyệt', value: '1', color: '#9A9AA6' },
               { label: 'Hoàn thành', value: '14', color: '#34D399' },
             ].map((stat, i) => (
               <div key={i} style={{
@@ -255,7 +255,7 @@ export default function PhoneMockupLive() {
                 textAlign: 'center',
               }}>
                 <div style={{ fontSize: 16, fontWeight: 700, color: stat.color, fontFamily: "'Space Grotesk', sans-serif" }}>{stat.value}</div>
-                <div style={{ fontSize: 9, color: '#8A857D', marginTop: 2 }}>{stat.label}</div>
+                <div style={{ fontSize: 9, color: '#9A9AA6', marginTop: 2 }}>{stat.label}</div>
               </div>
             ))}
           </motion.div>
@@ -267,11 +267,11 @@ export default function PhoneMockupLive() {
             transition={{ delay: 0.6, duration: 0.5, ease: 'easeOut' }}
             style={{ margin: '0 16px', flex: 1 }}
           >
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#8A857D', marginBottom: 6 }}>Hoạt động gần đây</div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#9A9AA6', marginBottom: 6 }}>Hoạt động gần đây</div>
             {[
               { label: 'Nhiệm vụ được duyệt', status: '+15.000đ', time: 'Vừa xong', color: '#34D399' },
               { label: 'Nhiệm vụ đã gửi kết quả', status: 'Đang kiểm tra', time: '12 phút trước', color: '#F5A623' },
-              { label: 'Yêu cầu rút tiền', status: 'Đang xử lý', time: '1 giờ trước', color: '#8A857D' },
+              { label: 'Yêu cầu rút tiền', status: 'Đang xử lý', time: '1 giờ trước', color: '#9A9AA6' },
             ].map((item, i) => (
               <motion.div
                 key={i}

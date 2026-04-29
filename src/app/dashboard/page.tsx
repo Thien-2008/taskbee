@@ -56,10 +56,10 @@ export default function DashboardPage() {
         <button onClick={handleLogout} style={{ background: 'transparent', border: '1px solid #1C1C1E', color: '#EDEBE7', padding: '6px 14px', borderRadius: 6, fontSize: 13, cursor: 'pointer' }}>Đăng xuất</button>
       </header>
       <div style={{ flex: 1, overflow: 'auto', paddingBottom: 80 }}>
-        {currentView === 'taskHistory' && <div style={{ padding: 20, textAlign: 'center', color: '#8A857D' }}>📋 Lịch sử làm task</div>}
-        {currentView === 'txHistory' && <div style={{ padding: 20, textAlign: 'center', color: '#8A857D' }}>💳 Lịch sử giao dịch</div>}
-        {currentView === 'settings' && <div style={{ padding: 20, textAlign: 'center', color: '#8A857D' }}>🔔 Cài đặt thông báo</div>}
-        {currentView === 'help' && <div style={{ padding: 20, textAlign: 'center', color: '#8A857D' }}>❓ Hướng dẫn sử dụng</div>}
+        {currentView === 'taskHistory' && <div style={{ padding: 20, textAlign: 'center', color: '#9A9AA6' }}>📋 Lịch sử làm task</div>}
+        {currentView === 'txHistory' && <div style={{ padding: 20, textAlign: 'center', color: '#9A9AA6' }}>💳 Lịch sử giao dịch</div>}
+        {currentView === 'settings' && <div style={{ padding: 20, textAlign: 'center', color: '#9A9AA6' }}>🔔 Cài đặt thông báo</div>}
+        {currentView === 'help' && <div style={{ padding: 20, textAlign: 'center', color: '#9A9AA6' }}>❓ Hướng dẫn sử dụng</div>}
         {currentView === 'main' && (
           <>
             {activeTab === 'dashboard' && (
@@ -67,32 +67,32 @@ export default function DashboardPage() {
                 <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 16 }}>Xin chào, {displayName} 👋</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
                   <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 16 }}>
-                    <div style={{ fontSize: 12, color: '#8A857D' }}>💰 Số dư</div>
+                    <div style={{ fontSize: 12, color: '#9A9AA6' }}>💰 Số dư</div>
                     <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 24, color: '#F5A623' }}>{balance.toLocaleString()}đ</div>
                   </div>
                   <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 16 }}>
-                    <div style={{ fontSize: 12, color: '#8A857D' }}>🐝 Task đã làm</div>
+                    <div style={{ fontSize: 12, color: '#9A9AA6' }}>🐝 Task đã làm</div>
                     <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 24 }}>{tasksDone}</div>
                   </div>
                 </div>
                 <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 28, textAlign: 'center' }}>
                   <div style={{ fontSize: 40, marginBottom: 12 }}>📋</div>
-                  <div style={{ color: '#8A857D' }}>Danh sách task sẽ hiển thị ở đây.</div>
+                  <div style={{ color: '#9A9AA6' }}>Danh sách task sẽ hiển thị ở đây.</div>
                 </div>
               </div>
             )}
-            {activeTab === 'tasks' && <div style={{ padding: 20, textAlign: 'center', color: '#8A857D' }}>📋 Danh sách task sẽ hiển thị ở đây</div>}
-            {activeTab === 'withdraw' && <div style={{ padding: 20, textAlign: 'center', color: '#8A857D' }}>💰 Rút tiền sẽ hiển thị ở đây</div>}
+            {activeTab === 'tasks' && <div style={{ padding: 20, textAlign: 'center', color: '#9A9AA6' }}>📋 Danh sách task sẽ hiển thị ở đây</div>}
+            {activeTab === 'withdraw' && <div style={{ padding: 20, textAlign: 'center', color: '#9A9AA6' }}>💰 Rút tiền sẽ hiển thị ở đây</div>}
             {activeTab === 'profile' && (
               <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
                 <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 20 }}>👤 Hồ sơ</h2>
                 <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, padding: 20, marginBottom: 20, textAlign: 'center' }}>
                   <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(245,166,35,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, margin: '0 auto 12px' }}>🐝</div>
                   <div style={{ fontWeight: 600, fontSize: 16 }}>{displayName}</div>
-                  <div style={{ fontSize: 13, color: '#8A857D', marginTop: 4 }}>Thành viên từ: Tháng 4/2025{userRole === 'admin' ? ' · 👑 Admin' : ''}</div>
+                  <div style={{ fontSize: 13, color: '#9A9AA6', marginTop: 4 }}>Thành viên từ: Tháng 4/2025{userRole === 'admin' ? ' · 👑 Admin' : ''}</div>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 16 }}>
-                    <div style={{ textAlign: 'center' }}><div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 18, color: '#F5A623' }}>{balance.toLocaleString()}đ</div><div style={{ fontSize: 11, color: '#8A857D' }}>Số dư</div></div>
-                    <div style={{ textAlign: 'center' }}><div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 18 }}>{tasksDone}</div><div style={{ fontSize: 11, color: '#8A857D' }}>Task đã làm</div></div>
+                    <div style={{ textAlign: 'center' }}><div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 18, color: '#F5A623' }}>{balance.toLocaleString()}đ</div><div style={{ fontSize: 11, color: '#9A9AA6' }}>Số dư</div></div>
+                    <div style={{ textAlign: 'center' }}><div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 18 }}>{tasksDone}</div><div style={{ fontSize: 11, color: '#9A9AA6' }}>Task đã làm</div></div>
                   </div>
                 </div>
                 <div style={{ background: '#161618', border: '1px solid #1C1C1E', borderRadius: 12, overflow: 'hidden' }}>
@@ -103,7 +103,7 @@ export default function DashboardPage() {
                     { icon: '❓', label: 'Hướng dẫn sử dụng', view: 'help' as View },
                   ].map((item, i, arr) => (
                     <div key={i} onClick={() => setCurrentView(item.view)} style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 20px', borderBottom: i < arr.length - 1 ? '1px solid #1C1C1E' : 'none', cursor: 'pointer' }}>
-                      <span>{item.icon} {item.label}</span><span style={{ color: '#8A857D' }}>→</span>
+                      <span>{item.icon} {item.label}</span><span style={{ color: '#9A9AA6' }}>→</span>
                     </div>
                   ))}
                 </div>
@@ -121,7 +121,7 @@ export default function DashboardPage() {
           { key: 'profile' as Tab, icon: '👤', label: 'Hồ sơ' },
         ].map(tab => (
           <button key={tab.key} onClick={() => { setActiveTab(tab.key); setCurrentView('main') }}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: activeTab === tab.key ? '#F5A623' : '#8A857D', fontSize: 11, fontWeight: activeTab === tab.key ? 600 : 400 }}>
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: activeTab === tab.key ? '#F5A623' : '#9A9AA6', fontSize: 11, fontWeight: activeTab === tab.key ? 600 : 400 }}>
             <span style={{ fontSize: 20 }}>{tab.icon}</span><span>{tab.label}</span>
           </button>
         ))}

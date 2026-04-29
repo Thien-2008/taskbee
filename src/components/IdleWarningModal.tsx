@@ -27,7 +27,7 @@ export default function IdleWarningModal({ countdown, onExtend, onLogout }: Prop
         <div style={{ marginBottom: 16 }}>
           <AlertTriangle size={40} color="#F5A623" />
         </div>
-        <div style={{ fontSize: 13, color: '#8A857D', marginBottom: 8, fontFamily: 'DM Sans' }}>
+        <div style={{ fontSize: 13, color: '#9A9AA6', marginBottom: 8, fontFamily: 'DM Sans' }}>
           Phiên đăng nhập sắp hết hạn
         </div>
         <div style={{
@@ -50,7 +50,7 @@ export default function IdleWarningModal({ countdown, onExtend, onLogout }: Prop
         <button onClick={onLogout} style={{
           width: '100%', padding: '14px', background: 'transparent',
           border: '1px solid #2A2A2E', borderRadius: 12,
-          color: '#8A857D', fontSize: 14, cursor: 'pointer',
+          color: '#9A9AA6', fontSize: 14, cursor: 'pointer',
           fontFamily: 'DM Sans',
         }}>
           Đăng xuất ngay

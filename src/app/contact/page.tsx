@@ -24,7 +24,7 @@ export default function ContactPage() {
         <ScrollReveal>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(32px, 5vw, 48px)', marginBottom: 12 }}>Cần hỗ trợ? Chúng tôi ở đây.</h1>
-            <p style={{ color: '#8A857D', fontSize: 16, lineHeight: 1.7 }}>Gửi câu hỏi, báo lỗi hoặc yêu cầu hỗ trợ. Chúng tôi ưu tiên các vấn đề liên quan đến tài khoản và thanh toán.</p>
+            <p style={{ color: '#9A9AA6', fontSize: 16, lineHeight: 1.7 }}>Gửi câu hỏi, báo lỗi hoặc yêu cầu hỗ trợ. Chúng tôi ưu tiên các vấn đề liên quan đến tài khoản và thanh toán.</p>
           </div>
         </ScrollReveal>
 
@@ -35,7 +35,7 @@ export default function ContactPage() {
               <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, marginBottom: 8, color: '#F5A623' }}>Thời gian duyệt rút tiền</div>
               <p style={{ color: '#EDEBE7', lineHeight: 1.8, margin: 0 }}>
                 Thứ 2 – Thứ 6, 8:00 sáng – 20:00 tối.<br />
-                <span style={{ color: '#8A857D', fontSize: 14 }}>Yêu cầu ngoài khung giờ hoặc Thứ 7, Chủ nhật, ngày lễ sẽ được xử lý vào ngày làm việc tiếp theo.</span>
+                <span style={{ color: '#9A9AA6', fontSize: 14 }}>Yêu cầu ngoài khung giờ hoặc Thứ 7, Chủ nhật, ngày lễ sẽ được xử lý vào ngày làm việc tiếp theo.</span>
               </p>
             </div>
           </div>
@@ -46,7 +46,7 @@ export default function ContactPage() {
             <div className="card-contact">
               <Mail size={22} color="#F5A623" style={{ marginBottom: 12 }} />
               <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 17, marginBottom: 8 }}>Email hỗ trợ</div>
-              <p style={{ color: '#8A857D', fontSize: 14, lineHeight: 1.6, marginBottom: 12 }}>Phản hồi trong 24-48 giờ làm việc. Phù hợp với các vấn đề cần mô tả chi tiết hoặc đính kèm tài liệu.</p>
+              <p style={{ color: '#9A9AA6', fontSize: 14, lineHeight: 1.6, marginBottom: 12 }}>Phản hồi trong 24-48 giờ làm việc. Phù hợp với các vấn đề cần mô tả chi tiết hoặc đính kèm tài liệu.</p>
               <div style={{ color: '#F5A623', fontWeight: 500, fontSize: 14 }}>taskbee.support@gmail.com</div>
             </div>
           </ScrollReveal>
@@ -54,7 +54,7 @@ export default function ContactPage() {
             <div className="card-contact">
               <Shield size={22} color="#F5A623" style={{ marginBottom: 12 }} />
               <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 17, marginBottom: 8 }}>Form trong ứng dụng</div>
-              <p style={{ color: '#8A857D', fontSize: 14, lineHeight: 1.6 }}>Ưu tiên sử dụng form hỗ trợ trong ứng dụng TaskBee để lưu lịch sử rõ ràng và phản hồi nhanh nhất.</p>
+              <p style={{ color: '#9A9AA6', fontSize: 14, lineHeight: 1.6 }}>Ưu tiên sử dụng form hỗ trợ trong ứng dụng TaskBee để lưu lịch sử rõ ràng và phản hồi nhanh nhất.</p>
             </div>
           </ScrollReveal>
         </div>
@@ -64,15 +64,15 @@ export default function ContactPage() {
             <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 24, marginBottom: 24, textAlign: 'center' }}>Câu hỏi thường gặp về hỗ trợ</h2>
             <div className="card-contact" style={{ marginBottom: 16 }}>
               <strong style={{ color: '#EDEBE7' }}>Yêu cầu rút tiền mất bao lâu?</strong>
-              <p style={{ color: '#8A857D', margin: '8px 0 0', lineHeight: 1.7 }}>Lệnh rút được duyệt trong giờ làm việc (T2-T6, 8:00-20:00). Tiền về tài khoản ngân hàng thường trong vài phút đến vài giờ sau duyệt.</p>
+              <p style={{ color: '#9A9AA6', margin: '8px 0 0', lineHeight: 1.7 }}>Lệnh rút được duyệt trong giờ làm việc (T2-T6, 8:00-20:00). Tiền về tài khoản ngân hàng thường trong vài phút đến vài giờ sau duyệt.</p>
             </div>
             <div className="card-contact" style={{ marginBottom: 16 }}>
               <strong style={{ color: '#EDEBE7' }}>Công việc bị từ chối, tôi phải làm sao?</strong>
-              <p style={{ color: '#8A857D', margin: '8px 0 0', lineHeight: 1.7 }}>Bạn sẽ nhận được lý do từ chối cụ thể. Nếu cho rằng không công bằng, hãy gửi khiếu nại kèm mã công việc qua email hoặc form hỗ trợ trong vòng 48 giờ.</p>
+              <p style={{ color: '#9A9AA6', margin: '8px 0 0', lineHeight: 1.7 }}>Bạn sẽ nhận được lý do từ chối cụ thể. Nếu cho rằng không công bằng, hãy gửi khiếu nại kèm mã công việc qua email hoặc form hỗ trợ trong vòng 48 giờ.</p>
             </div>
             <div className="card-contact">
               <strong style={{ color: '#EDEBE7' }}>Tôi có thể liên hệ khẩn cấp bằng cách nào?</strong>
-              <p style={{ color: '#8A857D', margin: '8px 0 0', lineHeight: 1.7 }}>Gửi email với tiêu đề bắt đầu bằng "[KHẨN]" cho các vấn đề về thanh toán hoặc tài khoản bị khóa. Chúng tôi ưu tiên xử lý nhanh nhất có thể.</p>
+              <p style={{ color: '#9A9AA6', margin: '8px 0 0', lineHeight: 1.7 }}>Gửi email với tiêu đề bắt đầu bằng "[KHẨN]" cho các vấn đề về thanh toán hoặc tài khoản bị khóa. Chúng tôi ưu tiên xử lý nhanh nhất có thể.</p>
             </div>
           </div>
         </ScrollReveal>
