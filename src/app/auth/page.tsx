@@ -6,28 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { createBrowserClient } from '@supabase/ssr'
 import { Eye, EyeOff, Check, X, Mail, User, Lock, Loader2, LogIn, Shield, AlertCircle } from 'lucide-react'
 import Logo from '@/components/Logo'
-
-function getPasswordStrength(password: string): { label: string; percent: number; color: string; glow: boolean } {
-  if (!password) return { label: '', percent: 0, color: '#2A2A2E', glow: false }
-  let score = 0
-  if (password.length >= 8) score += 3
-  if (password.length >= 14) score += 2
-  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 2
-  if (/\d/.test(password)) score += 1
-  if (/[^A-Za-z0-9]/.test(password)) score += 2
-  const lower = password.toLowerCase()
-  const common = ['password', '123456', '12345678', 'qwerty', 'abc123', '111111', 'admin', 'taskbee']
-  if (common.some(w => lower.includes(w))) score = Math.max(0, score - 5)
-
-  const clamped = Math.min(10, Math.max(0, score))
-  const percent = clamped * 10
-  let label = 'Yếu', color = '#F87171', glow = false
-  if (clamped >= 3) { label = 'Trung bình'; color = '#F5A623' }
-  if (clamped >= 5) { label = 'Khá'; color = '#D97706' }
-  if (clamped >= 7) { label = 'Mạnh'; color = '#4ADE80' }
-  if (clamped >= 10) { label = 'Rất mạnh'; color = '#22C55E'; glow = true }
-  return { label, percent, color, glow }
-}
+import PasswordStrengthBar from '@/components/PasswordStrengthBar'
+import AuthBackground from '@/components/AuthBackground'
 
 function translateError(errorMessage: string): string {
   if (errorMessage.includes('already registered') || errorMessage.includes('already exists')) {
@@ -60,7 +40,6 @@ function AuthForm() {
 
   const passwordRef = useRef<HTMLInputElement>(null)
 
-  const { label, percent, color, glow } = getPasswordStrength(password)
   const passMatch = confirmPass.length > 0 && password === confirmPass
   const passMismatch = confirmPass.length > 0 && password !== confirmPass
 
@@ -99,10 +78,10 @@ function AuthForm() {
 
   return (
     <div className="min-h-[100dvh] bg-[#0a0a0b] flex items-center justify-center p-6 font-dm-sans overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none opacity-30">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(245,166,35,0.06),transparent_70%)]" />
-      </div>
+      {/* Background với hiệu ứng mới */}
+      <AuthBackground />
 
+      {/* Amber Sweep signature moment */}
       <motion.div
         initial={{ left: '-100%' }}
         animate={{ left: '100%' }}
@@ -118,6 +97,7 @@ function AuthForm() {
         viewport={{ once: true }}
         className="w-full max-w-[400px] relative z-10"
       >
+        {/* Logo */}
         <div className="text-center mb-10">
           <Logo size={36} variant="icon" />
         </div>
@@ -162,24 +142,8 @@ function AuthForm() {
                       <button type="button" onClick={() => setShowPass(!showPass)} className="text-gray-500 hover:text-gray-300 transition-colors ml-2">{showPass ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                     </div>
                   </div>
-                  {password.length > 0 && (
-                    <div className="mt-2">
-                      <div className="h-[3px] w-full bg-[#2A2A2E] rounded-full overflow-hidden">
-                        <motion.div
-                          className="h-full rounded-full"
-                          style={{
-                            width: `${percent}%`,
-                            backgroundColor: color,
-                            boxShadow: glow ? `0 0 12px ${color}, 0 0 24px ${color}` : 'none',
-                            transition: 'width 0.3s ease-out, box-shadow 0.3s ease-out',
-                          }}
-                          initial={{ width: '0%' }}
-                          animate={{ width: `${percent}%` }}
-                        />
-                      </div>
-                      <p className="text-[11px] text-right mt-1" style={{ color }}>{label}</p>
-                    </div>
-                  )}
+                  {/* Thanh độ mạnh mật khẩu mới */}
+                  <PasswordStrengthBar password={password} />
                 </div>
                 <div className={fieldBorder}>
                   <div className="flex items-center">
