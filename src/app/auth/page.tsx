@@ -78,7 +78,9 @@ function AuthForm() {
   }
 
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault(); setError(''); setSuccess('')
+    e.preventDefault()
+    setError('')
+    setSuccess('')
     if (!agreeTerms) { setError('Vui lòng đồng ý điều khoản'); return }
     const usernameError = validateUsername(username)
     if (usernameError) { setError(usernameError); return }
