@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="vi" style="background-color: #0a0a0b; color: #EDEBE7;">
+    <html lang="vi" style={{ backgroundColor: '#0a0a0b', color: '#EDEBE7' }}>
       <body>
         <SkipToContent />
         <JsonLd />
