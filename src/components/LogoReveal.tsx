@@ -2,14 +2,26 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { usePathname } from 'next/navigation'
 
 export default function LogoReveal() {
-  const [visible, setVisible] = useState(true)
+  const [visible, setVisible] = useState(false)
+  const pathname = usePathname()
 
   useEffect(() => {
-    const timer = setTimeout(() => setVisible(false), 2200)
-    return () => clearTimeout(timer)
-  }, [])
+    // Chỉ hoạt động trên Landing Page (pathname = '/')
+    if (pathname !== '/') return
+
+    // Nếu referrer chứa domain của chính mình -> điều hướng nội bộ -> không hiện
+    const referrer = document.referrer
+    const isInternalNavigation = referrer.includes(window.location.host)
+
+    if (!isInternalNavigation) {
+      setVisible(true)
+      const timer = setTimeout(() => setVisible(false), 2200)
+      return () => clearTimeout(timer)
+    }
+  }, [pathname])
 
   return (
     <AnimatePresence>
@@ -30,9 +42,9 @@ export default function LogoReveal() {
           }}
         >
           <motion.svg
-            width="140"
-            height="140"
-            viewBox="-4 -4 56 56"
+            width="120"
+            height="120"
+            viewBox="-4 -4 40 40"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             initial={{ scale: 0.6, opacity: 0 }}
@@ -42,11 +54,10 @@ export default function LogoReveal() {
           >
             {/* Lục giác */}
             <motion.path
-              d="M24 8L35.5 15V31L24 38L12.5 31V15L24 8Z"
+              d="M16 2L27.5 9V23L16 30L4.5 23V9L16 2Z"
               stroke="#F5A623"
               strokeWidth="1.8"
               strokeLinejoin="round"
-              strokeLinecap="round"
               fill="none"
               initial={{ pathLength: 0, opacity: 0 }}
               animate={{ pathLength: 1, opacity: 1 }}
@@ -55,9 +66,9 @@ export default function LogoReveal() {
 
             {/* Cánh trái */}
             <motion.path
-              d="M16 21 C13 20, 11 22, 13 24 C11 26, 13 28, 16 27"
+              d="M14 12C11 10 7 11.5 7.5 15C8 18.5 12 18 14 16.5"
               stroke="#F5A623"
-              strokeWidth="1.5"
+              strokeWidth="1.6"
               strokeLinecap="round"
               fill="none"
               initial={{ opacity: 0 }}
@@ -71,9 +82,9 @@ export default function LogoReveal() {
 
             {/* Cánh phải */}
             <motion.path
-              d="M32 21 C35 20, 37 22, 35 24 C37 26, 35 28, 32 27"
+              d="M18 12C21 10 25 11.5 24.5 15C24 18.5 20 18 18 16.5"
               stroke="#F5A623"
-              strokeWidth="1.5"
+              strokeWidth="1.6"
               strokeLinecap="round"
               fill="none"
               initial={{ opacity: 0 }}
@@ -87,9 +98,9 @@ export default function LogoReveal() {
 
             {/* Chấm trung tâm */}
             <motion.circle
-              cx="24"
-              cy="24"
-              r="2"
+              cx="16"
+              cy="14.5"
+              r="1.8"
               fill="#F5A623"
               initial={{ scale: 0 }}
               animate={{ scale: [0, 1.3, 1] }}
@@ -98,9 +109,9 @@ export default function LogoReveal() {
 
             {/* Tia sáng quét */}
             <motion.circle
-              cx="24"
-              cy="24"
-              r="22"
+              cx="16"
+              cy="14.5"
+              r="20"
               fill="none"
               stroke="#F5A623"
               strokeWidth="0.5"
