@@ -1,15 +1,15 @@
 'use client'
 
-import { useState, useRef, Suspense, ComponentType } from 'react'
+import { useState, useRef, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createBrowserClient } from '@supabase/ssr'
-import { Eye, EyeOff, ArrowLeft, Check, X, Mail, User, Lock, Loader2, LogIn, Shield, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, Check, X, Mail, User, Lock, Loader2, LogIn, Shield, AlertCircle, ArrowLeft } from 'lucide-react'
 import Logo from '@/components/Logo'
 
 /* ───── Hàm tính độ mạnh mật khẩu ───── */
 function getPasswordStrength(password: string): { label: string; percent: number; color: string } {
-  if (!password) return { label: '', percent: 0, color: '#1C1C1E' }
+  if (!password) return { label: '', percent: 0, color: '#2A2A2E' }
   let score = 0
   if (password.length >= 8) score += 2
   if (password.length >= 12) score += 2
@@ -22,11 +22,13 @@ function getPasswordStrength(password: string): { label: string; percent: number
 
   const clamped = Math.min(10, Math.max(0, score))
   const percent = clamped * 10
-  let label = 'Yếu', color = '#F87171'
-  if (clamped >= 3) { label = 'Trung bình'; color = '#F59E0B' }
-  if (clamped >= 5) { label = 'Khá'; color = '#D97706' }
-  if (clamped >= 7) { label = 'Mạnh'; color = '#F5A623' }
-  if (clamped >= 9) { label = 'Rất mạnh'; color = '#22C55E' }
+
+  // Màu theo yêu cầu: Yếu -> đỏ, Trung bình -> vàng, Khá -> cam, Mạnh -> xanh nhạt, Rất mạnh -> xanh đậm
+  let label = 'Yếu', color = '#F87171'                   // đỏ
+  if (clamped >= 3) { label = 'Trung bình'; color = '#F5A623' } // vàng
+  if (clamped >= 5) { label = 'Khá'; color = '#D97706' }        // cam
+  if (clamped >= 7) { label = 'Mạnh'; color = '#4ADE80' }       // xanh nhạt
+  if (clamped >= 9) { label = 'Rất mạnh'; color = '#22C55E' }   // xanh đậm
   return { label, percent, color }
 }
 
@@ -76,7 +78,7 @@ function AuthForm() {
     setLoading(true)
     const { error } = await supabase.auth.signUp({ email, password, options: { data: { username } } })
     if (error) { setError(error.message || 'Đăng ký thất bại'); setShake(true); setTimeout(() => setShake(false), 600) }
-    else { setSuccess('Đăng ký thành công! Vui lòng kiểm tra email để xác minh tài khoản.'); setMode('login') }
+    else { setSuccess('Đăng ký thành công! Kiểm tra email để xác minh tài khoản.'); setMode('login') }
     setLoading(false)
   }
 
@@ -93,7 +95,7 @@ function AuthForm() {
   const resetForm = () => { setError(''); setSuccess(''); setEmail(''); setPassword(''); setUsername(''); setConfirmPass(''); setAgreeTerms(false) }
 
   const inputClass = "w-full px-0 py-3.5 bg-transparent border-0 text-[#EDEBE7] placeholder-gray-500 focus:outline-none font-dm-sans text-base caret-[#F5A623]"
-  const fieldBorder = "border-b border-[#1C1C1E] focus-within:border-[#F5A623] transition-colors duration-300"
+  const fieldBorder = "border-b border-[#2A2A2E] focus-within:border-[#F5A623] transition-colors duration-300"
 
   return (
     <div className="min-h-[100dvh] bg-[#0a0a0b] flex items-center justify-center p-6 font-dm-sans overflow-hidden">
@@ -101,6 +103,22 @@ function AuthForm() {
       <div className="absolute inset-0 pointer-events-none opacity-30">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(245,166,35,0.06),transparent_70%)]" />
       </div>
+
+      {/* Amber Sweep */}
+      <motion.div
+        initial={{ left: '-100%' }}
+        animate={{ left: '100%' }}
+        transition={{ duration: 0.8, ease: 'easeInOut', delay: 0.2 }}
+        style={{
+          position: 'fixed',
+          top: 0,
+          width: 2,
+          height: '100%',
+          background: 'linear-gradient(180deg, transparent, #F5A623, transparent)',
+          zIndex: 50,
+          pointerEvents: 'none',
+        }}
+      />
 
       <motion.div
         animate={shake ? { x: [0, -6, 6, -4, 4, 0] } : {}}
@@ -118,7 +136,7 @@ function AuthForm() {
           {/* ───── LOGIN ───── */}
           {mode === 'login' && (
             <motion.div key="login" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
-              <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-8">Đăng nhập</h1>
+              <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-8">Đăng nhập vào tài khoản</h1>
               <form onSubmit={handleLogin} className="space-y-6">
                 <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
                 <div className={fieldBorder}>
@@ -145,7 +163,7 @@ function AuthForm() {
           {/* ───── REGISTER ───── */}
           {mode === 'register' && (
             <motion.div key="register" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
-              <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-8">Đăng ký</h1>
+              <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-8">Tạo tài khoản mới</h1>
               <form onSubmit={handleRegister} className="space-y-6">
                 <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
                 <div className={fieldBorder}><input type="text" required maxLength={24} value={username} onChange={e => setUsername(e.target.value)} placeholder="Tên đăng nhập" className={inputClass} /></div>
@@ -158,7 +176,7 @@ function AuthForm() {
                   </div>
                   {password.length > 0 && (
                     <div className="mt-1.5">
-                      <div className="h-[2px] w-full bg-[#1C1C1E] rounded-full overflow-hidden">
+                      <div className="h-[1.5px] w-full bg-[#2A2A2E] rounded-full overflow-hidden">
                         <motion.div
                           className="h-full rounded-full"
                           style={{ width: `${strength.percent}%`, backgroundColor: strength.color, boxShadow: strength.percent >= 90 ? `0 0 6px ${strength.color}` : 'none' }}
@@ -204,14 +222,14 @@ function AuthForm() {
           {/* ───── FORGOT PASSWORD ───── */}
           {mode === 'forgot' && (
             <motion.div key="forgot" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
-              <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-4">Quên mật khẩu</h1>
-              <p className="text-gray-400 text-sm text-center mb-8">Nhập email đã đăng ký để nhận link reset mật khẩu.</p>
+              <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-4">Lấy lại mật khẩu</h1>
+              <p className="text-gray-400 text-sm text-center mb-8">Nhập email đã đăng ký, chúng tôi sẽ gửi link đặt lại mật khẩu.</p>
               <form onSubmit={handleForgot} className="space-y-6">
                 <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
                 {error && <div className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
                 {success && <div className="flex items-center gap-2 text-[#4ADE80] text-sm"><Check size={16} /> {success}</div>}
                 <motion.button whileTap={{ scale: 0.98 }} disabled={loading} className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">
-                  {loading ? <Loader2 className="animate-spin" size={20} /> : 'Gửi yêu cầu'}
+                  {loading ? <Loader2 className="animate-spin" size={20} /> : 'Gửi link'}
                 </motion.button>
                 <button type="button" onClick={() => { setMode('login'); resetForm() }} className="w-full text-center text-sm text-gray-400 hover:text-white transition-colors">← Trở về đăng nhập</button>
               </form>
