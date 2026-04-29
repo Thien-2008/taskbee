@@ -25,13 +25,13 @@ export default function LandingPage() {
   return (
     <div style={{
       fontFamily: "'DM Sans', sans-serif",
-        <ScrollProgressBar />
       background: '#0a0a0b',
       color: '#EDEBE7',
       overflowX: 'hidden',
       userSelect: 'none',
       position: 'relative',
     }}>
+      <ScrollProgressBar />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap');
         .btn-primary { background: #F5A623; color: #000; border: none; padding: 14px 32px; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.3s ease; position: relative; overflow: hidden; }
@@ -43,9 +43,6 @@ export default function LandingPage() {
         .card-hover { transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); cursor: default; }
         .card-hover:hover { border-color: rgba(245,166,35,0.35) !important; transform: translateY(-4px); box-shadow: 0 0 30px rgba(245,166,35,0.08), 0 8px 32px rgba(0,0,0,0.4); }
         :focus-visible { outline: 2px solid rgba(245,166,35,0.8); outline-offset: 3px; border-radius: 4px; }
-        /* Empathy Mode styles */
-        body.low-power-mode .btn-primary, body.low-power-mode .btn-primary::before { animation: none !important; transition: none !important; }
-        body.low-power-mode canvas, body.low-power-mode [class*="particle"] { opacity: 0.3 !important; }
       `}</style>
 
       <LogoReveal />
@@ -53,14 +50,16 @@ export default function LandingPage() {
       <EmpathyMode />
       <TorchCursor />
 
+      {/* Navigation */}
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px', background: 'rgba(10,10,11,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #1C1C1E' }}>
         <Logo size={28} variant="full" />
         <div style={{ display: 'flex', gap: 10 }}>
-          <button aria-label="Đăng nhập vào TaskBee" onClick={() => router.push('/auth?mode=login')}>Đăng nhập</button>
-          <button aria-label="Tạo tài khoản TaskBee miễn phí" onClick={() => router.push('/auth?mode=register')}>Tạo tài khoản miễn phí</button>
+          <button onClick={() => router.push('/auth?mode=login')} className="btn-ghost" style={{ padding: '10px 20px', fontSize: 14 }}>Đăng nhập</button>
+          <button onClick={() => router.push('/auth?mode=register')} className="btn-primary" style={{ padding: '10px 20px', fontSize: 14 }}>Tạo tài khoản miễn phí</button>
         </div>
       </nav>
 
+      {/* Hero */}
       <section style={{ position: 'relative', zIndex: 10, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '100px 16px 40px' }}>
         <AmberParticleField />
         <div>
@@ -91,13 +90,13 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Trust Section */}
       <section style={{ position: 'relative', zIndex: 10, maxWidth: 960, margin: '0 auto', padding: '60px 16px' }}>
         <ScrollReveal>
           <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: 'uppercase', color: '#F5A623', marginBottom: 16, textAlign: 'center' }}>Cam kết của TaskBee</div>
         </ScrollReveal>
         <ScrollReveal delay={0.1}>
           <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(24px, 3vw, 36px)', maxWidth: 600, margin: '0 auto 40px', textAlign: 'center' }}>Minh bạch từ ngày đầu tiên</h2>
-                    <p className="text-center text-sm text-[#9A9AA6] mb-8">Nhận việc → Hoàn thành → Được duyệt → Tiền về ví → Rút bất cứ lúc nào.</p>
         </ScrollReveal>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
           {[
@@ -116,12 +115,15 @@ export default function LandingPage() {
             </ScrollReveal>
           ))}
         </div>
+        <p className="text-center text-sm text-[#9A9AA6] mt-8">Nhận việc → Hoàn thành → Được duyệt → Tiền về ví → Rút bất cứ lúc nào.</p>
       </section>
 
+      {/* Phone Mockup */}
       <ScrollReveal delay={0.1}>
         <PhoneMockupLive />
       </ScrollReveal>
 
+      {/* How it Works */}
       <section style={{ position: 'relative', zIndex: 10, maxWidth: 960, margin: '0 auto', padding: '60px 16px' }}>
         <ScrollReveal>
           <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: 'uppercase', color: '#F5A623', marginBottom: 16, textAlign: 'center' }}>Cách hoạt động</div>
@@ -148,12 +150,14 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* FAQ */}
       <section style={{ position: 'relative', zIndex: 10, padding: '40px 16px 60px' }}>
         <ScrollReveal>
           <FAQ />
         </ScrollReveal>
       </section>
 
+      {/* CTA */}
       <ScrollReveal delay={0.2}>
         <section style={{ position: 'relative', zIndex: 10, maxWidth: 700, margin: '50px auto', background: 'linear-gradient(135deg, #1a1508, #0f0e0c)', border: '1px solid rgba(245,166,35,0.2)', borderRadius: 24, padding: '60px 24px', textAlign: 'center' }}>
           <Logo size={48} variant="icon" />
