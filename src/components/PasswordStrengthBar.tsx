@@ -62,10 +62,10 @@ function getStrength(password: string) {
 
   const clamped = Math.min(10, Math.max(0, score))
   const percent = clamped * 10
-  let label = 'Yếu', color = '#F87171', glow = false
+  let label = 'Yếu', color = '#8A857D', glow = false
   if (clamped >= 3) { label = 'Trung bình'; color = '#F5A623' }
-  if (clamped >= 5) { label = 'Khá'; color = '#D97706' }
-  if (clamped >= 7) { label = 'Mạnh'; color = '#4ADE80' }
-  if (clamped >= 10) { label = 'Rất mạnh'; color = '#22C55E'; glow = true }
+  if (clamped >= 5) { label = 'Khá'; color = '#F5A623' }
+  if (clamped >= 7) { label = 'Mạnh'; color = '#FFC04D' }
+  if (clamped >= 10) { label = 'Rất mạnh'; color = '#FFC04D'; glow = true }
   return { label, percent, color, glow }
 }

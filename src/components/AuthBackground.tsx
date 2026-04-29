@@ -15,7 +15,7 @@ export default function AuthBackground() {
       />
 
       <div
-        className="absolute w-[500px] h-[500px] rounded-full top-[-100px] left-[-100px]"
+        className="absolute w-[500px] h-[500px] rounded-full top-[-100px] left-[-100px] hidden sm:block"
         style={{
           background: 'radial-gradient(circle, rgba(245,166,35,0.06) 0%, transparent 70%)',
           filter: 'blur(80px)',
@@ -23,7 +23,7 @@ export default function AuthBackground() {
         }}
       />
       <div
-        className="absolute w-[400px] h-[400px] rounded-full bottom-[-80px] right-[-80px]"
+        className="absolute w-[400px] h-[400px] rounded-full bottom-[-80px] right-[-80px] hidden sm:block"
         style={{
           background: 'radial-gradient(circle, rgba(245,166,35,0.04) 0%, transparent 70%)',
           filter: 'blur(80px)',
@@ -34,7 +34,7 @@ export default function AuthBackground() {
         className="absolute w-[300px] h-[300px] rounded-full top-[50%] left-[50%]"
         style={{
           background: 'radial-gradient(circle, rgba(180,83,9,0.05) 0%, transparent 70%)',
-          filter: 'blur(80px)',
+          filter: 'blur(40px)',
           transform: 'translate(-50%, -50%)',
           animation: 'drift-3 20s ease-in-out infinite alternate',
         }}
@@ -52,6 +52,9 @@ export default function AuthBackground() {
         @keyframes drift-3 {
           from { transform: translate(-50%, -50%) scale(0.9); }
           to { transform: translate(-45%, -55%) scale(1.1); }
+        }
+        @media (max-width: 640px) {
+          .sm\\:block { display: none; }
         }
       `}</style>
     </div>

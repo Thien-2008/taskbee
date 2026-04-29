@@ -54,8 +54,8 @@ export default function LandingPage() {
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px', background: 'rgba(10,10,11,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #1C1C1E' }}>
         <Logo size={28} variant="full" />
         <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={() => router.push('/auth?mode=login')} className="btn-ghost" style={{ padding: '10px 20px', fontSize: 14 }}>Đăng nhập</button>
-          <button onClick={() => router.push('/auth?mode=register')} className="btn-primary" style={{ padding: '10px 20px', fontSize: 14 }}>Tạo tài khoản miễn phí</button>
+          <button aria-label="Đăng nhập vào TaskBee" onClick={() => router.push('/auth?mode=login')}>Đăng nhập</button>
+          <button aria-label="Tạo tài khoản TaskBee miễn phí" onClick={() => router.push('/auth?mode=register')}>Tạo tài khoản miễn phí</button>
         </div>
       </nav>
 

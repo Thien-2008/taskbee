@@ -20,31 +20,32 @@ export default function AmberParticleField() {
     let particles: Particle[] = []
     let touchX: number | null = null, touchY: number | null = null
     let mouseX: number | null = null, mouseY: number | null = null
+    let mounted = true
 
     function init() {
       if (!canvas) return
       w = canvas.width = window.innerWidth
       h = canvas.height = window.innerHeight
-      const count = w < 768 ? 150 : 300
+      const count = w < 768 ? 120 : 250
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * w, y: Math.random() * h,
         baseX: Math.random() * w, baseY: Math.random() * h,
         vx: 0, vy: 0,
-        opacity: Math.random() * 0.25 + 0.05,
+        opacity: Math.random() * 0.2 + 0.04,
         size: Math.random() * 2 + 1,
       }))
     }
 
     function animate() {
-      if (!ctx || !canvas) return
+      if (!mounted || !ctx || !canvas) return
       ctx.clearRect(0, 0, w, h)
       const ix = touchX ?? mouseX, iy = touchY ?? mouseY
 
       for (const p of particles) {
         if (ix !== null && iy !== null) {
           const dx = p.x - ix, dy = p.y - iy, dist = Math.sqrt(dx*dx + dy*dy)
-          if (dist < 120) {
-            const f = (120 - dist) / 120, a = Math.atan2(dy, dx)
+          if (dist < 100) {
+            const f = (100 - dist) / 100, a = Math.atan2(dy, dx)
             p.vx += Math.cos(a) * f * 2
             p.vy += Math.sin(a) * f * 2
           }
@@ -75,6 +76,7 @@ export default function AmberParticleField() {
     window.addEventListener('resize', init)
 
     return () => {
+      mounted = false
       cancelAnimationFrame(id)
       window.removeEventListener('mousemove', onMouse)
       window.removeEventListener('touchstart', onTouch)
@@ -82,5 +84,5 @@ export default function AmberParticleField() {
     }
   }, [])
 
-  return <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 1 }} />
+  return <canvas ref={canvasRef} aria-hidden="true" role="presentation" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 1, touchAction: 'pan-y' }} />
 }

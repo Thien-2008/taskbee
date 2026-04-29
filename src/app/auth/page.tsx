@@ -114,10 +114,10 @@ function AuthForm() {
             <motion.div key="login" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
               <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-8">Đăng nhập vào tài khoản</h1>
               <form onSubmit={handleLogin} className="space-y-6">
-                <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
+                <div className={fieldBorder}><input type="email" autoComplete="email" inputMode="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
                 <div className={fieldBorder}>
                   <div className="flex items-center">
-                    <input ref={passwordRef} type={showPass ? 'text' : 'password'} required maxLength={128} value={password} onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} flex-1`} />
+                    <input ref={passwordRef} type={showPass ? 'text' : 'password'} required maxLength={128} value={password} autoComplete="new-password" onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} flex-1`} />
                     <button type="button" onClick={() => setShowPass(!showPass)} className="text-gray-500 hover:text-gray-300 transition-colors ml-2">{showPass ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                   </div>
                 </div>
@@ -139,12 +139,12 @@ function AuthForm() {
             <motion.div key="register" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
               <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-8">Tạo tài khoản mới</h1>
               <form onSubmit={handleRegister} className="space-y-6">
-                <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
-                <div className={fieldBorder}><input type="text" required maxLength={24} value={username} onChange={e => setUsername(e.target.value)} placeholder="Tên đăng nhập" className={inputClass} /></div>
+                <div className={fieldBorder}><input type="email" autoComplete="email" inputMode="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
+                <div className={fieldBorder}><input type="text" required maxLength={24} value={username} autoComplete="username" onChange={e => setUsername(e.target.value)} placeholder="Tên đăng nhập" className={inputClass} /></div>
                 <div>
                   <div className={fieldBorder}>
                     <div className="flex items-center">
-                      <input ref={passwordRef} type={showPass ? 'text' : 'password'} required maxLength={128} value={password} onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} flex-1`} />
+                      <input ref={passwordRef} type={showPass ? 'text' : 'password'} required maxLength={128} value={password} autoComplete="new-password" onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} flex-1`} />
                       <button type="button" onClick={() => setShowPass(!showPass)} className="text-gray-500 hover:text-gray-300 transition-colors ml-2">{showPass ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                     </div>
                   </div>
@@ -152,7 +152,7 @@ function AuthForm() {
                 </div>
                 <div className={fieldBorder}>
                   <div className="flex items-center">
-                    <input type={showConfirm ? 'text' : 'password'} required maxLength={128} value={confirmPass} onChange={e => setConfirmPass(e.target.value)} placeholder="Xác nhận mật khẩu" className={`${inputClass} flex-1`} />
+                    <input type={showConfirm ? 'text' : 'password'} required maxLength={128} value={confirmPass} autoComplete="new-password" onChange={e => setConfirmPass(e.target.value)} placeholder="Xác nhận mật khẩu" className={`${inputClass} flex-1`} />
                     <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="text-gray-500 hover:text-gray-300 transition-colors ml-2">{showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                     {passMatch && <Check size={16} className="text-[#4ADE80] ml-2" />}
                     {passMismatch && <X size={16} className="text-[#F87171] ml-2" />}
@@ -179,7 +179,7 @@ function AuthForm() {
               <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-4">Lấy lại mật khẩu</h1>
               <p className="text-gray-400 text-sm text-center mb-8">Nhập email đã đăng ký, chúng tôi sẽ gửi link đặt lại mật khẩu.</p>
               <form onSubmit={handleForgot} className="space-y-6">
-                <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
+                <div className={fieldBorder}><input type="email" autoComplete="email" inputMode="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
                 {error && <div className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
                 {success && <div className="flex items-center gap-2 text-[#4ADE80] text-sm"><Check size={16} /> {success}</div>}
                 <motion.button whileTap={{ scale: 0.98 }} disabled={loading} type="submit" className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">
