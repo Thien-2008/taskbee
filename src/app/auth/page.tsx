@@ -17,7 +17,11 @@ function translateError(errorMessage: string): string {
   if (errorMessage.includes('Invalid login')) {
     return 'Email hoặc mật khẩu không đúng.'
   }
-  return 'Đăng ký thất bại. Vui lòng thử lại.'
+  if (errorMessage.includes('Email not confirmed')) {
+    return 'Email chưa được xác nhận. Vui lòng kiểm tra hộp thư.'
+  }
+  // Hiển thị nguyên văn lỗi để debug, sau đó sẽ ẩn đi
+  return errorMessage || 'Đăng ký thất bại. Vui lòng thử lại.'
 }
 
 function AuthForm() {
@@ -84,9 +88,22 @@ function AuthForm() {
     setLoading(true)
     const cleanEmail = email.trim().toLowerCase()
     setEmail(cleanEmail)
-    const { error } = await supabase.auth.signUp({ email: cleanEmail, password, options: { data: { username } } })
-    if (error) { setError(translateError(error.message)); setShake(true); setTimeout(() => setShake(false), 600) }
-    else { setSuccess('Đăng ký thành công! Kiểm tra email để xác minh tài khoản.'); setMode('login') }
+    const cleanUsername = username.trim()
+    const { data, error } = await supabase.auth.signUp({
+      email: cleanEmail,
+      password,
+      options: {
+        data: { username: cleanUsername, full_name: cleanUsername },
+      },
+    })
+    if (error) {
+      setError(translateError(error.message))
+      setShake(true)
+      setTimeout(() => setShake(false), 600)
+    } else {
+      setSuccess('Đăng ký thành công! Kiểm tra email để xác minh tài khoản.')
+      setMode('login')
+    }
     setLoading(false)
   }
 
@@ -162,14 +179,14 @@ function AuthForm() {
             <motion.div key="register" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
               <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-8">Tạo tài khoản mới</h1>
               <form onSubmit={handleRegister} className="space-y-6">
-                <div style={{ position: "absolute", left: "-9999px", opacity: 0 }} aria-hidden="true"><input type="text" name="website" tabIndex={-1} autoComplete="off" /></div>
+                <div style={{ position: "absolute", left: "-9999px", opacity: 0 }} aria-hidden="true"><input type="text" name="phone_number" tabIndex={-1} autoComplete="off" /></div>
                 <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
                 <div className={fieldBorder}><input type="text" required maxLength={24} value={username} onChange={e => setUsername(e.target.value)} placeholder="Tên đăng nhập" className={inputClass} /></div>
                 <div><div className={fieldBorder}><div className="flex items-center"><input ref={passwordRef} type={showPass ? 'text' : 'password'} required maxLength={72} value={password} onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} flex-1`} /><button type="button" onClick={() => setShowPass(!showPass)} className="text-gray-500 hover:text-gray-300 transition-colors ml-2">{showPass ? <EyeOff size={20} /> : <Eye size={20} />}</button></div></div><PasswordStrengthBar password={password} /></div>
                 <div className={fieldBorder}><div className="flex items-center"><input type={showConfirm ? 'text' : 'password'} required maxLength={72} value={confirmPass} onChange={e => setConfirmPass(e.target.value)} placeholder="Xác nhận mật khẩu" className={`${inputClass} flex-1`} /><button type="button" onClick={() => setShowConfirm(!showConfirm)} className="text-gray-500 hover:text-gray-300 transition-colors ml-2">{showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}</button>{passMatch && <Check size={16} className="text-[#4ADE80] ml-2" />}{passMismatch && <X size={16} className="text-[#F87171] ml-2" />}</div></div>
                 {passMismatch && <p className="text-[#F87171] text-[11px] mt-1">Mật khẩu không khớp</p>}
                 <label className="flex items-start gap-2 text-sm text-gray-400 cursor-pointer"><input type="checkbox" checked={agreeTerms} onChange={e => setAgreeTerms(e.target.checked)} className="accent-[#F5A623] mt-0.5 w-4 h-4" /><span>Tôi đồng ý với <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#F5A623] hover:underline">điều khoản</a> và <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[#F5A623] hover:underline">chính sách bảo mật</a></span></label>
-                {error && <div id="auth-error" role="alert" aria-live="assertive" className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
+                {error && <div id="auth-error" role="alert" aria-live="assertive" className="flex items-center gap-2 text-[#F87171] text-sm break-words"><AlertCircle size={16} /> {error}</div>}
                 {success && <div className="flex items-center gap-2 text-[#4ADE80] text-sm"><Check size={16} /> {success}</div>}
                 <motion.button whileTap={{ scale: 0.98 }} disabled={loading} type="submit" className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">{loading ? <Loader2 className="animate-spin" size={20} /> : 'Tạo tài khoản'}</motion.button>
               </form>

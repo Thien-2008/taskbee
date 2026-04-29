@@ -23,6 +23,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi" style={{ backgroundColor: '#0a0a0b', color: '#EDEBE7' }}>
+        <head><link rel="icon" href="/favicon.svg" type="image/svg+xml" /><link rel="apple-touch-icon" href="/favicon.svg" /></head>
       <body>
         <SkipToContent />
         <JsonLd />

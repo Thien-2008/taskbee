@@ -6,6 +6,7 @@ import ScrollReveal from '@/components/ScrollReveal'
 import FAQ from '@/components/FAQ'
 import Logo from '@/components/Logo'
 import Footer from '@/components/Footer'
+import ScrollProgressBar from '@/components/ScrollProgressBar'
 import StickyCTA from '@/components/StickyCTA'
 import LogoReveal from '@/components/LogoReveal'
 import PhoneMockupLive from '@/components/PhoneMockupLive'
@@ -22,6 +23,7 @@ export default function LandingPage() {
   const { greeting, subtext } = useTimeGreeting()
 
   return (
+        <ScrollProgressBar />
     <div style={{
       fontFamily: "'DM Sans', sans-serif",
       background: '#0a0a0b',
