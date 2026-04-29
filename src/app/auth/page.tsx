@@ -7,12 +7,12 @@ import { createBrowserClient } from '@supabase/ssr'
 import { Eye, EyeOff, Check, X, Mail, User, Lock, Loader2, LogIn, Shield, AlertCircle } from 'lucide-react'
 import Logo from '@/components/Logo'
 
-function getPasswordStrength(password: string): { label: string; percent: number; color: string } {
-  if (!password) return { label: '', percent: 0, color: '#2A2A2E' }
+function getPasswordStrength(password: string): { label: string; percent: number; color: string; glow: boolean } {
+  if (!password) return { label: '', percent: 0, color: '#2A2A2E', glow: false }
   let score = 0
   if (password.length >= 8) score += 3
-  if (password.length >= 12) score += 2
-  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 1
+  if (password.length >= 14) score += 2
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 2
   if (/\d/.test(password)) score += 1
   if (/[^A-Za-z0-9]/.test(password)) score += 2
   const lower = password.toLowerCase()
@@ -21,12 +21,13 @@ function getPasswordStrength(password: string): { label: string; percent: number
 
   const clamped = Math.min(10, Math.max(0, score))
   const percent = clamped * 10
-  let label = 'Yếu', color = '#F87171'
+  let label = 'Yếu', color = '#F87171', glow = false
   if (clamped >= 3) { label = 'Trung bình'; color = '#F5A623' }
   if (clamped >= 5) { label = 'Khá'; color = '#D97706' }
   if (clamped >= 7) { label = 'Mạnh'; color = '#4ADE80' }
-  if (clamped >= 9) { label = 'Rất mạnh'; color = '#22C55E' }
-  return { label, percent, color }
+  if (clamped >= 9) { label = 'Rất mạnh'; color = '#22C55E'; glow = true }
+  if (clamped >= 10) { label = 'Rất mạnh'; color = '#22C55E'; glow = true }
+  return { label, percent, color, glow }
 }
 
 function AuthForm() {
@@ -49,7 +50,7 @@ function AuthForm() {
 
   const passwordRef = useRef<HTMLInputElement>(null)
 
-  const strength = getPasswordStrength(password)
+  const { label, percent, color, glow } = getPasswordStrength(password)
   const passMatch = confirmPass.length > 0 && password === confirmPass
   const passMismatch = confirmPass.length > 0 && password !== confirmPass
 
@@ -152,11 +153,21 @@ function AuthForm() {
                     </div>
                   </div>
                   {password.length > 0 && (
-                    <div className="mt-1.5">
-                      <div className="h-[1.5px] w-full bg-[#2A2A2E] rounded-full overflow-hidden">
-                        <motion.div className="h-full rounded-full" style={{ width: `${strength.percent}%`, backgroundColor: strength.color, boxShadow: strength.percent >= 90 ? `0 0 6px ${strength.color}` : 'none' }} initial={{ width: '0%' }} animate={{ width: `${strength.percent}%` }} transition={{ duration: 0.3, ease: 'easeOut' }} />
+                    <div className="mt-2">
+                      <div className="h-[3px] w-full bg-[#2A2A2E] rounded-full overflow-hidden">
+                        <motion.div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${percent}%`,
+                            backgroundColor: color,
+                            boxShadow: glow ? `0 0 12px ${color}, 0 0 24px ${color}` : 'none',
+                            transition: 'width 0.3s ease-out, box-shadow 0.3s ease-out',
+                          }}
+                          initial={{ width: '0%' }}
+                          animate={{ width: `${percent}%` }}
+                        />
                       </div>
-                      <p className="text-[11px] text-right mt-0.5" style={{ color: strength.color }}>{strength.label}</p>
+                      <p className="text-[11px] text-right mt-1" style={{ color }}>{label}</p>
                     </div>
                   )}
                 </div>
