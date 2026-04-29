@@ -23,7 +23,6 @@ export default function AmberParticleField() {
     let mounted = true
     let active = true
 
-    // Khi tab không active, dừng animation để tiết kiệm pin
     const onVisibility = () => { active = !document.hidden }
     document.addEventListener('visibilitychange', onVisibility)
 
@@ -31,12 +30,12 @@ export default function AmberParticleField() {
       if (!canvas) return
       w = canvas.width = window.innerWidth
       h = canvas.height = window.innerHeight
-      const count = w < 768 ? 100 : 200
+      const count = w < 768 ? 80 : 150
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * w, y: Math.random() * h,
         baseX: Math.random() * w, baseY: Math.random() * h,
         vx: 0, vy: 0,
-        opacity: Math.random() * 0.18 + 0.04,
+        opacity: Math.random() * 0.15 + 0.03,
         size: Math.random() * 2 + 1,
       }))
     }
