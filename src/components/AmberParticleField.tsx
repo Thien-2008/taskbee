@@ -21,23 +21,28 @@ export default function AmberParticleField() {
     let touchX: number | null = null, touchY: number | null = null
     let mouseX: number | null = null, mouseY: number | null = null
     let mounted = true
+    let active = true
+
+    // Khi tab không active, dừng animation để tiết kiệm pin
+    const onVisibility = () => { active = !document.hidden }
+    document.addEventListener('visibilitychange', onVisibility)
 
     function init() {
       if (!canvas) return
       w = canvas.width = window.innerWidth
       h = canvas.height = window.innerHeight
-      const count = w < 768 ? 120 : 250
+      const count = w < 768 ? 100 : 200
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * w, y: Math.random() * h,
         baseX: Math.random() * w, baseY: Math.random() * h,
         vx: 0, vy: 0,
-        opacity: Math.random() * 0.2 + 0.04,
+        opacity: Math.random() * 0.18 + 0.04,
         size: Math.random() * 2 + 1,
       }))
     }
 
     function animate() {
-      if (!mounted || !ctx || !canvas) return
+      if (!mounted || !active || !ctx || !canvas) { id = requestAnimationFrame(animate); return }
       ctx.clearRect(0, 0, w, h)
       const ix = touchX ?? mouseX, iy = touchY ?? mouseY
 
@@ -78,6 +83,7 @@ export default function AmberParticleField() {
     return () => {
       mounted = false
       cancelAnimationFrame(id)
+      document.removeEventListener('visibilitychange', onVisibility)
       window.removeEventListener('mousemove', onMouse)
       window.removeEventListener('touchstart', onTouch)
       window.removeEventListener('touchmove', onTouch)
