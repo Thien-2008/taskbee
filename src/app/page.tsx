@@ -23,9 +23,9 @@ export default function LandingPage() {
   const { greeting, subtext } = useTimeGreeting()
 
   return (
-        <ScrollProgressBar />
     <div style={{
       fontFamily: "'DM Sans', sans-serif",
+        <ScrollProgressBar />
       background: '#0a0a0b',
       color: '#EDEBE7',
       overflowX: 'hidden',
