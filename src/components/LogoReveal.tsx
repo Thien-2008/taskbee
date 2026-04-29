@@ -4,19 +4,11 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function LogoReveal() {
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(true)
 
   useEffect(() => {
-    // Chỉ hiển thị logo reveal một lần duy nhất khi vào Landing Page lần đầu
-    const hasSeenIntro = sessionStorage.getItem('taskbee_intro_seen')
-    
-    if (!hasSeenIntro) {
-      setVisible(true)
-      sessionStorage.setItem('taskbee_intro_seen', 'true')
-      
-      const timer = setTimeout(() => setVisible(false), 2200)
-      return () => clearTimeout(timer)
-    }
+    const timer = setTimeout(() => setVisible(false), 2200)
+    return () => clearTimeout(timer)
   }, [])
 
   return (
@@ -48,7 +40,7 @@ export default function LogoReveal() {
             transition={{ duration: 0.6, ease: 'easeOut' }}
             style={{ overflow: 'visible' }}
           >
-            {/* Lục giác ngoài */}
+            {/* Lục giác */}
             <motion.path
               d="M24 8L35.5 15V31L24 38L12.5 31V15L24 8Z"
               stroke="#F5A623"
