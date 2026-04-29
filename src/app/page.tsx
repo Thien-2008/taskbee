@@ -95,6 +95,7 @@ export default function LandingPage() {
         </ScrollReveal>
         <ScrollReveal delay={0.1}>
           <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(24px, 3vw, 36px)', maxWidth: 600, margin: '0 auto 40px', textAlign: 'center' }}>Minh bạch từ ngày đầu tiên</h2>
+                    <p className="text-center text-sm text-[#8A857D] mb-8">Nhận việc → Hoàn thành → Được duyệt → Tiền về ví → Rút bất cứ lúc nào.</p>
         <p className="text-center text-sm text-[#8A857D] mb-8">Nhận việc → Hoàn thành → Được duyệt → Tiền về ví → Rút bất cứ lúc nào.</p>
         </ScrollReveal>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, Suspense } from 'react'
+import { useState, useRef, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createBrowserClient } from '@supabase/ssr'
@@ -22,15 +22,18 @@ function translateError(errorMessage: string): string {
 function AuthForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const modeParam = searchParams.get('mode') || 'login'
+  const reasonParam = searchParams.get('reason')
   const [supabase] = useState(() => createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!))
 
-  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login')
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>(modeParam as 'login' | 'register' | 'forgot')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [showPass, setShowPass] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [shake, setShake] = useState(false)
+  const [rememberEmail, setRememberEmail] = useState(false)
 
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
@@ -40,6 +43,12 @@ function AuthForm() {
 
   const passwordRef = useRef<HTMLInputElement>(null)
 
+  // Khôi phục email đã nhớ
+  useEffect(() => {
+    const saved = localStorage.getItem('taskbee_email')
+    if (saved) { setEmail(saved); setRememberEmail(true) }
+  }, [])
+
   const passMatch = confirmPass.length > 0 && password === confirmPass
   const passMismatch = confirmPass.length > 0 && password !== confirmPass
 
@@ -47,7 +56,11 @@ function AuthForm() {
     e.preventDefault(); setError(''); setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) { setError(translateError(error.message)); setShake(true); setTimeout(() => setShake(false), 600) }
-    else router.push('/dashboard')
+    else {
+      if (rememberEmail) { localStorage.setItem('taskbee_email', email) }
+      else { localStorage.removeItem('taskbee_email') }
+      router.push('/dashboard')
+    }
     setLoading(false)
   }
 
@@ -87,7 +100,7 @@ function AuthForm() {
         style={{ position: 'fixed', top: 0, width: 2, height: '100%', background: 'linear-gradient(180deg, transparent, #F5A623, transparent)', zIndex: 50, pointerEvents: 'none' }}
       />
 
-      {/* Nút quay về trang chủ - pill nhỏ tinh tế */}
+      {/* Nút quay về trang chủ */}
       <motion.button
         onClick={() => router.push('/')}
         className="fixed top-6 left-6 z-20 flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#161618]/80 backdrop-blur-sm border border-[#2A2A2E] text-[#8A857D] hover:text-[#F5A623] hover:border-[#F5A623]/30 transition-all duration-300 group shadow-sm"
@@ -112,11 +125,17 @@ function AuthForm() {
           <Logo size={32} variant="icon" />
         </div>
 
+        {reasonParam === 'idle' && (
+          <div className="text-center mb-4 text-[#F5A623] text-sm">
+            Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.
+          </div>
+        )}
+
         <AnimatePresence mode="wait">
           {/* LOGIN */}
           {mode === 'login' && (
             <motion.div key="login" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
-              <h1 className="text-2xl font-space-grotesk font-bold text-white flex justify-end mb-8">Đăng nhập vào tài khoản</h1>
+              <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-8">Đăng nhập vào tài khoản</h1>
               <form onSubmit={handleLogin} className="space-y-6">
                 <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} aria-describedby={error ? "auth-error" : undefined} /></div>
                 <div className={fieldBorder}>
@@ -126,6 +145,10 @@ function AuthForm() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between text-sm">
+                  <label className="flex items-center gap-2 text-gray-400 cursor-pointer">
+                    <input type="checkbox" checked={rememberEmail} onChange={e => setRememberEmail(e.target.checked)} className="accent-[#F5A623] w-4 h-4" />
+                    <span>Ghi nhớ email</span>
+                  </label>
                   <button type="button" onClick={() => { setMode('forgot'); resetForm() }} className="text-[#F5A623] hover:underline">Quên mật khẩu?</button>
                 </div>
                 {error && <div id="auth-error" role="alert" aria-live="assertive" className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
@@ -141,7 +164,7 @@ function AuthForm() {
           {/* REGISTER */}
           {mode === 'register' && (
             <motion.div key="register" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
-              <h1 className="text-2xl font-space-grotesk font-bold text-white flex justify-end mb-8">Tạo tài khoản mới</h1>
+              <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-8">Tạo tài khoản mới</h1>
               <form onSubmit={handleRegister} className="space-y-6">
                 <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
                 <div className={fieldBorder}><input type="text" required maxLength={24} value={username} onChange={e => setUsername(e.target.value)} placeholder="Tên đăng nhập" className={inputClass} /></div>
@@ -181,7 +204,7 @@ function AuthForm() {
           {mode === 'forgot' && (
             <motion.div key="forgot" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
               <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-4">Lấy lại mật khẩu</h1>
-              <p className="text-gray-400 text-sm flex justify-end mb-8">Nhập email đã đăng ký, chúng tôi sẽ gửi link đặt lại mật khẩu.</p>
+              <p className="text-gray-400 text-sm text-center mb-8">Nhập email đã đăng ký, chúng tôi sẽ gửi link đặt lại mật khẩu.</p>
               <form onSubmit={handleForgot} className="space-y-6">
                 <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
                 {error && <div id="auth-error" role="alert" aria-live="assertive" className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
