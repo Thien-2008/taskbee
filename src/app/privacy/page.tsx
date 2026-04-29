@@ -18,7 +18,7 @@ export default function PrivacyPage() {
       </nav>
       <main style={{ maxWidth: 800, margin: '0 auto', padding: '64px 20px 80px' }}>
         <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(32px, 5vw, 48px)', marginBottom: 8 }}>Chính sách bảo mật</h1>
-        <p style={{ color: '#8A857D', marginBottom: 40 }}>Cập nhật lần cuối: 01/01/2025</p>
+        <p style={{ color: '#8A857D', marginBottom: 40 }}>Cập nhật lần cuối: 28/02/2026</p>
         <section style={{ marginBottom: 32 }}>
           <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, color: '#F5A623', marginBottom: 12 }}>1. Thông tin thu thập</h2>
           <p style={{ color: '#8A857D', lineHeight: 1.8 }}>Khi đăng ký: họ tên, số điện thoại, email. Khi sử dụng: lịch sử công việc, lịch sử giao dịch, kết quả đã gửi. Tự động: địa chỉ IP, loại thiết bị, hành vi trong ứng dụng (phục vụ phát hiện gian lận và cải thiện dịch vụ).</p>

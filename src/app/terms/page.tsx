@@ -18,7 +18,7 @@ export default function TermsPage() {
       </nav>
       <main style={{ maxWidth: 800, margin: '0 auto', padding: '64px 20px 80px' }}>
         <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(32px, 5vw, 48px)', marginBottom: 8 }}>Điều khoản sử dụng</h1>
-        <p style={{ color: '#8A857D', marginBottom: 40 }}>Cập nhật lần cuối: 01/01/2025</p>
+        <p style={{ color: '#8A857D', marginBottom: 40 }}>Cập nhật lần cuối: 15/02/2026</p>
         <section style={{ marginBottom: 32 }}>
           <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, color: '#F5A623', marginBottom: 12 }}>1. Giới thiệu</h2>
           <p style={{ color: '#8A857D', lineHeight: 1.8 }}>TaskBee là nền tảng kết nối người thực hiện công việc vi mô với doanh nghiệp có nhu cầu thuê ngoài. Sử dụng dịch vụ đồng nghĩa đồng ý với các điều khoản dưới đây.</p>
