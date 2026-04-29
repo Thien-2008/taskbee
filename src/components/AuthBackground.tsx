@@ -6,10 +6,8 @@ export default function AuthBackground() {
   const [lowEnd, setLowEnd] = useState(false)
 
   useEffect(() => {
-    // @ts-ignore
-    const cores = navigator.hardwareConcurrency || 4
-    // @ts-ignore
-    const memory = navigator.deviceMemory || 4
+    const cores = (navigator as any).hardwareConcurrency || 4
+    const memory = (navigator as any).deviceMemory || 4
     if (cores <= 2 || memory <= 2) setLowEnd(true)
   }, [])
 
@@ -43,8 +41,8 @@ export default function AuthBackground() {
 
       <div
         className="absolute w-[500px] h-[500px] rounded-full top-[-100px] left-[-100px] hidden md:block"
-      style={{ willChange: "transform" }}
         style={{
+          willChange: 'transform',
           background: 'radial-gradient(circle, rgba(245,166,35,0.06) 0%, transparent 70%)',
           filter: 'blur(80px)',
           animation: 'drift-1 25s ease-in-out infinite alternate',
@@ -52,8 +50,8 @@ export default function AuthBackground() {
       />
       <div
         className="absolute w-[400px] h-[400px] rounded-full bottom-[-80px] right-[-80px] hidden md:block"
-      style={{ willChange: "transform" }}
         style={{
+          willChange: 'transform',
           background: 'radial-gradient(circle, rgba(245,166,35,0.04) 0%, transparent 70%)',
           filter: 'blur(80px)',
           animation: 'drift-2 30s ease-in-out infinite alternate',
@@ -62,6 +60,7 @@ export default function AuthBackground() {
       <div
         className="absolute w-[300px] h-[300px] rounded-full top-[50%] left-[50%] block"
         style={{
+          willChange: 'transform',
           background: 'radial-gradient(circle, rgba(180,83,9,0.05) 0%, transparent 70%)',
           filter: 'blur(40px)',
           transform: 'translate(-50%, -50%)',
