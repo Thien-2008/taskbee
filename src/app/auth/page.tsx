@@ -8,6 +8,7 @@ import { Eye, EyeOff, Check, X, Mail, User, Lock, Loader2, LogIn, Shield, AlertC
 import Logo from '@/components/Logo'
 import PasswordStrengthBar from '@/components/PasswordStrengthBar'
 import AuthBackground from '@/components/AuthBackground'
+import { validateUsername } from '@/lib/usernameValidation'
 
 function translateError(errorMessage: string): string {
   if (errorMessage.includes('already registered') || errorMessage.includes('already exists')) {
@@ -39,8 +40,10 @@ function AuthForm() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPass, setConfirmPass] = useState('')
+  const [resetCooldown, setResetCooldown] = useState(0)
   const [agreeTerms, setAgreeTerms] = useState(false)
 
+  useEffect(() => { if (resetCooldown > 0) { const timer = setTimeout(() => setResetCooldown(resetCooldown - 1), 1000); return () => clearTimeout(timer); } }, [resetCooldown])
   const passwordRef = useRef<HTMLInputElement>(null)
 
   // Khôi phục email đã nhớ
@@ -54,7 +57,7 @@ function AuthForm() {
 
   const handleLogin = async (e: React.FormEvent) => { const cleanEmail = email.trim().toLowerCase(); setEmail(cleanEmail) => {
     e.preventDefault(); setError(''); setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const cleanEmail = email.trim().toLowerCase(); setEmail(cleanEmail); const { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password })
     if (error) { setError(translateError(error.message)); setShake(true); setTimeout(() => setShake(false), 600) }
     else {
       if (rememberEmail) { localStorage.setItem('taskbee_email', email) }
@@ -68,9 +71,11 @@ function AuthForm() {
     e.preventDefault(); setError('')
     if (!agreeTerms) { setError('Vui lòng đồng ý điều khoản'); return }
     if (password.length < 8) { setError('Mật khẩu tối thiểu 8 ký tự'); return }
+    const usernameError = validateUsername(username)
+    if (usernameError) { setError(usernameError); return }
     if (password !== confirmPass) { setError('Mật khẩu không khớp'); return }
     setLoading(true)
-    const { error } = await supabase.auth.signUp({ email, password, options: { data: { username } } })
+    const cleanEmail2 = email.trim().toLowerCase(); setEmail(cleanEmail2); const { error } = await supabase.auth.signUp({ email: cleanEmail2, password, options: { data: { username } } })
     if (error) { setError(translateError(error.message)); setShake(true); setTimeout(() => setShake(false), 600) }
     else { setSuccess('Đăng ký thành công! Kiểm tra email để xác minh tài khoản.'); setMode('login') }
     setLoading(false)
@@ -78,9 +83,9 @@ function AuthForm() {
 
   const handleForgot = async (e: React.FormEvent) => {
     e.preventDefault(); setError(''); setLoading(true)
-    const { error } = await supabase.auth.resetPasswordForEmail(email)
+    const cleanEmail3 = email.trim().toLowerCase(); setEmail(cleanEmail3); const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail3)
     if (error) setError(translateError(error.message))
-    else setSuccess('Email reset mật khẩu đã được gửi.')
+    else setSuccess('Email reset mật khẩu đã được gửi. Nếu không thấy, hãy kiểm tra mục Spam / Quảng cáo.')
     setLoading(false)
   }
 
@@ -157,7 +162,7 @@ function AuthForm() {
                   {loading ? <Loader2 className="animate-spin" size={20} /> : <><LogIn size={18} /> Đăng nhập</>}
                 </motion.button>
               </form>
-              <p className="text-center mt-8 text-gray-400 text-sm">Chưa có tài khoản? <button onClick={() => { setMode('register'); resetForm() }} className="text-[#F5A623] font-bold hover:underline">Đăng ký</button></p>
+              <p className="text-center mt-8 text-gray-400 text-sm">Chưa có tài khoản? <button onClick={() => { setMode('register'); resetForm() }} className="text-[#F5A623] font-bold hover:underline">Tạo tài khoản</button></p>
             </motion.div>
           )}
 
@@ -167,6 +172,10 @@ function AuthForm() {
               <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-8">Tạo tài khoản mới</h1>
               <form onSubmit={handleRegister} className="space-y-6">
                 <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} /></div>
+                    {/* Honeypot field - ẩn với người dùng, bot sẽ điền vào */}
+                <div style={{ position: "absolute", left: "-9999px", opacity: 0 }} aria-hidden="true">
+                  <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+                </div>
                 <div className={fieldBorder}><input type="text" required maxLength={24} value={username} onChange={e => setUsername(e.target.value)} placeholder="Tên đăng nhập" className={inputClass} /></div>
                 <div>
                   <div className={fieldBorder}>

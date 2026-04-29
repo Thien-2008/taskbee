@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 
-const IDLE_LIMIT = 30 * 60 * 1000      // 30 phút
-const WARNING_BEFORE = 2 * 60 * 1000   // Cảnh báo trước 2 phút
+const IDLE_LIMIT = 30 * 60 * 1000
+const WARNING_BEFORE = 2 * 60 * 1000
+const THROTTLE_MS = 1000
 
 export function useIdleLogout() {
   const router = useRouter()
@@ -13,34 +14,48 @@ export function useIdleLogout() {
   const timer = useRef<NodeJS.Timeout>()
   const warningTimer = useRef<NodeJS.Timeout>()
   const [showWarning, setShowWarning] = useState(false)
-  const [countdown, setCountdown] = useState(120) // 2 phút đếm ngược
+  const [countdown, setCountdown] = useState(120)
+  const lastReset = useRef(0)
 
-  const reset = () => {
+  const throttledReset = useCallback(() => {
+    const now = Date.now()
+    if (now - lastReset.current < THROTTLE_MS) return
+    lastReset.current = now
+
     clearTimeout(timer.current)
     clearTimeout(warningTimer.current)
     setShowWarning(false)
     setCountdown(120)
 
-    // Cảnh báo sau 28 phút
     warningTimer.current = setTimeout(() => {
       setShowWarning(true)
       setCountdown(120)
     }, IDLE_LIMIT - WARNING_BEFORE)
 
-    // Đăng xuất sau 30 phút
     timer.current = setTimeout(async () => {
       await supabase.auth.signOut()
-      localStorage.removeItem('taskbee_email') // Xóa email đã nhớ khi đăng xuất
+      localStorage.removeItem('taskbee_email')
       router.replace('/auth?reason=idle')
     }, IDLE_LIMIT)
-  }
+  }, [supabase, router])
+
+  // Multi-tab logout sync
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        router.replace('/auth?reason=idle')
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [supabase, router])
 
   useEffect(() => {
-    const events = ['mousedown', 'mousemove', 'keydown', 'touchstart', 'scroll']
-    events.forEach(e => window.addEventListener(e, reset, { passive: true }))
-    reset()
+    const events = ['mousedown', 'keydown', 'touchstart', 'scroll']
+    events.forEach(e => window.addEventListener(e, throttledReset, { passive: true }))
+    const onMouseMove = () => throttledReset()
+    window.addEventListener('mousemove', onMouseMove, { passive: true })
+    throttledReset()
 
-    // Đếm ngược khi hiển thị cảnh báo
     let countdownInterval: NodeJS.Timeout
     if (showWarning) {
       countdownInterval = setInterval(() => {
@@ -49,16 +64,17 @@ export function useIdleLogout() {
     }
 
     return () => {
-      events.forEach(e => window.removeEventListener(e, reset))
+      events.forEach(e => window.removeEventListener(e, throttledReset))
+      window.removeEventListener('mousemove', onMouseMove)
       clearTimeout(timer.current)
       clearTimeout(warningTimer.current)
       clearInterval(countdownInterval)
     }
-  }, [showWarning])
+  }, [showWarning, throttledReset])
 
   const extendSession = () => {
     setShowWarning(false)
-    reset()
+    throttledReset()
   }
 
   const logoutNow = async () => {

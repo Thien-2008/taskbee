@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import NoCopyScript from '@/components/NoCopyScript'
 import SkipToContent from '@/components/SkipToContent'
+import JsonLd from '@/components/JsonLd'
 
 export const metadata: Metadata = {
   title: 'TaskBee — Việc nhỏ, thu nhập thật',
@@ -24,6 +25,7 @@ export default function RootLayout({
     <html lang="vi" style="background-color: #0a0a0b; color: #EDEBE7;">
       <body>
         <SkipToContent />
+        <JsonLd />
         <NoCopyScript />
         {children}
       </body>
