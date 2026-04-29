@@ -25,9 +25,18 @@ function getPasswordStrength(password: string): { label: string; percent: number
   if (clamped >= 3) { label = 'Trung bình'; color = '#F5A623' }
   if (clamped >= 5) { label = 'Khá'; color = '#D97706' }
   if (clamped >= 7) { label = 'Mạnh'; color = '#4ADE80' }
-  if (clamped >= 9) { label = 'Rất mạnh'; color = '#22C55E'; glow = true }
   if (clamped >= 10) { label = 'Rất mạnh'; color = '#22C55E'; glow = true }
   return { label, percent, color, glow }
+}
+
+function translateError(errorMessage: string): string {
+  if (errorMessage.includes('already registered') || errorMessage.includes('already exists')) {
+    return 'Email này đã được đăng ký. Vui lòng đăng nhập hoặc sử dụng email khác.'
+  }
+  if (errorMessage.includes('Invalid login')) {
+    return 'Email hoặc mật khẩu không đúng.'
+  }
+  return 'Đăng ký thất bại. Vui lòng thử lại.'
 }
 
 function AuthForm() {
@@ -40,6 +49,7 @@ function AuthForm() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [showPass, setShowPass] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const [shake, setShake] = useState(false)
 
   const [email, setEmail] = useState('')
@@ -57,7 +67,7 @@ function AuthForm() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); setError(''); setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) { setError('Email hoặc mật khẩu không đúng'); setShake(true); setTimeout(() => setShake(false), 600) }
+    if (error) { setError(translateError(error.message)); setShake(true); setTimeout(() => setShake(false), 600) }
     else router.push('/dashboard')
     setLoading(false)
   }
@@ -69,7 +79,7 @@ function AuthForm() {
     if (password !== confirmPass) { setError('Mật khẩu không khớp'); return }
     setLoading(true)
     const { error } = await supabase.auth.signUp({ email, password, options: { data: { username } } })
-    if (error) { setError(error.message || 'Đăng ký thất bại'); setShake(true); setTimeout(() => setShake(false), 600) }
+    if (error) { setError(translateError(error.message)); setShake(true); setTimeout(() => setShake(false), 600) }
     else { setSuccess('Đăng ký thành công! Kiểm tra email để xác minh tài khoản.'); setMode('login') }
     setLoading(false)
   }
@@ -77,7 +87,7 @@ function AuthForm() {
   const handleForgot = async (e: React.FormEvent) => {
     e.preventDefault(); setError(''); setLoading(true)
     const { error } = await supabase.auth.resetPasswordForEmail(email)
-    if (error) setError(error.message || 'Gửi yêu cầu thất bại')
+    if (error) setError(translateError(error.message))
     else setSuccess('Email reset mật khẩu đã được gửi.')
     setLoading(false)
   }
@@ -173,7 +183,8 @@ function AuthForm() {
                 </div>
                 <div className={fieldBorder}>
                   <div className="flex items-center">
-                    <input type="password" required maxLength={128} value={confirmPass} onChange={e => setConfirmPass(e.target.value)} placeholder="Xác nhận mật khẩu" className={`${inputClass} flex-1`} />
+                    <input type={showConfirm ? 'text' : 'password'} required maxLength={128} value={confirmPass} onChange={e => setConfirmPass(e.target.value)} placeholder="Xác nhận mật khẩu" className={`${inputClass} flex-1`} />
+                    <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="text-gray-500 hover:text-gray-300 transition-colors ml-2">{showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                     {passMatch && <Check size={16} className="text-[#4ADE80] ml-2" />}
                     {passMismatch && <X size={16} className="text-[#F87171] ml-2" />}
                   </div>
