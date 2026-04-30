@@ -9,7 +9,6 @@ export default function StickyCTA() {
   const [isMobile, setIsMobile] = useState(false)
   const { scrollYProgress } = useScroll()
 
-  // Chỉ hiển thị khi scroll qua 20% trang và trước 85% trang
   const opacity = useTransform(scrollYProgress, [0.1, 0.2, 0.8, 0.9], [0, 1, 1, 0])
   const translateY = useTransform(scrollYProgress, [0.1, 0.2, 0.8, 0.9], [80, 0, 0, 80])
 
@@ -33,7 +32,7 @@ export default function StickyCTA() {
         opacity,
         y: translateY,
         padding: '12px 20px',
-        paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
+        paddingBottom: 'calc(16px + env(safe-area-inset-bottom))',
         background: 'rgba(10,10,11,0.95)',
         backdropFilter: 'blur(20px)',
         borderTop: '1px solid rgba(245,166,35,0.15)',
@@ -44,6 +43,7 @@ export default function StickyCTA() {
     >
       <motion.button
         onClick={() => router.push('/auth?mode=register')}
+        aria-label="Tạo tài khoản TaskBee miễn phí"
         style={{
           background: '#F5A623',
           color: '#000',

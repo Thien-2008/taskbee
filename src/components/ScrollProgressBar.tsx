@@ -10,7 +10,7 @@ export default function ScrollProgressBar() {
       const scrollTop = window.scrollY
       const docHeight = document.documentElement.scrollHeight - window.innerHeight
       const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
-      setProgress(scrollPercent)
+      setProgress(Math.round(scrollPercent))
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -19,6 +19,11 @@ export default function ScrollProgressBar() {
 
   return (
     <div
+      role="progressbar"
+      aria-valuenow={progress}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label="Tiến độ cuộn trang"
       style={{
         position: 'fixed',
         top: 0,
@@ -30,11 +35,6 @@ export default function ScrollProgressBar() {
         transition: 'width 0.1s ease-out',
         boxShadow: progress > 0 ? '0 0 6px rgba(245,166,35,0.4)' : 'none',
       }}
-      role="progressbar"
-      aria-valuenow={Math.round(progress)}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-label="Tiến độ cuộn trang"
     />
   )
 }

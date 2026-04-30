@@ -19,13 +19,13 @@ function BeeMascot({ progress }: { progress: number }) {
       transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
     >
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-        <ellipse cx="5" cy="4" rx="3" ry="2" fill="#F5A623" opacity="0.5">
+        <ellipse cx="5" cy="4" rx="3" ry="2" fill="#F5A623" opacity="0.4">
           <animateTransform attributeName="transform" type="rotate" values="-10 5 4;10 5 4;-10 5 4" dur="0.2s" repeatCount="indefinite"/>
         </ellipse>
-        <ellipse cx="9" cy="4" rx="3" ry="2" fill="#F5A623" opacity="0.5">
+        <ellipse cx="9" cy="4" rx="3" ry="2" fill="#F5A623" opacity="0.4">
           <animateTransform attributeName="transform" type="rotate" values="10 9 4;-10 9 4;10 9 4" dur="0.2s" repeatCount="indefinite"/>
         </ellipse>
-        <ellipse cx="7" cy="7.5" rx="3" ry="4" fill="#F5A623"/>
+        <ellipse cx="7" cy="7.5" rx="3" ry="4" fill="#F5A623" opacity="0.5"/>
       </svg>
     </motion.div>
   )
@@ -48,6 +48,7 @@ export default function BeeTrailScroll() {
   return (
     <div
       ref={containerRef}
+      aria-hidden="true"
       style={{
         position: 'absolute',
         top: 0,
@@ -67,8 +68,8 @@ export default function BeeTrailScroll() {
         <defs>
           <linearGradient id="trailGradient" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#F5A623" stopOpacity="0" />
-            <stop offset="15%" stopColor="#F5A623" stopOpacity="0.8" />
-            <stop offset="85%" stopColor="#F5A623" stopOpacity="0.8" />
+            <stop offset="15%" stopColor="#F5A623" stopOpacity="0.5" />
+            <stop offset="85%" stopColor="#F5A623" stopOpacity="0.5" />
             <stop offset="100%" stopColor="#F5A623" stopOpacity="0" />
           </linearGradient>
         </defs>
@@ -87,7 +88,7 @@ export default function BeeTrailScroll() {
           stroke="#F5A623"
           strokeWidth="6"
           strokeLinecap="round"
-          opacity={0.15}
+          opacity={0.1}
           initial={{ pathLength: 0 }}
           style={{ pathLength: smoothProgress }}
         />

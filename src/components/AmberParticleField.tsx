@@ -30,12 +30,12 @@ export default function AmberParticleField() {
       if (!canvas) return
       w = canvas.width = window.innerWidth
       h = canvas.height = window.innerHeight
-      const count = w < 768 ? 80 : 150
+      const count = w < 768 ? 60 : 120
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * w, y: Math.random() * h,
         baseX: Math.random() * w, baseY: Math.random() * h,
         vx: 0, vy: 0,
-        opacity: Math.random() * 0.15 + 0.03,
+        opacity: Math.random() * 0.12 + 0.03,
         size: Math.random() * 2 + 1,
       }))
     }
@@ -89,5 +89,22 @@ export default function AmberParticleField() {
     }
   }, [])
 
-  return <canvas ref={canvasRef} aria-hidden="true" role="presentation" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 1, touchAction: 'pan-y' }} />
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
+      role="presentation"
+      tabIndex={-1}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        zIndex: 1,
+        touchAction: 'pan-y',
+      }}
+    />
+  )
 }

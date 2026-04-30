@@ -4,6 +4,8 @@ import Link from 'next/link'
 import Logo from '@/components/Logo'
 
 export default function Footer() {
+  const currentYear = new Date().getFullYear()
+
   return (
     <footer style={{
       borderTop: '1px solid #1C1C1E',
@@ -39,7 +41,7 @@ export default function Footer() {
             <Link href="/terms" style={{ color: '#9A9AA6', textDecoration: 'none' }}>Điều khoản sử dụng</Link>
             <Link href="/privacy" style={{ color: '#9A9AA6', textDecoration: 'none' }}>Chính sách bảo mật</Link>
             <Link href="/contact" style={{ color: '#9A9AA6', textDecoration: 'none' }}>Liên hệ hỗ trợ</Link>
-            <span style={{ color: '#9A9AA6' }}>taskbee.support@gmail.com</span>
+            <a href="mailto:taskbee.support@gmail.com" style={{ color: '#9A9AA6', textDecoration: 'none' }}>taskbee.support@gmail.com</a>
           </div>
         </div>
       </div>
@@ -51,7 +53,7 @@ export default function Footer() {
         borderTop: '1px solid #1C1C1E',
         paddingTop: 16,
       }}>
-        © {new Date().getFullYear()} TaskBee. Tất cả các quyền được bảo lưu.
+        © {currentYear} TaskBee. Tất cả các quyền được bảo lưu.
       </div>
     </footer>
   )

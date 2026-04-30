@@ -19,9 +19,13 @@ export default function EmailConfirmedToast() {
   if (!show) return null
 
   return (
-    <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-green-500/10 border border-green-500/30 text-green-400 px-6 py-3 rounded-xl flex items-center gap-3 shadow-lg backdrop-blur-sm">
+    <div
+      role="status"
+      tabIndex={0}
+      className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-green-500/10 border border-green-500/30 text-green-400 px-6 py-3 rounded-xl flex items-center gap-3 shadow-lg backdrop-blur-sm"
+    >
       <CheckCircle size={20} />
-      <span className="font-medium">Xác nhận email thành công! Bạn có thể đăng nhập ngay.</span>
+      <span className="font-medium">Email đã xác nhận thành công! Nhấn nút Đăng nhập ở góc trên để vào tài khoản.</span>
     </div>
   )
 }

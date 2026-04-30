@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { Smartphone, CheckCircle, Wallet, Shield, Lock, Eye } from 'lucide-react'
 import ScrollReveal from '@/components/ScrollReveal'
@@ -17,6 +18,7 @@ import { useTimeGreeting } from '@/components/TimeGreeting'
 import KineticHeadline from '@/components/KineticHeadline'
 import EmpathyMode from '@/components/EmpathyMode'
 import TorchCursor from '@/components/TorchCursor'
+import EmailConfirmedToast from '@/components/EmailConfirmedToast'
 
 export default function LandingPage() {
   const router = useRouter()
@@ -32,6 +34,9 @@ export default function LandingPage() {
       position: 'relative',
     }}>
       <ScrollProgressBar />
+      <Suspense fallback={null}>
+        <EmailConfirmedToast />
+      </Suspense>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap');
         .btn-primary { background: #F5A623; color: #000; border: none; padding: 14px 32px; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.3s ease; position: relative; overflow: hidden; }
@@ -54,13 +59,13 @@ export default function LandingPage() {
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px', background: 'rgba(10,10,11,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #1C1C1E' }}>
         <Logo size={28} variant="full" />
         <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={() => router.push('/auth?mode=login')} className="btn-ghost" style={{ padding: '10px 20px', fontSize: 14 }}>Đăng nhập</button>
-          <button onClick={() => router.push('/auth?mode=register')} className="btn-primary" style={{ padding: '10px 20px', fontSize: 14 }}>Tạo tài khoản miễn phí</button>
+          <button onClick={() => router.push('/auth?mode=login')} aria-label="Đi tới trang đăng nhập TaskBee" style={{ background: 'transparent', color: '#EDEBE7', border: '1px solid #1C1C1E', padding: '10px 20px', fontSize: 14, borderRadius: 8, fontWeight: 500, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", transition: 'all 0.2s' }}>Đăng nhập</button>
+          <button onClick={() => router.push('/auth?mode=register')} aria-label="Đi tới trang đăng ký TaskBee" style={{ background: '#F5A623', color: '#000', border: 'none', padding: '10px 20px', fontSize: 14, borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", transition: 'all 0.2s' }}>Tạo tài khoản miễn phí</button>
         </div>
       </nav>
 
       {/* Hero */}
-      <section style={{ position: 'relative', zIndex: 10, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '100px 16px 40px' }}>
+      <section id="main-content" style={{ position: 'relative', zIndex: 10, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '100px 16px 40px' }}>
         <AmberParticleField />
         <div>
           <ScrollReveal>
