@@ -21,6 +21,7 @@ function translateError(errorMessage: string): string {
     return 'Email chưa được xác nhận. Vui lòng kiểm tra hộp thư.'
   }
   return errorMessage || 'Đăng ký thất bại. Vui lòng thử lại.'
+  if (errorMessage.includes("email rate limit exceeded")) return "Quá nhiều yêu cầu. Vui lòng đợi 1 giờ trước khi thử lại."
 }
 
 function AuthForm() {
