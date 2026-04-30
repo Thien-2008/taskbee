@@ -37,10 +37,27 @@ function UpdatePasswordForm() {
 
   useEffect(() => {
     let cancelled = false
+    
     async function init() {
-      const params = new URLSearchParams(window.location.search)
-      const accessToken = params.get('access_token')
-      const refreshToken = params.get('refresh_token')
+      // Đọc token từ hash fragment (cách Supabase gửi link recovery)
+      // Link có dạng: /auth/update-password#access_token=xxx&refresh_token=yyy&type=recovery
+      const hash = window.location.hash.substring(1) // bỏ dấu #
+      
+      let accessToken = ''
+      let refreshToken = ''
+
+      if (hash) {
+        const hashParams = new URLSearchParams(hash)
+        accessToken = hashParams.get('access_token') || ''
+        refreshToken = hashParams.get('refresh_token') || ''
+      }
+      
+      // Nếu không có trong hash, thử đọc từ query string (phòng hờ)
+      if (!accessToken) {
+        const queryParams = new URLSearchParams(window.location.search)
+        accessToken = queryParams.get('access_token') || ''
+        refreshToken = queryParams.get('refresh_token') || ''
+      }
 
       if (!accessToken || !refreshToken) {
         if (!cancelled) {
@@ -50,8 +67,13 @@ function UpdatePasswordForm() {
         return
       }
 
-      const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+      const { error } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      })
+
       if (cancelled) return
+      
       if (error) {
         setErrorMsg('Phiên đặt lại mật khẩu không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu lại.')
         setPhase('error')
@@ -59,6 +81,7 @@ function UpdatePasswordForm() {
         setPhase('form')
       }
     }
+
     init()
     return () => { cancelled = true }
   }, [supabase])
@@ -67,10 +90,13 @@ function UpdatePasswordForm() {
     e.preventDefault()
     if (password.length < 8) { setErrorMsg('Mật khẩu phải có ít nhất 8 ký tự.'); return }
     if (password !== confirmPw) { setErrorMsg('Mật khẩu xác nhận không khớp.'); return }
+    
     setSubmitting(true)
     setErrorMsg('')
+    
     const { error } = await supabase.auth.updateUser({ password })
     setSubmitting(false)
+    
     if (error) {
       const msg = error.message.toLowerCase()
       if (msg.includes('expired') || msg.includes('invalid')) {
@@ -83,6 +109,7 @@ function UpdatePasswordForm() {
       }
       return
     }
+    
     setPhase('success')
     setTimeout(() => router.push('/dashboard?reset=success'), 2000)
   }
