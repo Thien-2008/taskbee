@@ -93,7 +93,7 @@ function AuthForm() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); setError(''); setSuccess(''); setLoading(true)
     if (!agreePrivacyLogin) {
-      setError('Vui lòng đồng ý với Chính sách bảo mật để tiếp tục.')
+      setError('Vui lòng đồng ý với Điều khoản sử dụng và Tiêu chuẩn cộng đồng để tiếp tục.')
       setLoading(false)
       return
     }
@@ -256,7 +256,7 @@ function AuthForm() {
                 )}
                 <label className="flex items-start gap-2 text-sm text-gray-400 cursor-pointer">
                   <input type="checkbox" checked={agreePrivacyLogin} onChange={e => setAgreePrivacyLogin(e.target.checked)} className="accent-[#F5A623] mt-0.5 w-4 h-4" />
-                  <span>Tôi đồng ý với <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#F5A623] hover:underline">điều khoản</a> và <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[#F5A623] hover:underline">chính sách bảo mật</a></span>
+                  <span>Tôi đồng ý với <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#F5A623] hover:underline">điều khoản sử dụng</a> và <a href="/community" target="_blank" rel="noopener noreferrer" className="text-[#F5A623] hover:underline">tiêu chuẩn cộng đồng</a></span>
                 </label>
                 <motion.button whileTap={{ scale: 0.98 }} disabled={loading || !agreePrivacyLogin} type="submit" className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">{loading ? <Loader2 className="animate-spin" size={20} /> : <><LogIn size={18} /> Đăng nhập</>}</motion.button>
               </form>
