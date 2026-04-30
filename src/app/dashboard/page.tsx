@@ -1,18 +1,29 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
-import { motion } from 'framer-motion'
-import { User, LogOut, Shield, Mail, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { User, LogOut, Shield, Mail, CheckCircle, XCircle, Loader2, AlertTriangle } from 'lucide-react'
 import Logo from '@/components/Logo'
 
 export default function DashboardPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const confirmedParam = searchParams.get('confirmed')
   const [supabase] = useState(() => createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!))
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [profileError, setProfileError] = useState('')
+  const [showConfirmedMsg, setShowConfirmedMsg] = useState(confirmedParam === 'true')
+
+  useEffect(() => {
+    if (showConfirmedMsg) {
+      const timer = setTimeout(() => setShowConfirmedMsg(false), 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [showConfirmedMsg])
 
   useEffect(() => {
     const getUser = async () => {
@@ -23,14 +34,21 @@ export default function DashboardPage() {
       }
       setUser(user)
       
-      // Lấy thông tin profile
-      const { data: profileData } = await supabase
+      // Lấy thông tin profile từ bảng profiles
+      const { data: profileData, error: profileErr } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single()
       
-      setProfile(profileData)
+      if (profileErr) {
+        console.error('Lỗi lấy profile:', profileErr.message)
+        setProfileError('Không thể tải thông tin tài khoản. Vui lòng thử lại sau.')
+      } else if (!profileData) {
+        setProfileError('Hồ sơ chưa được tạo. Vui lòng liên hệ hỗ trợ.')
+      } else {
+        setProfile(profileData)
+      }
       setLoading(false)
     }
     getUser()
@@ -52,8 +70,21 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0b] font-dm-sans">
-      {/* Navbar đơn giản */}
-      <nav className="sticky top-0 z-50 bg-[#0a0a0b]/90 backdrop-blur-xl border-b border-[#1C1C1E] px-6 py-4 flex items-center justify-between">
+      <AnimatePresence>
+        {showConfirmedMsg && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-[#22C55E]/10 border border-[#22C55E]/30 text-[#4ADE80] px-6 py-3 rounded-xl flex items-center gap-3 shadow-lg backdrop-blur-sm"
+          >
+            <CheckCircle size={20} />
+            <span className="font-medium">Xác nhận email thành công! Chào mừng bạn đến với TaskBee.</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <nav className="sticky top-0 z-40 bg-[#0a0a0b]/90 backdrop-blur-xl border-b border-[#1C1C1E] px-6 py-4 flex items-center justify-between">
         <Logo size={28} variant="full" />
         <button
           onClick={handleLogout}
@@ -64,14 +95,12 @@ export default function DashboardPage() {
         </button>
       </nav>
 
-      {/* Nội dung chính */}
       <main className="max-w-2xl mx-auto px-6 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Chào mừng */}
           <div className="mb-8">
             <h1 className="text-3xl font-space-grotesk font-bold text-white mb-2">
               Xin chào{profile?.username ? `, ${profile.username}` : ''}!
@@ -81,7 +110,13 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* Card thông tin tài khoản */}
+          {profileError && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 flex items-center gap-3">
+              <AlertTriangle size={20} />
+              <span>{profileError}</span>
+            </div>
+          )}
+
           <div className="grid gap-4">
             <div className="bg-[#161618] border border-[#1C1C1E] rounded-2xl p-6">
               <h2 className="font-space-grotesk font-semibold text-white mb-4 flex items-center gap-2">
@@ -90,7 +125,6 @@ export default function DashboardPage() {
               </h2>
               
               <div className="space-y-4">
-                {/* Email */}
                 <div className="flex items-center gap-3">
                   <Mail size={16} className="text-[#9A9AA6]" />
                   <div>
@@ -99,7 +133,6 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Username */}
                 <div className="flex items-center gap-3">
                   <User size={16} className="text-[#9A9AA6]" />
                   <div>
@@ -108,7 +141,6 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Trạng thái xác minh email */}
                 <div className="flex items-center gap-3">
                   {user?.email_confirmed_at ? (
                     <CheckCircle size={16} className="text-[#4ADE80]" />
@@ -123,7 +155,6 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Ngày tham gia */}
                 <div className="flex items-center gap-3">
                   <Shield size={16} className="text-[#9A9AA6]" />
                   <div>
@@ -131,16 +162,14 @@ export default function DashboardPage() {
                     <p className="text-white">
                       {profile?.created_at
                         ? new Date(profile.created_at).toLocaleDateString('vi-VN')
-                        : '—'}
+                        : 'Đang cập nhật'}
                     </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Placeholder cho các tính năng sau */}
             <div className="bg-[#161618] border border-[#1C1C1E] rounded-2xl p-8 text-center">
-              <div className="text-4xl mb-4 opacity-30">🚧</div>
               <p className="text-[#9A9AA6]">Các tính năng đang được phát triển</p>
               <p className="text-sm text-[#4A4A50] mt-1">Số dư · Nhiệm vụ · Rút tiền</p>
             </div>
