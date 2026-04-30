@@ -28,24 +28,35 @@ export default function UpdatePasswordPage() {
 
   useEffect(() => {
     let cancelled = false
+
     async function init() {
-      // Đọc token từ hash (cách Supabase gửi cho recovery) hoặc query string (fallback)
-      let accessToken = ''
-      let refreshToken = ''
-      
-      // Supabase gửi token qua hash fragment: #access_token=...&refresh_token=...&type=recovery
-      const hash = window.location.hash.substring(1)
-      if (hash) {
-        const hashParams = new URLSearchParams(hash)
-        accessToken = hashParams.get('access_token') || ''
-        refreshToken = hashParams.get('refresh_token') || ''
+      // Parse toàn bộ URL (hash + query) để tìm access_token và refresh_token
+      const fullUrl = window.location.href
+      let accessToken: string | null = null
+      let refreshToken: string | null = null
+
+      // Thử lấy từ hash (cách Supabase thường dùng)
+      const hashPart = window.location.hash.substring(1) // bỏ dấu #
+      if (hashPart) {
+        const hashParams = new URLSearchParams(hashPart)
+        accessToken = hashParams.get('access_token')
+        refreshToken = hashParams.get('refresh_token')
       }
-      
-      // Nếu không có trong hash, thử query string (một số cấu hình email template có thể dùng query)
+
+      // Nếu không có, thử query string (dùng cho trường hợp token bị đẩy sang query)
       if (!accessToken) {
-        const searchParams = new URLSearchParams(window.location.search)
-        accessToken = searchParams.get('access_token') || ''
-        refreshToken = searchParams.get('refresh_token') || ''
+        const queryParams = new URLSearchParams(window.location.search)
+        accessToken = queryParams.get('access_token')
+        refreshToken = queryParams.get('refresh_token')
+      }
+
+      // Trường hợp token bị gói trong error_description (ít gặp nhưng vẫn xử lý)
+      if (!accessToken) {
+        const searchStr = window.location.search + window.location.hash
+        const tokenMatch = searchStr.match(/access_token=([^&]+)/)
+        if (tokenMatch) accessToken = tokenMatch[1]
+        const refreshMatch = searchStr.match(/refresh_token=([^&]+)/)
+        if (refreshMatch) refreshToken = refreshMatch[1]
       }
 
       if (!accessToken || !refreshToken) {
@@ -56,20 +67,26 @@ export default function UpdatePasswordPage() {
         return
       }
 
-      const { error } = await supabase.auth.setSession({
+      const { error: sessionError } = await supabase.auth.setSession({
         access_token: accessToken,
         refresh_token: refreshToken,
       })
 
       if (!cancelled) {
-        if (error) {
-          setError('Phiên đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.')
+        if (sessionError) {
+          const message = sessionError.message.toLowerCase()
+          if (message.includes('expired') || message.includes('invalid')) {
+            setError('Liên kết đã hết hạn hoặc không còn hiệu lực. Vui lòng yêu cầu lại.')
+          } else {
+            setError('Phiên đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.')
+          }
           setPhase('error')
         } else {
           setPhase('form')
         }
       }
     }
+
     init()
     return () => { cancelled = true }
   }, [supabase])
