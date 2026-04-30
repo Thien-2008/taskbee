@@ -68,9 +68,9 @@ function AuthForm() {
   const handleRememberEmailChange = (checked: boolean) => {
     setRememberEmail(checked)
     if (checked && email.trim()) {
-      localStorage.setItem('taskbee_email', email.trim().toLowerCase())
-    } else if (!checked) {
-      localStorage.removeItem('taskbee_email')
+      localStorage.setItem("taskbee_email", email.trim().toLowerCase())
+    } else {
+      localStorage.removeItem("taskbee_email")
     }
   }
 
@@ -124,7 +124,7 @@ function AuthForm() {
     const cleanEmail = email.trim().toLowerCase()
     setEmail(cleanEmail)
     const cleanUsername = username.trim()
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({ emailRedirectTo: `https://taskbee-tau.vercel.app/auth/callback`,
       email: cleanEmail,
       password,
       options: {

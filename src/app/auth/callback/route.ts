@@ -1,32 +1,39 @@
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
 
 export async function GET(request: Request) {
-  const requestUrl = new URL(request.url)
-  const code = requestUrl.searchParams.get('code')
+  const { searchParams, origin } = new URL(request.url)
+  const code = searchParams.get('code')
 
-  if (code) {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name) {
-            return cookies().get(name)?.value
-          },
-          set(name, value, options) {
-            cookies().set(name, value, options)
-          },
-          remove(name, options) {
-            cookies().set(name, '', { ...options, maxAge: 0 })
-          },
-        },
-      }
-    )
-    await supabase.auth.exchangeCodeForSession(code)
+  if (!code) {
+    return NextResponse.redirect(`${origin}/auth?error=invalid_link`)
   }
 
-  // Chuyển thẳng vào Dashboard sau khi xác nhận email thành công
-  return NextResponse.redirect(new URL('/dashboard', request.url))
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookies().get(name)?.value
+        },
+        set(name: string, value: string, options) {
+          cookies().set({ name, value, ...options })
+        },
+        remove(name: string, options) {
+          cookies().set({ name, value: '', ...options })
+        },
+      },
+    }
+  )
+
+  const { error } = await supabase.auth.exchangeCodeForSession(code)
+
+  if (error) {
+    return NextResponse.redirect(`${origin}/auth?error=callback_failed`)
+  }
+
+  // Redirect thẳng vào Dashboard kèm thông báo thành công
+  return NextResponse.redirect(`${origin}/dashboard?confirmed=true`)
 }
