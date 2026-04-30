@@ -9,8 +9,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/auth?mode=login&error=missing_code`)
   }
 
-  // Chuẩn bị response trước để set cookie lên nó
-  const response = NextResponse.redirect(`${origin}/dashboard?confirmed=true`)
+  const response = NextResponse.redirect(`${origin}/?confirmed=true`)
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
