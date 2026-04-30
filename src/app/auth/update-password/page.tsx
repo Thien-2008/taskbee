@@ -32,7 +32,6 @@ export default function UpdatePasswordPage() {
   useEffect(() => {
     let cancelled = false
     async function init() {
-      // Supabase gửi link dạng /auth/update-password#access_token=...
       const hash = window.location.hash.substring(1)
       const params = new URLSearchParams(hash || window.location.search)
       const accessToken = params.get('access_token')
@@ -83,7 +82,6 @@ export default function UpdatePasswordPage() {
         setError('Liên kết đã hết hạn. Vui lòng yêu cầu lại.')
         setPhase('error')
       } else if (msg.includes('same') || msg.includes('different')) {
-        // Lỗi mật khẩu mới trùng mật khẩu cũ
         setError('Mật khẩu mới không được trùng mật khẩu hiện tại.')
       } else {
         setError('Có lỗi xảy ra. Vui lòng thử lại sau ít phút.')
@@ -91,7 +89,6 @@ export default function UpdatePasswordPage() {
       return
     }
 
-    // Thành công → chuyển về login với thông báo
     setPhase('success')
     setTimeout(() => {
       router.replace('/auth?mode=login&reset=success')
@@ -110,7 +107,6 @@ export default function UpdatePasswordPage() {
     <div className="min-h-[100dvh] bg-[#0a0a0b] flex items-center justify-center p-6 font-dm-sans overflow-hidden">
       <AuthBackground />
 
-      {/* Header giống Auth Page */}
       <motion.button
         onClick={() => router.push('/')}
         className="fixed top-6 left-6 z-20 flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#161618]/80 backdrop-blur-sm border border-[#2A2A2E] text-[#9A9AA6] hover:text-[#F5A623] hover:border-[#F5A623]/30 transition-all duration-300 group shadow-sm"
@@ -127,14 +123,11 @@ export default function UpdatePasswordPage() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-[400px] relative z-10"
       >
-        {/* Logo */}
         <div className="flex justify-end mb-8">
           <Logo size={32} variant="icon" />
         </div>
 
-        {/* Card */}
         <div className="bg-[#161618]/40 backdrop-blur-md border border-[#2A2A2E] rounded-2xl p-6 shadow-2xl shadow-black/40">
-          {/* Title */}
           <div className="flex flex-col items-center gap-3 mb-6">
             <div className="w-12 h-12 rounded-full bg-[#F5A623]/10 flex items-center justify-center">
               <Lock size={20} className="text-[#F5A623]" />
@@ -150,14 +143,12 @@ export default function UpdatePasswordPage() {
             </p>
           </div>
 
-          {/* Loading */}
           {phase === 'loading' && (
             <div className="flex justify-center py-4">
               <Loader2 size={24} className="animate-spin text-[#F5A623]" />
             </div>
           )}
 
-          {/* Error */}
           {phase === 'error' && (
             <div className="flex flex-col items-center gap-4">
               <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm w-full">
@@ -174,7 +165,6 @@ export default function UpdatePasswordPage() {
             </div>
           )}
 
-          {/* Success */}
           {phase === 'success' && (
             <div className="flex flex-col items-center gap-3 py-4">
               <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center">
@@ -186,14 +176,11 @@ export default function UpdatePasswordPage() {
             </div>
           )}
 
-          {/* Form */}
           {phase === 'form' && (
             <form onSubmit={handleSubmit} noValidate className="space-y-6">
-              {/* Mật khẩu mới */}
               <div className={fieldBorder}>
                 <div className="flex items-center">
                   <input
-                    ref={useRef<HTMLInputElement>(null)}
                     type={showPw ? 'text' : 'password'}
                     required
                     maxLength={72}
@@ -215,7 +202,6 @@ export default function UpdatePasswordPage() {
               </div>
               <PasswordStrengthBar password={password} />
 
-              {/* Xác nhận mật khẩu */}
               <div className={fieldBorder}>
                 <div className="flex items-center">
                   <input
@@ -244,7 +230,6 @@ export default function UpdatePasswordPage() {
                 </div>
               </div>
 
-              {/* Thông báo lỗi (nếu có trong form) */}
               {error && (
                 <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
                   <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
@@ -252,7 +237,6 @@ export default function UpdatePasswordPage() {
                 </div>
               )}
 
-              {/* Nút submit */}
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 disabled={submitting || password.length < 8 || password !== confirmPw}
@@ -272,7 +256,6 @@ export default function UpdatePasswordPage() {
           )}
         </div>
 
-        {/* Trust line */}
         <p className="text-center text-[11px] text-[#9A9AA6] mt-10 flex items-center justify-center gap-1.5">
           <Shield size={12} /> Kết nối an toàn · Mã hóa dữ liệu
         </p>
