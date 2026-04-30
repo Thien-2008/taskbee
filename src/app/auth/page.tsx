@@ -16,7 +16,7 @@ function translateError(errorMessage: string): string {
     return 'Email này đã được đăng ký. Vui lòng đăng nhập hoặc sử dụng email khác.'
   }
   if (msg.includes('email rate limit')) {
-    return 'Quá nhiều yêu cầu. Vui lòng thử lại sau 60 phút.'
+    return 'Quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.'
   }
   if (msg.includes('invalid login') || msg.includes('invalid credentials')) {
     return 'Email hoặc mật khẩu không đúng. Vui lòng kiểm tra lại.'
@@ -161,7 +161,7 @@ function AuthForm() {
     const cleanEmail = email.trim().toLowerCase()
     setEmail(cleanEmail)
     const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
-      redirectTo: `${window.location.origin}/auth?mode=login&reset=success`,
+      redirectTo: `${window.location.origin}/auth/update-password`,
     })
     if (error) { setError(translateError(error.message)) }
     else {

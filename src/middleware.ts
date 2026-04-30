@@ -6,6 +6,9 @@ export async function middleware(req: NextRequest) {
   if (req.nextUrl.pathname === '/auth/callback') {
     return NextResponse.next()
   }
+  if (req.nextUrl.pathname === '/auth/update-password') {
+    return NextResponse.next()
+  }
 
   const res = NextResponse.next()
 
@@ -32,7 +35,6 @@ export async function middleware(req: NextRequest) {
   if (req.nextUrl.pathname.startsWith('/dashboard') && !session) {
     return NextResponse.redirect(new URL('/auth?mode=login', req.url))
   }
-
   if (req.nextUrl.pathname.startsWith('/auth') && session) {
     return NextResponse.redirect(new URL('/dashboard', req.url))
   }
