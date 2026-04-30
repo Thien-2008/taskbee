@@ -39,6 +39,7 @@ function AuthForm() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [shake, setShake] = useState(false)
   const [rememberEmail, setRememberEmail] = useState(false)
+  const [hydrated, setHydrated] = useState(false)
   const [resetCooldown, setResetCooldown] = useState(0)
 
   const [email, setEmail] = useState('')
@@ -49,30 +50,21 @@ function AuthForm() {
 
   const passwordRef = useRef<HTMLInputElement>(null)
 
-  // Chỉ khôi phục email đã lưu khi checkbox "Ghi nhớ" được bật
+  // Chỉ đọc localStorage sau khi component mount (client-only)
   useEffect(() => {
-    if (mode === 'login') {
-      const saved = localStorage.getItem('taskbee_email')
-      if (saved) {
-        setEmail(saved)
-        setRememberEmail(true)
-      } else {
-        setEmail('')
-        setRememberEmail(false)
-      }
-    } else {
-      setEmail('')
-      setRememberEmail(false)
+    const saved = localStorage.getItem('taskbee_remembered_email')
+    if (saved) {
+      setEmail(saved)
+      setRememberEmail(true)
     }
-  }, [mode])
+    setHydrated(true)
+  }, [])
 
-  // Xử lý khi checkbox "Ghi nhớ email" thay đổi
-  const handleRememberEmailChange = (checked: boolean) => {
+  // Khi bỏ tick checkbox -> xóa localStorage ngay
+  const handleRememberToggle = (checked: boolean) => {
     setRememberEmail(checked)
-    if (checked && email.trim()) {
-      localStorage.setItem('taskbee_email', email.trim().toLowerCase())
-    } else {
-      localStorage.removeItem('taskbee_email')
+    if (!checked) {
+      localStorage.removeItem('taskbee_remembered_email')
     }
   }
 
@@ -93,8 +85,12 @@ function AuthForm() {
     const { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password })
     if (error) { setError(translateError(error.message)); setShake(true); setTimeout(() => setShake(false), 600) }
     else {
-      if (rememberEmail) { localStorage.setItem('taskbee_email', cleanEmail) }
-      else { localStorage.removeItem('taskbee_email') }
+      // Lưu email SAU KHI đăng nhập thành công
+      if (rememberEmail) {
+        localStorage.setItem('taskbee_remembered_email', cleanEmail)
+      } else {
+        localStorage.removeItem('taskbee_remembered_email')
+      }
       router.push('/dashboard')
     }
     setLoading(false)
@@ -193,10 +189,13 @@ function AuthForm() {
             <motion.div key="login" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
               <h1 className="text-2xl font-space-grotesk font-bold text-white text-center mb-8">Đăng nhập vào tài khoản</h1>
               <form onSubmit={handleLogin} className="space-y-6">
-                <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} autoComplete="off" aria-describedby={error ? "auth-error" : undefined} /></div>
+                <div className={fieldBorder}><input type="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} aria-describedby={error ? "auth-error" : undefined} /></div>
                 <div className={fieldBorder}><div className="flex items-center"><input ref={passwordRef} type={showPass ? 'text' : 'password'} required maxLength={72} value={password} onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu" className={`${inputClass} flex-1`} /><button type="button" onClick={() => setShowPass(!showPass)} className="text-gray-500 hover:text-gray-300 transition-colors ml-2">{showPass ? <EyeOff size={20} /> : <Eye size={20} />}</button></div></div>
                 <div className="flex items-center justify-between text-sm">
-                  <label className="flex items-center gap-2 text-gray-400 cursor-pointer"><input type="checkbox" checked={rememberEmail} onChange={e => handleRememberEmailChange(e.target.checked)} className="accent-[#F5A623] w-4 h-4" /><span>Ghi nhớ email</span></label>
+                  <label className="flex items-center gap-2 text-gray-400 cursor-pointer">
+                    <input type="checkbox" checked={rememberEmail} disabled={!hydrated} onChange={e => handleRememberToggle(e.target.checked)} className="accent-[#F5A623] w-4 h-4" />
+                    <span>Ghi nhớ email</span>
+                  </label>
                   <button type="button" onClick={() => { setMode('forgot'); resetForm() }} className="text-[#F5A623] hover:underline">Quên mật khẩu?</button>
                 </div>
                 {error && <div id="auth-error" role="alert" aria-live="assertive" className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>}
