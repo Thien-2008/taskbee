@@ -162,7 +162,7 @@ function AuthForm() {
     const cleanEmail = email.trim().toLowerCase()
     setEmail(cleanEmail)
     const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
-      redirectTo: `${window.location.origin}/auth?mode=login&reset=success`,
+      redirectTo: `${window.location.origin}/auth/update-password`,
     })
     if (error) { setError(translateError(error.message)) }
     else {
