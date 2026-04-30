@@ -162,7 +162,7 @@ function AuthForm() {
     const cleanEmail = email.trim().toLowerCase()
     setEmail(cleanEmail)
     const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
-      redirectTo: `${window.location.origin}/auth/update-password`,
+      redirectTo: `${window.location.origin}/auth/update-password`, // ← DÒNG DUY NHẤT ĐƯỢC SỬA
     })
     if (error) { setError(translateError(error.message)) }
     else {
