@@ -51,8 +51,6 @@ function AuthForm() {
   const [showPass, setShowPass] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [shake, setShake] = useState(false)
-  const [rememberUsername, setRememberUsername] = useState(false)
-  const [hydrated, setHydrated] = useState(false)
   const [resetCooldown, setResetCooldown] = useState(0)
   const [resendLoading, setResendLoading] = useState(false)
   const [resendSuccess, setResendSuccess] = useState(false)
@@ -62,24 +60,9 @@ function AuthForm() {
   const [password, setPassword] = useState('')
   const [confirmPass, setConfirmPass] = useState('')
   const [agreeTerms, setAgreeTerms] = useState(false)
+  const [agreePrivacyLogin, setAgreePrivacyLogin] = useState(false)
 
   const passwordRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    const saved = localStorage.getItem('taskbee_remembered_username')
-    if (saved) {
-      setUsername(saved)
-      setRememberUsername(true)
-    }
-    setHydrated(true)
-  }, [])
-
-  const handleRememberToggle = (checked: boolean) => {
-    setRememberUsername(checked)
-    if (!checked) {
-      localStorage.removeItem('taskbee_remembered_username')
-    }
-  }
 
   useEffect(() => {
     if (resetCooldown > 0) {
@@ -93,9 +76,10 @@ function AuthForm() {
 
   const handleResendConfirmation = async () => {
     setResendLoading(true)
+    const cleanEmail = username.trim().toLowerCase()
     const { error } = await supabase.auth.resend({
       type: 'signup',
-      email: username, // username here is actually email
+      email: cleanEmail,
     })
     if (error) {
       setError(translateError(error.message))
@@ -108,10 +92,14 @@ function AuthForm() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); setError(''); setSuccess(''); setLoading(true)
+    if (!agreePrivacyLogin) {
+      setError('Vui lòng đồng ý với Chính sách bảo mật để tiếp tục.')
+      setLoading(false)
+      return
+    }
     const cleanUsername = username.trim()
     setUsername(cleanUsername)
 
-    // Step 1: Get email from username via API
     const res = await fetch('/api/auth/get-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -124,15 +112,9 @@ function AuthForm() {
       return
     }
 
-    // Step 2: Sign in with email
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
     if (signInError) { setError(translateError(signInError.message)); setShake(true); setTimeout(() => setShake(false), 600) }
     else {
-      if (rememberUsername) {
-        localStorage.setItem('taskbee_remembered_username', cleanUsername)
-      } else {
-        localStorage.removeItem('taskbee_remembered_username')
-      }
       router.push('/dashboard')
     }
     setLoading(false)
@@ -150,7 +132,6 @@ function AuthForm() {
     if (password !== confirmPass) { setError('Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại.'); return }
     setLoading(true)
 
-    // Generate fake email
     const randomNum = Math.floor(10000000 + Math.random() * 90000000)
     const fakeEmail = `no-email-${randomNum}@taskbee.internal`
     const cleanUsername = username.trim()
@@ -181,7 +162,6 @@ function AuthForm() {
     setLoading(true)
     const cleanUsername = username.trim()
     setUsername(cleanUsername)
-    // Forgot password requires email, so we need to get email from username first
     const res = await fetch('/api/auth/get-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -204,7 +184,7 @@ function AuthForm() {
     setLoading(false)
   }
 
-  const resetForm = () => { setError(''); setSuccess(''); setPassword(''); setUsername(''); setFullName(''); setConfirmPass(''); setAgreeTerms(false) }
+  const resetForm = () => { setError(''); setSuccess(''); setPassword(''); setUsername(''); setFullName(''); setConfirmPass(''); setAgreeTerms(false); setAgreePrivacyLogin(false) }
 
   const inputClass = "w-full px-0 py-3.5 bg-transparent border-0 text-[#EDEBE7] placeholder-gray-500 focus:outline-none font-dm-sans text-base caret-[#F5A623]"
   const fieldBorder = "border-b border-[#2A2A2E] focus-within:border-[#F5A623] transition-colors duration-300"
@@ -262,13 +242,7 @@ function AuthForm() {
               <form onSubmit={handleLogin} className="space-y-6">
                 <div className={fieldBorder}><input type="text" required maxLength={24} value={username} onChange={e => setUsername(e.target.value)} placeholder="Tên đăng nhập" className={inputClass} autoComplete="username" aria-describedby={error ? "auth-error" : undefined} /></div>
                 <div className={fieldBorder}><div className="flex items-center"><input ref={passwordRef} type={showPass ? 'text' : 'password'} required maxLength={72} value={password} onChange={e => setPassword(e.target.value)} placeholder="Mật khẩu (tối đa 72 ký tự)" className={`${inputClass} flex-1`} /><button type="button" onClick={() => setShowPass(!showPass)} className="text-gray-500 hover:text-gray-300 transition-colors ml-2" aria-label={showPass ? "Ẩn mật khẩu" : "Hiện mật khẩu"}>{showPass ? <EyeOff size={20} /> : <Eye size={20} />}</button></div></div>
-                <div className="flex items-center justify-between text-sm">
-                  <label className="flex items-center gap-2 text-gray-400 cursor-pointer">
-                    <input type="checkbox" checked={rememberUsername} disabled={!hydrated} onChange={e => handleRememberToggle(e.target.checked)} className="accent-[#F5A623] w-4 h-4" />
-                    <span>Ghi nhớ tên đăng nhập</span>
-                  </label>
-                  <button type="button" onClick={() => { setMode('forgot'); resetForm() }} className="text-[#F5A623] hover:underline">Quên mật khẩu?</button>
-                </div>
+                <button type="button" onClick={() => { setMode('forgot'); resetForm() }} className="text-[#F5A623] hover:underline text-sm ml-1">Quên mật khẩu?</button>
                 {error && error !== 'EMAIL_NOT_CONFIRMED' && (
                   <div id="auth-error" role="alert" aria-live="assertive" className="flex items-center gap-2 text-[#F87171] text-sm"><AlertCircle size={16} /> {error}</div>
                 )}
@@ -280,7 +254,11 @@ function AuthForm() {
                     </button>
                   </div>
                 )}
-                <motion.button whileTap={{ scale: 0.98 }} disabled={loading} type="submit" className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">{loading ? <Loader2 className="animate-spin" size={20} /> : <><LogIn size={18} /> Đăng nhập</>}</motion.button>
+                <label className="flex items-start gap-2 text-sm text-gray-400 cursor-pointer">
+                  <input type="checkbox" checked={agreePrivacyLogin} onChange={e => setAgreePrivacyLogin(e.target.checked)} className="accent-[#F5A623] mt-0.5 w-4 h-4" />
+                  <span>Tôi đồng ý với <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#F5A623] hover:underline">điều khoản</a> và <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[#F5A623] hover:underline">chính sách bảo mật</a></span>
+                </label>
+                <motion.button whileTap={{ scale: 0.98 }} disabled={loading || !agreePrivacyLogin} type="submit" className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all">{loading ? <Loader2 className="animate-spin" size={20} /> : <><LogIn size={18} /> Đăng nhập</>}</motion.button>
               </form>
               <p className="text-center mt-8 text-gray-400 text-sm">Chưa có tài khoản? <button onClick={() => { setMode('register'); resetForm() }} className="text-[#F5A623] font-bold hover:underline">Đăng ký</button></p>
             </motion.div>
