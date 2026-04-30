@@ -26,38 +26,15 @@ export default function UpdatePasswordPage() {
   const [phase, setPhase] = useState<'loading' | 'form' | 'success' | 'error'>('loading')
   const [error, setError] = useState('')
 
+  // Đọc token từ hash fragment (#access_token=...)
   useEffect(() => {
     let cancelled = false
 
     async function init() {
-      // Parse toàn bộ URL (hash + query) để tìm access_token và refresh_token
-      const fullUrl = window.location.href
-      let accessToken: string | null = null
-      let refreshToken: string | null = null
-
-      // Thử lấy từ hash (cách Supabase thường dùng)
-      const hashPart = window.location.hash.substring(1) // bỏ dấu #
-      if (hashPart) {
-        const hashParams = new URLSearchParams(hashPart)
-        accessToken = hashParams.get('access_token')
-        refreshToken = hashParams.get('refresh_token')
-      }
-
-      // Nếu không có, thử query string (dùng cho trường hợp token bị đẩy sang query)
-      if (!accessToken) {
-        const queryParams = new URLSearchParams(window.location.search)
-        accessToken = queryParams.get('access_token')
-        refreshToken = queryParams.get('refresh_token')
-      }
-
-      // Trường hợp token bị gói trong error_description (ít gặp nhưng vẫn xử lý)
-      if (!accessToken) {
-        const searchStr = window.location.search + window.location.hash
-        const tokenMatch = searchStr.match(/access_token=([^&]+)/)
-        if (tokenMatch) accessToken = tokenMatch[1]
-        const refreshMatch = searchStr.match(/refresh_token=([^&]+)/)
-        if (refreshMatch) refreshToken = refreshMatch[1]
-      }
+      const hash = window.location.hash.substring(1)
+      const params = new URLSearchParams(hash)
+      const accessToken = params.get('access_token')
+      const refreshToken = params.get('refresh_token')
 
       if (!accessToken || !refreshToken) {
         if (!cancelled) {
@@ -74,12 +51,7 @@ export default function UpdatePasswordPage() {
 
       if (!cancelled) {
         if (sessionError) {
-          const message = sessionError.message.toLowerCase()
-          if (message.includes('expired') || message.includes('invalid')) {
-            setError('Liên kết đã hết hạn hoặc không còn hiệu lực. Vui lòng yêu cầu lại.')
-          } else {
-            setError('Phiên đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.')
-          }
+          setError('Phiên đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.')
           setPhase('error')
         } else {
           setPhase('form')
