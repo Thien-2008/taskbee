@@ -47,7 +47,7 @@ function AuthForm() {
   const [mode, setMode] = useState<'login' | 'register' | 'forgot'>(modeParam as 'login' | 'register' | 'forgot')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(confirmedParam === 'true' ? 'Email đã xác nhận! Nhấn nút Đăng nhập ở góc trên để vào tài khoản.' : '')
+  const [success, setSuccess] = useState(confirmedParam === 'true' ? 'Email đã xác nhận! Nhấn nút Đăng nhập để vào tài khoản.' : '')
   const [showPass, setShowPass] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [shake, setShake] = useState(false)
@@ -91,7 +91,6 @@ function AuthForm() {
   const passMatch = confirmPass.length > 0 && password === confirmPass
   const passMismatch = confirmPass.length > 0 && password !== confirmPass
 
-  // Gửi lại email xác nhận
   const handleResendConfirmation = async () => {
     setResendLoading(true)
     const cleanEmail = email.trim().toLowerCase()
@@ -162,7 +161,7 @@ function AuthForm() {
     const cleanEmail = email.trim().toLowerCase()
     setEmail(cleanEmail)
     const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
-      redirectTo: `${window.location.origin}/auth/update-password`, // ← DÒNG DUY NHẤT ĐƯỢC SỬA
+      redirectTo: `${window.location.origin}/auth?mode=login&reset=success`,
     })
     if (error) { setError(translateError(error.message)) }
     else {
