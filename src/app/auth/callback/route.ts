@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/auth?mode=login&error=missing_code`)
   }
 
-  const response = NextResponse.redirect(`${origin}/?confirmed=true`)
+  const response = NextResponse.redirect(`${origin}/dashboard?confirmed=true`)
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,7 +32,6 @@ export async function GET(request: Request) {
   const { error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
-    console.error('[callback] error:', error.message)
     return NextResponse.redirect(`${origin}/auth?mode=login&error=invalid_code`)
   }
 
