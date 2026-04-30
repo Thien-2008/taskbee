@@ -33,6 +33,7 @@ export default function Footer() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13 }}>
             <Link href="/how-it-works" style={{ color: '#9A9AA6', textDecoration: 'none' }}>Cách hoạt động</Link>
             <Link href="/business" style={{ color: '#9A9AA6', textDecoration: 'none' }}>Dành cho doanh nghiệp</Link>
+            <Link href="/community" style={{ color: '#9A9AA6', textDecoration: 'none' }}>Tiêu chuẩn cộng đồng</Link>
           </div>
         </div>
         <div>
