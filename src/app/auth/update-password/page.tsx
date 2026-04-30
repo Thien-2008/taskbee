@@ -26,9 +26,13 @@ export default function UpdatePasswordPage() {
   const [phase, setPhase] = useState<'loading' | 'form' | 'success' | 'error'>('loading')
   const [error, setError] = useState('')
 
+  // ═══════════════════════════════════════════
+  // 1. Xác thực token & thiết lập session
+  // ═══════════════════════════════════════════
   useEffect(() => {
     let cancelled = false
     async function init() {
+      // Supabase gửi link dạng /auth/update-password#access_token=...
       const hash = window.location.hash.substring(1)
       const params = new URLSearchParams(hash || window.location.search)
       const accessToken = params.get('access_token')
@@ -60,6 +64,9 @@ export default function UpdatePasswordPage() {
     return () => { cancelled = true }
   }, [supabase])
 
+  // ═══════════════════════════════════════════
+  // 2. Cập nhật mật khẩu
+  // ═══════════════════════════════════════════
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (password.length < 8) { setError('Mật khẩu phải có ít nhất 8 ký tự.'); return }
@@ -75,76 +82,86 @@ export default function UpdatePasswordPage() {
       if (msg.includes('expired') || msg.includes('invalid')) {
         setError('Liên kết đã hết hạn. Vui lòng yêu cầu lại.')
         setPhase('error')
-      } else if (msg.includes('same')) {
-        setError('Mật khẩu mới không được trùng mật khẩu cũ.')
+      } else if (msg.includes('same') || msg.includes('different')) {
+        // Lỗi mật khẩu mới trùng mật khẩu cũ
+        setError('Mật khẩu mới không được trùng mật khẩu hiện tại.')
       } else {
         setError('Có lỗi xảy ra. Vui lòng thử lại sau ít phút.')
       }
       return
     }
 
+    // Thành công → chuyển về login với thông báo
     setPhase('success')
-    setTimeout(() => router.push('/dashboard?reset=success'), 2500)
+    setTimeout(() => {
+      router.replace('/auth?mode=login&reset=success')
+    }, 2000)
   }
 
-  const inputClass = "w-full bg-transparent border rounded-xl px-4 py-3.5 text-sm text-[#EDEBE7] placeholder-[#4A4A50] outline-none transition-all duration-300 focus:ring-1 focus:ring-[#F5A623] focus:border-[#F5A623] border-[#2A2A2E] caret-[#F5A623] pr-11"
-  const btnClass = "w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 bg-[#F5A623] text-black hover:bg-[#FFC04D] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-[0_0_20px_rgba(245,166,35,0.2)]"
+  // ═══════════════════════════════════════════
+  // 3. Styles (giống hệt auth page)
+  // ═══════════════════════════════════════════
+  const inputClass =
+    "w-full px-0 py-3.5 bg-transparent border-0 text-[#EDEBE7] placeholder-gray-500 focus:outline-none font-dm-sans text-base caret-[#F5A623]"
+  const fieldBorder =
+    "border-b border-[#2A2A2E] focus-within:border-[#F5A623] transition-colors duration-300"
 
   return (
-    <div className="relative min-h-[100dvh] bg-[#0a0a0b] flex flex-col items-center justify-center p-6 overflow-hidden font-dm-sans">
+    <div className="min-h-[100dvh] bg-[#0a0a0b] flex items-center justify-center p-6 font-dm-sans overflow-hidden">
       <AuthBackground />
 
-      {/* Header */}
-      <div className="absolute top-6 left-6 z-20">
-        <button
-          type="button"
-          onClick={() => router.push('/')}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#2A2A2E] bg-[#161618]/80 text-xs text-[#9A9AA6] hover:text-[#F5A623] hover:border-[#F5A623]/30 transition-colors"
-        >
-          <ArrowLeft size={14} />
-          Trang chủ
-        </button>
-      </div>
-      <div className="absolute top-6 right-6 z-20">
-        <Logo variant="icon" size={32} />
-      </div>
+      {/* Header giống Auth Page */}
+      <motion.button
+        onClick={() => router.push('/')}
+        className="fixed top-6 left-6 z-20 flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#161618]/80 backdrop-blur-sm border border-[#2A2A2E] text-[#9A9AA6] hover:text-[#F5A623] hover:border-[#F5A623]/30 transition-all duration-300 group shadow-sm"
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        aria-label="Quay về trang chủ"
+      >
+        <ArrowLeft size={14} className="transition-transform duration-300 group-hover:-translate-x-0.5" />
+        <span className="text-xs font-medium">Trang chủ</span>
+      </motion.button>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-sm z-10"
+        className="w-full max-w-[400px] relative z-10"
       >
-        <div className="bg-[#161618]/60 backdrop-blur-xl border border-[#2A2A2E] rounded-2xl p-8 shadow-2xl shadow-black/50">
-          {/* Icon & Title */}
-          <div className="flex flex-col items-center gap-4 mb-8">
-            <div className="w-16 h-16 rounded-full bg-[#F5A623]/10 border border-[#F5A623]/20 flex items-center justify-center shadow-[0_0_30px_rgba(245,166,35,0.1)]">
-              <Lock size={24} className="text-[#F5A623]" />
+        {/* Logo */}
+        <div className="flex justify-end mb-8">
+          <Logo size={32} variant="icon" />
+        </div>
+
+        {/* Card */}
+        <div className="bg-[#161618]/40 backdrop-blur-md border border-[#2A2A2E] rounded-2xl p-6 shadow-2xl shadow-black/40">
+          {/* Title */}
+          <div className="flex flex-col items-center gap-3 mb-6">
+            <div className="w-12 h-12 rounded-full bg-[#F5A623]/10 flex items-center justify-center">
+              <Lock size={20} className="text-[#F5A623]" />
             </div>
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-[#EDEBE7] font-space-grotesk">
-                Đặt lại mật khẩu
-              </h1>
-              <p className="text-sm text-[#9A9AA6] mt-2">
-                {phase === 'loading' && 'Đang xác thực liên kết...'}
-                {phase === 'form' && 'Nhập mật khẩu mới cho tài khoản của bạn'}
-                {phase === 'success' && 'Mật khẩu đã được cập nhật!'}
-                {phase === 'error' && 'Không thể xác thực'}
-              </p>
-            </div>
+            <h1 className="text-xl font-bold text-[#EDEBE7] font-space-grotesk">
+              Đặt lại mật khẩu
+            </h1>
+            <p className="text-sm text-[#9A9AA6] text-center">
+              {phase === 'loading' && 'Đang xác thực liên kết...'}
+              {phase === 'form'   && 'Nhập mật khẩu mới cho tài khoản của bạn'}
+              {phase === 'success'&& 'Mật khẩu đã được cập nhật!'}
+              {phase === 'error'  && 'Không thể xác thực'}
+            </p>
           </div>
 
           {/* Loading */}
           {phase === 'loading' && (
-            <div className="flex justify-center py-6">
-              <Loader2 size={28} className="animate-spin text-[#F5A623]" />
+            <div className="flex justify-center py-4">
+              <Loader2 size={24} className="animate-spin text-[#F5A623]" />
             </div>
           )}
 
           {/* Error */}
           {phase === 'error' && (
-            <div className="flex flex-col items-center gap-5">
-              <div className="flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm w-full">
-                <AlertCircle size={18} className="mt-0.5 flex-shrink-0" />
+            <div className="flex flex-col items-center gap-4">
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm w-full">
+                <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
                 <span>{error}</span>
               </div>
               <button
@@ -159,85 +176,75 @@ export default function UpdatePasswordPage() {
 
           {/* Success */}
           {phase === 'success' && (
-            <div className="flex flex-col items-center gap-5 py-4">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center"
-              >
-                <Check size={28} className="text-emerald-400" />
-              </motion.div>
-              <p className="text-sm text-[#EDEBE7] text-center">
-                Đang chuyển về Dashboard...
+            <div className="flex flex-col items-center gap-3 py-4">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                <Check size={22} className="text-emerald-400" />
+              </div>
+              <p className="text-sm text-[#EDEBE7]">
+                Đổi mật khẩu thành công. Vui lòng đăng nhập với mật khẩu mới.
               </p>
             </div>
           )}
 
           {/* Form */}
           {phase === 'form' && (
-            <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+            <form onSubmit={handleSubmit} noValidate className="space-y-6">
               {/* Mật khẩu mới */}
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold text-[#9A9AA6] uppercase tracking-wide">
-                  Mật khẩu mới
-                </label>
-                <div className="relative">
+              <div className={fieldBorder}>
+                <div className="flex items-center">
                   <input
+                    ref={useRef<HTMLInputElement>(null)}
                     type={showPw ? 'text' : 'password'}
+                    required
+                    maxLength={72}
                     value={password}
                     onChange={e => setPassword(e.target.value)}
-                    placeholder="Nhập mật khẩu mới"
-                    maxLength={72}
-                    required
+                    placeholder="Mật khẩu mới (tối thiểu 8 ký tự)"
+                    className={`${inputClass} flex-1`}
                     autoComplete="new-password"
-                    className={inputClass}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPw(!showPw)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4A4A50] hover:text-[#9A9AA6] transition-colors"
-                    aria-label={showPw ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                    className="text-gray-500 hover:text-gray-300 transition-colors ml-2"
+                    aria-label={showPw ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                   >
-                    {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPw ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
-                <PasswordStrengthBar password={password} />
               </div>
+              <PasswordStrengthBar password={password} />
 
               {/* Xác nhận mật khẩu */}
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold text-[#9A9AA6] uppercase tracking-wide">
-                  Xác nhận mật khẩu
-                </label>
-                <div className="relative">
+              <div className={fieldBorder}>
+                <div className="flex items-center">
                   <input
                     type={showConfirm ? 'text' : 'password'}
+                    required
+                    maxLength={72}
                     value={confirmPw}
                     onChange={e => setConfirmPw(e.target.value)}
-                    placeholder="Nhập lại mật khẩu mới"
-                    maxLength={72}
-                    required
+                    placeholder="Xác nhận mật khẩu mới"
+                    className={`${inputClass} flex-1`}
                     autoComplete="new-password"
-                    className={inputClass}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4A4A50] hover:text-[#9A9AA6] transition-colors"
-                    aria-label={showConfirm ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                    className="text-gray-500 hover:text-gray-300 transition-colors ml-2"
+                    aria-label={showConfirm ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                   >
-                    {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
+                  {confirmPw.length > 0 && (
+                    password === confirmPw
+                      ? <Check size={16} className="text-[#4ADE80] ml-2" />
+                      : <AlertCircle size={16} className="text-[#F87171] ml-2" />
+                  )}
                 </div>
-                {confirmPw.length > 0 && (
-                  <p className={`text-xs ${password === confirmPw ? 'text-emerald-400' : 'text-red-400'}`}>
-                    {password === confirmPw ? 'Mật khẩu khớp' : 'Mật khẩu không khớp'}
-                  </p>
-                )}
               </div>
 
-              {/* Lỗi (nếu có trong form) */}
+              {/* Thông báo lỗi (nếu có trong form) */}
               {error && (
                 <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
                   <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
@@ -245,29 +252,29 @@ export default function UpdatePasswordPage() {
                 </div>
               )}
 
-              {/* Submit */}
-              <button
-                type="submit"
+              {/* Nút submit */}
+              <motion.button
+                whileTap={{ scale: 0.98 }}
                 disabled={submitting || password.length < 8 || password !== confirmPw}
-                className={btnClass}
+                type="submit"
+                className="w-full bg-[#F5A623] hover:bg-[#FFC04D] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-all"
               >
                 {submitting ? (
                   <>
-                    <Loader2 size={16} className="animate-spin" />
+                    <Loader2 className="animate-spin" size={20} />
                     Đang cập nhật...
                   </>
                 ) : (
                   'Cập nhật mật khẩu'
                 )}
-              </button>
+              </motion.button>
             </form>
           )}
         </div>
 
         {/* Trust line */}
-        <p className="text-center text-[11px] text-[#4A4A50] mt-6 flex items-center justify-center gap-1.5">
-          <Shield size={12} />
-          Kết nối an toàn · Mã hóa dữ liệu
+        <p className="text-center text-[11px] text-[#9A9AA6] mt-10 flex items-center justify-center gap-1.5">
+          <Shield size={12} /> Kết nối an toàn · Mã hóa dữ liệu
         </p>
       </motion.div>
     </div>
