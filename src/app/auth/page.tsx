@@ -148,7 +148,7 @@ function AuthForm() {
     if (error) { setError(translateError(error.message)); setShake(true); setTimeout(() => setShake(false), 600) }
     else {
       setError('')
-      setSuccess('Đăng ký thành công! Vui lòng kiểm tra email (và mục Spam) để xác minh tài khoản.')
+      setSuccess('Đăng ký thành công! Vui lòng đăng nhập.')
       setMode('login')
     }
     setLoading(false)
