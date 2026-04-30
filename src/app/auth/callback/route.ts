@@ -1,5 +1,4 @@
 import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
@@ -10,14 +9,23 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/auth?mode=login&error=missing_code`)
   }
 
+  // Chuẩn bị response trước để set cookie lên nó
+  const response = NextResponse.redirect(`${origin}/dashboard?confirmed=true`)
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) { return cookies().get(name)?.value },
-        set(name: string, value: string, options) { cookies().set({ name, value, ...options }) },
-        remove(name: string, options) { cookies().set({ name, value: '', ...options }) },
+        get(name: string) {
+          return (request as any).cookies?.get(name)?.value
+        },
+        set(name: string, value: string, options: any) {
+          response.cookies.set({ name, value, ...options })
+        },
+        remove(name: string, options: any) {
+          response.cookies.set({ name, value: '', ...options })
+        },
       },
     }
   )
@@ -25,8 +33,9 @@ export async function GET(request: Request) {
   const { error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
+    console.error('[callback] error:', error.message)
     return NextResponse.redirect(`${origin}/auth?mode=login&error=invalid_code`)
   }
 
-  return NextResponse.redirect(`${origin}/dashboard?confirmed=true`)
+  return response
 }
