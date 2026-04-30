@@ -7,7 +7,7 @@ import Footer from '@/components/Footer'
 import ScrollReveal from '@/components/ScrollReveal'
 
 const benefits = [
-  { icon: Zap, title: 'Tốc độ nhanh chóng', desc: 'Hàng ngàn người dùng sẵn sàng nhận việc ngay khi bạn đăng. Kết quả đầu tiên có thể về trong vài giờ.' },
+  { icon: Zap, title: 'Triển khai nhanh', desc: 'Hàng ngàn người dùng sẵn sàng nhận việc ngay khi bạn đăng. Kết quả đầu tiên có thể về trong vài giờ.' },
   { icon: TrendingUp, title: 'Chỉ trả cho kết quả', desc: 'Ngân sách được giữ an toàn. Bạn chỉ thanh toán khi công việc đạt yêu cầu và được duyệt.' },
   { icon: Shield, title: 'Kiểm soát chất lượng', desc: 'Tự đặt tiêu chí đánh giá. Hệ thống hỗ trợ duyệt kết quả và báo cáo chi tiết.' },
   { icon: BarChart3, title: 'Báo cáo minh bạch', desc: 'Theo dõi tiến độ, số lượng công việc đã hoàn thành, chi phí thực tế qua dashboard trực quan.' },
@@ -30,7 +30,7 @@ export default function BusinessPage() {
           <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(32px, 5vw, 48px)', lineHeight: 1.15, marginBottom: 16 }}>Giải pháp nhân lực linh hoạt cho doanh nghiệp</h1>
         </ScrollReveal>
         <ScrollReveal delay={0.1}>
-          <p style={{ color: '#9A9AA6', fontSize: 16, lineHeight: 1.7, margin: 0 }}>Thuê người làm việc theo từng công việc nhỏ. Chỉ trả tiền khi có kết quả – không rủi ro, không ràng buộc.</p>
+          <p style={{ color: '#9A9AA6', fontSize: 16, lineHeight: 1.7, margin: 0 }}>Thuê người làm việc theo từng công việc nhỏ. Chỉ trả tiền khi có kết quả – không rủi ro, không ràng buộc. Người làm có quyền khiếu nại nếu đánh giá không công bằng.</p>
         </ScrollReveal>
       </section>
       <section style={{ maxWidth: 960, margin: '0 auto', padding: '40px 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20 }}>
@@ -50,9 +50,9 @@ export default function BusinessPage() {
         <ScrollReveal>
           <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(24px, 4vw, 32px)', marginBottom: 32, textAlign: 'center' }}>Quy trình đăng công việc đơn giản</h2>
         </ScrollReveal>
-        {[ 
+        {[
           { step: 1, title: 'Đăng ký tài khoản doanh nghiệp', desc: 'Tạo hồ sơ công ty và xác minh trong 1 ngày làm việc.' },
-          { step: 2, title: 'Tạo công việc mới', desc: 'Điền mô tả, thời gian, yêu cầu và ngân sách cho từng công việc.' },
+          { step: 2, title: 'Tạo công việc mới', desc: 'Điền mô tả, tiêu chí, thời gian và ngân sách cho từng công việc.' },
           { step: 3, title: 'Nhận kết quả và duyệt', desc: 'Kiểm tra kết quả người dùng gửi về. Duyệt hoặc yêu cầu chỉnh sửa.' },
           { step: 4, title: 'Thanh toán tự động', desc: 'Hệ thống tự động giải ngân cho những kết quả đạt yêu cầu.' },
         ].map((item, idx) => (
@@ -96,7 +96,7 @@ export default function BusinessPage() {
               </tr>
               <tr style={{ borderBottom: '1px solid #1C1C1E' }}>
                 <td style={{ padding: 12 }}>Quy mô linh hoạt</td>
-                <td style={{ padding: 12, textAlign: 'center', color: '#F5A623' }}>1 – 10.000</td>
+                <td style={{ padding: 12, textAlign: 'center', color: '#F5A623' }}>1 – 10.000+</td>
                 <td style={{ padding: 12, textAlign: 'center' }}>Hạn chế</td>
                 <td style={{ padding: 12, textAlign: 'center' }}>Hạn chế</td>
               </tr>

@@ -27,12 +27,11 @@ export default function ContactPage() {
             <p style={{ color: '#9A9AA6', fontSize: 16, lineHeight: 1.7 }}>Gửi câu hỏi, báo lỗi hoặc yêu cầu hỗ trợ. Chúng tôi ưu tiên các vấn đề liên quan đến tài khoản và thanh toán.</p>
           </div>
         </ScrollReveal>
-
         <ScrollReveal delay={0.1}>
           <div className="highlight-box" style={{ marginBottom: 40, display: 'flex', alignItems: 'flex-start', gap: 16 }}>
             <Clock size={24} color="#F5A623" style={{ marginTop: 2 }} />
             <div>
-              <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, marginBottom: 8, color: '#F5A623' }}>Thời gian duyệt rút tiền</div>
+              <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, marginBottom: 8, color: '#F5A623' }}>Thời gian xử lý rút tiền</div>
               <p style={{ color: '#EDEBE7', lineHeight: 1.8, margin: 0 }}>
                 Thứ 2 – Thứ 6, 8:00 sáng – 20:00 tối.<br />
                 <span style={{ color: '#9A9AA6', fontSize: 14 }}>Yêu cầu ngoài khung giờ hoặc Thứ 7, Chủ nhật, ngày lễ sẽ được xử lý vào ngày làm việc tiếp theo.</span>
@@ -40,7 +39,6 @@ export default function ContactPage() {
             </div>
           </div>
         </ScrollReveal>
-
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 20, marginBottom: 40 }}>
           <ScrollReveal delay={0.15}>
             <div className="card-contact">
@@ -58,17 +56,16 @@ export default function ContactPage() {
             </div>
           </ScrollReveal>
         </div>
-
         <ScrollReveal delay={0.25}>
           <div style={{ marginTop: 60 }}>
             <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 24, marginBottom: 24, textAlign: 'center' }}>Câu hỏi thường gặp về hỗ trợ</h2>
             <div className="card-contact" style={{ marginBottom: 16 }}>
-              <strong style={{ color: '#EDEBE7' }}>Yêu cầu rút tiền mất bao lâu?</strong>
-              <p style={{ color: '#9A9AA6', margin: '8px 0 0', lineHeight: 1.7 }}>Lệnh rút được duyệt trong giờ làm việc (T2-T6, 8:00-20:00). Tiền về tài khoản ngân hàng thường trong vài phút đến vài giờ sau duyệt.</p>
+              <strong style={{ color: '#EDEBE7' }}>Rút tiền mất bao lâu?</strong>
+              <p style={{ color: '#9A9AA6', margin: '8px 0 0', lineHeight: 1.7 }}>Sau khi lệnh được duyệt, tiền thường về trong vài phút đến vài giờ, tùy ngân hàng nhận.</p>
             </div>
             <div className="card-contact" style={{ marginBottom: 16 }}>
               <strong style={{ color: '#EDEBE7' }}>Công việc bị từ chối, tôi phải làm sao?</strong>
-              <p style={{ color: '#9A9AA6', margin: '8px 0 0', lineHeight: 1.7 }}>Bạn sẽ nhận được lý do từ chối cụ thể. Nếu cho rằng không công bằng, hãy gửi khiếu nại kèm mã công việc qua email hoặc form hỗ trợ trong vòng 48 giờ.</p>
+              <p style={{ color: '#9A9AA6', margin: '8px 0 0', lineHeight: 1.7 }}>Bạn có 48 giờ làm việc để gửi khiếu nại qua form trong ứng dụng hoặc email. Nêu rõ mã công việc và lý do bạn cho rằng kết quả đạt yêu cầu.</p>
             </div>
             <div className="card-contact">
               <strong style={{ color: '#EDEBE7' }}>Tôi có thể liên hệ khẩn cấp bằng cách nào?</strong>

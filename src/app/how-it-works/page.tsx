@@ -12,7 +12,7 @@ const steps = [
     title: 'Bước 1: Tạo tài khoản',
     desc: 'Đăng ký miễn phí trong 2 phút bằng số điện thoại hoặc email. Xác thực danh tính cơ bản để đảm bảo an toàn cho tài khoản của bạn.',
     time: 'Thời gian: dưới 2 phút',
-    note: 'Không cần hồ sơ, không cần kinh nghiệm.',
+    note: 'Không cần hồ sơ, không cần kinh nghiệm. Ai cũng có thể tham gia.',
   },
   {
     icon: Search,
@@ -31,16 +31,16 @@ const steps = [
   {
     icon: CheckCircle2,
     title: 'Bước 4: Duyệt kết quả',
-    desc: 'Người đăng việc hoặc hệ thống kiểm tra kết quả của bạn. Nếu đạt yêu cầu, phần thưởng sẽ được ghi vào Ví TaskBee. Nếu cần chỉnh sửa, bạn sẽ nhận được thông báo rõ lý do.',
+    desc: 'Người đăng việc hoặc hệ thống kiểm tra kết quả của bạn dựa trên tiêu chí đã công bố. Nếu đạt yêu cầu, phần thưởng sẽ được ghi vào Ví TaskBee. Nếu cần chỉnh sửa, bạn sẽ nhận được thông báo rõ lý do.',
     time: 'Thời gian duyệt: thường trong 24 giờ',
-    note: 'Luôn có lý do cụ thể nếu kết quả bị từ chối – minh bạch tuyệt đối.',
+    note: 'Bạn có thể khiếu nại trong vòng 48 giờ làm việc nếu không đồng ý với quyết định.',
   },
   {
     icon: Wallet,
     title: 'Bước 5: Nhận tiền về ngân hàng',
-    desc: 'Khi số dư đạt mức tối thiểu, bạn có thể yêu cầu rút về tài khoản ngân hàng. Lệnh rút được duyệt từ Thứ 2 đến Thứ 6, 8:00 – 20:00.',
-    time: 'Tiền về trong vài phút đến vài giờ sau duyệt',
-    note: 'Không thu phí rút tiền. Lịch sử giao dịch rõ ràng từng đồng.',
+    desc: 'Khi số dư đạt mức tối thiểu, bạn có thể yêu cầu rút về tài khoản ngân hàng. Lệnh rút được duyệt từ Thứ 2 đến Thứ 6, 8:00 – 20:00. Tiền về trong vài phút đến vài giờ sau duyệt.',
+    time: 'Không thu phí rút tiền',
+    note: 'Lịch sử giao dịch rõ ràng từng đồng.',
   },
 ]
 
@@ -58,10 +58,12 @@ export default function HowItWorksPage() {
       </nav>
       <section style={{ maxWidth: 720, margin: '0 auto', padding: '64px 20px 32px', textAlign: 'center' }}>
         <ScrollReveal>
-          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(32px, 5vw, 48px)', lineHeight: 1.15, marginBottom: 16 }}>TaskBee hoạt động như thế nào?</h1>
+          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(32px, 5vw, 48px)', lineHeight: 1.15, marginBottom: 16 }}>Cách TaskBee hoạt động</h1>
         </ScrollReveal>
         <ScrollReveal delay={0.1}>
-          <p style={{ color: '#9A9AA6', fontSize: 16, lineHeight: 1.7, margin: 0 }}>Từ lúc đăng ký đến lúc nhận tiền, mọi bước đều minh bạch và rõ ràng.</p>
+          <p style={{ color: '#9A9AA6', fontSize: 16, lineHeight: 1.7, margin: 0 }}>
+            Từ lúc đăng ký đến lúc nhận tiền, mọi bước đều minh bạch và rõ ràng cho cả Người làm và Doanh nghiệp.
+          </p>
         </ScrollReveal>
       </section>
       <section style={{ maxWidth: 800, margin: '0 auto', padding: '20px 20px 80px' }}>

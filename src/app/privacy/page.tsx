@@ -18,11 +18,13 @@ export default function PrivacyPage() {
       </nav>
       <main style={{ maxWidth: 800, margin: '0 auto', padding: '64px 20px 80px' }}>
         <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(32px, 5vw, 48px)', marginBottom: 8 }}>Chính sách bảo mật</h1>
-        <p style={{ color: '#9A9AA6', marginBottom: 40 }}>Cập nhật lần cuối: 28/02/2026</p>
+        <p style={{ color: '#9A9AA6', marginBottom: 40 }}>Cập nhật lần cuối: 30/04/2026</p>
+
         <section style={{ marginBottom: 32 }}>
-          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, color: '#F5A623', marginBottom: 12 }}>1. Thông tin thu thập</h2>
-          <p style={{ color: '#9A9AA6', lineHeight: 1.8 }}>Khi đăng ký: họ tên, số điện thoại, email. Khi sử dụng: lịch sử công việc, lịch sử giao dịch, kết quả đã gửi. Tự động: địa chỉ IP, loại thiết bị, hành vi trong ứng dụng (phục vụ phát hiện gian lận và cải thiện dịch vụ).</p>
+          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, color: '#F5A623', marginBottom: 12 }}>1. Thông tin chúng tôi thu thập</h2>
+          <p style={{ color: '#9A9AA6', lineHeight: 1.8 }}>Khi bạn đăng ký: họ tên, số điện thoại, email. Khi bạn sử dụng: lịch sử công việc, lịch sử giao dịch, kết quả đã gửi. Dữ liệu tự động: địa chỉ IP, loại thiết bị, hành vi trong ứng dụng (phục vụ phát hiện gian lận và cải thiện dịch vụ).</p>
         </section>
+
         <section style={{ marginBottom: 32 }}>
           <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, color: '#F5A623', marginBottom: 12 }}>2. Mục đích sử dụng</h2>
           <ul style={{ color: '#9A9AA6', lineHeight: 1.8, paddingLeft: 20 }}>
@@ -33,22 +35,26 @@ export default function PrivacyPage() {
             <li>Tuân thủ nghĩa vụ pháp lý theo quy định Việt Nam.</li>
           </ul>
         </section>
+
         <section style={{ marginBottom: 32 }}>
-          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, color: '#F5A623', marginBottom: 12 }}>3. Cam kết KHÔNG làm</h2>
+          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, color: '#F5A623', marginBottom: 12 }}>3. Cam kết không làm</h2>
           <ul style={{ color: '#9A9AA6', lineHeight: 1.8, paddingLeft: 20 }}>
             <li>Không bán thông tin cá nhân cho bên thứ ba.</li>
-            <li>Không chia sẻ dữ liệu nhạy cảm với doanh nghiệp đăng công việc.</li>
+            <li>Không chia sẻ dữ liệu nhạy cảm với Doanh nghiệp đăng công việc nếu không cần thiết.</li>
             <li>Không gửi email quảng cáo từ đối tác bên ngoài.</li>
           </ul>
         </section>
+
         <section style={{ marginBottom: 32 }}>
           <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, color: '#F5A623', marginBottom: 12 }}>4. Bảo mật dữ liệu</h2>
           <p style={{ color: '#9A9AA6', lineHeight: 1.8 }}>Dữ liệu nhạy cảm được mã hóa. Toàn bộ kết nối sử dụng HTTPS/TLS. Truy cập nội bộ bị giới hạn theo nguyên tắc "cần biết" và được ghi nhật ký. Kiểm tra bảo mật định kỳ.</p>
         </section>
+
         <section style={{ marginBottom: 32 }}>
           <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, color: '#F5A623', marginBottom: 12 }}>5. Quyền của bạn</h2>
-          <p style={{ color: '#9A9AA6', lineHeight: 1.8 }}>Bạn có quyền truy cập, chỉnh sửa hoặc yêu cầu xóa dữ liệu cá nhân. Gửi yêu cầu về taskbee.support@gmail.com – phản hồi trong 5 ngày làm việc. Dữ liệu giao dịch sẽ được ẩn danh hóa và lưu trữ 5 năm theo quy định pháp luật.</p>
+          <p style={{ color: '#9A9AA6', lineHeight: 1.8 }}>Bạn có quyền truy cập, chỉnh sửa hoặc yêu cầu xóa dữ liệu cá nhân. Gửi yêu cầu về taskbee.support@gmail.com – chúng tôi phản hồi trong 5 ngày làm việc. Dữ liệu giao dịch sẽ được ẩn danh hóa và lưu trữ 5 năm theo quy định pháp luật.</p>
         </section>
+
         <section>
           <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, color: '#F5A623', marginBottom: 12 }}>6. Liên hệ</h2>
           <p style={{ color: '#9A9AA6', lineHeight: 1.8 }}>Mọi thắc mắc về bảo mật, vui lòng liên hệ: taskbee.support@gmail.com</p>
