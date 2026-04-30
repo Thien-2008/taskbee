@@ -6,17 +6,18 @@ import { motion } from 'framer-motion'
 export default function TorchCursor() {
   const [position, setPosition] = useState({ x: -100, y: -100 })
   const [visible, setVisible] = useState(false)
-  const [isDesktop, setIsDesktop] = useState(true)
+  const [isTouch, setIsTouch] = useState(false)
 
   useEffect(() => {
-    // Chỉ bật trên desktop (có chuột), tắt trên mobile
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+
     if (isTouchDevice) {
-      setIsDesktop(false)
+      setIsTouch(true)
+      // Tắt hoàn toàn TorchCursor trên mobile
       return
     }
 
-    setIsDesktop(true)
+    setIsTouch(false)
 
     const handleMouseMove = (e: MouseEvent) => {
       setPosition({ x: e.clientX, y: e.clientY })
@@ -34,7 +35,8 @@ export default function TorchCursor() {
     }
   }, [])
 
-  if (!isDesktop || !visible) return null
+  // Không render gì trên mobile
+  if (isTouch || !visible) return null
 
   return (
     <motion.div

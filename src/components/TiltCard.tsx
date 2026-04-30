@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
 export default function TiltCard({ children, style, className }: {
@@ -11,8 +11,18 @@ export default function TiltCard({ children, style, className }: {
   const cardRef = useRef<HTMLDivElement>(null)
   const [rotateX, setRotateX] = useState(0)
   const [rotateY, setRotateY] = useState(0)
+  const [reducedMotion, setReducedMotion] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setReducedMotion(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    if (reducedMotion) return
     if (!cardRef.current || window.innerWidth < 768) return
     const rect = cardRef.current.getBoundingClientRect()
     const x = (e.clientX - rect.left) / rect.width - 0.5
@@ -22,6 +32,14 @@ export default function TiltCard({ children, style, className }: {
   }
 
   const handleMouseLeave = () => { setRotateX(0); setRotateY(0) }
+
+  if (reducedMotion) {
+    return (
+      <div className={className} style={style}>
+        {children}
+      </div>
+    )
+  }
 
   return (
     <motion.div
