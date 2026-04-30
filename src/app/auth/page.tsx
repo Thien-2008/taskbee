@@ -44,10 +44,10 @@ function AuthForm() {
   const confirmedParam = searchParams.get('confirmed')
   const [supabase] = useState(() => createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!))
 
-  const [mode, setMode] = useState(modeParam === 'register' ? 'register' : modeParam === 'forgot' ? 'forgot' : 'login')
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>(modeParam as 'login' | 'register' | 'forgot')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(confirmedParam === 'true' ? 'Email đã xác nhận! Nhấn nút Đăng nhập để vào tài khoản.' : '')
+  const [success, setSuccess] = useState(confirmedParam === 'true' ? 'Xác nhận email thành công! Bạn có thể đăng nhập ngay bên dưới.' : '')
   const [showPass, setShowPass] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [shake, setShake] = useState(false)
